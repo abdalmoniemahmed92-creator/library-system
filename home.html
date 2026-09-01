@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرئيسية</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+
+            <!-- العنوان الرئيسي -->
+            <h2 style="color: #1f2937; margin-bottom: 2px;">الرئيسية</h2>
+            
+            <!-- رسالة الترحيب الديناميكية الخاصة بالمستخدم -->
+            <p id="welcomeUserText" style="color: #3b82f6; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-align: center;">جاري التحميل...</p>
+
+            <!-- شريط البحث وبجانبه زر البحث -->
+            <div style="display: flex; gap: 8px; width: 100%; margin-bottom: 5px;">
+                <input type="text" id="searchInput" placeholder="ابحث عن كتاب، مؤلف، أو رسالة..." style="flex: 1; background: #e2e8f0; border: none; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 14px; box-sizing: border-box;">
+                <button onclick="performSearch()" style="background: #3b82f6; color: white; border: none; border-radius: 25px; padding: 0 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">بحث</button>
+            </div>
+
+            <!-- صندوق عرض النتائج -->
+            <div id="searchResults" style="width: 100%; display: none; flex-direction: column; gap: 8px; background: white; padding: 12px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); max-height: 250px; overflow-y: auto;"></div>
+
+            <!-- زر استعراض الكتب والرسائل الجامعية -->
+            <button onclick="navigateTo('catalog.html')" style="width: 100%; background: #e2e8f0; border: none; border-radius: 25px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 15px; color: #334155; font-weight: bold;">
+                <span>استعراض الكتب والرسائل الجامعية</span>
+                <span>📚</span>
+            </button>
+
+            <!-- زر الخدمات -->
+            <button onclick="navigateTo('service.html')" style="width: 100%; background: #3b82f6; border: none; border-radius: 25px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 15px; color: white; font-weight: bold;">
+                <span>الخدمات (اضغط للعرض)</span>
+                <span>⚙️</span>
+            </button>
+
+            <!-- زر متابعة الطلبات -->
+            <button onclick="navigateTo('orders.html')" style="width: 100%; background: #e2e8f0; border: none; border-radius: 25px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 15px; color: #334155; font-weight: bold;">
+                <span>متابعة الطلبات</span>
+                <span>📥</span>
+            </button>
+
+            <!-- زر الملف الشخصي -->
+            <button onclick="navigateTo('profile.html')" style="width: 100%; background: #e2e8f0; border: none; border-radius: 25px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 15px; color: #334155; font-weight: bold;">
+                <span>الملف الشخصي</span>
+                <span>👤</span>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- نافذة منبثقة (Popup Modal) لتفاصيل العنصر وحالة الإعارة -->
+    <div id="itemModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 20px; box-sizing: border-box;">
+        <div style="background: white; width: 100%; max-width: 350px; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="modalTypeBadge" style="font-size: 10px; padding: 3px 8px; border-radius: 10px; color: white; font-weight: bold;">نوع</span>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #64748b;">✕</button>
+            </div>
+            <h3 id="modalTitle" style="margin: 0; color: #1f2937; font-size: 16px;">العنوان</h3>
+            <p id="modalSub" style="margin: 0; color: #475569; font-size: 13px;"></p>
+            <div id="modalStatusContainer" style="padding: 10px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+                <span style="font-size: 13px; color: #334155; font-weight: bold;">حالة الإعارة:</span>
+                <span id="modalStatusText" style="font-size: 13px; font-weight: bold;">-</span>
+            </div>
+            <button id="modalActionBtn" onclick="requestLoan()" style="background: #3b82f6; color: white; border: none; border-radius: 20px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">طلب إعارة / حجز</button>
+        </div>
+    </div>
+
+    <!-- استدعاء مكتبات Firebase والوظائف البرمجية -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // التحقق من حالة المستخدم وجلب بياناته من مجموعة uid لعرض اسمه وصفته
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDocRef = doc(db, "uid", user.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        document.getElementById('welcomeUserText').innerText = `أهلاً بك، ${userData.name} (${userData.type})`;
+                    } else {
+                        document.getElementById('welcomeUserText').innerText = `أهلاً بك في النظام`;
+                    }
+                } catch (error) {
+                    console.error("خطأ في جلب بيانات المستخدم:", error);
+                    document.getElementById('welcomeUserText').innerText = `أهلاً بك`;
+                }
+            } else {
+                // إذا لم يكن مسجلاً الدخول، يتم تحويله لصفحة تسجيل الدخول
+                window.location.href = 'login.html';
+            }
+        });
+
+        let selectedItemData = null;
+
+        window.performSearch = async function() {
+            const queryText = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (!queryText) {
+                resultsDiv.style.display = 'none';
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            resultsDiv.style.display = 'flex';
+            resultsDiv.innerHTML = '<p style="text-align: center; color: #3b82f6; font-size: 13px; margin: 5px;">جاري البحث في الجداول...</p>';
+
+            try {
+                let allResults = [];
+
+                const booksSnap = await getDocs(collection(db, "books"));
+                booksSnap.forEach(doc => {
+                    const data = doc.data();
+                    if ((data.title && data.title.toLowerCase().includes(queryText)) || 
+                        (data.author && data.author.toLowerCase().includes(queryText))) {
+                        let isAvailable = data.isAvailable !== undefined ? data.isAvailable : (data.available !== undefined ? data.available : true);
+                        allResults.push({ 
+                            title: data.title || 'بدون عنوان', 
+                            type: 'كتاب', 
+                            sub: data.author ? `المؤلف: ${data.author}` : 'مؤلف غير معروف', 
+                            isAvailable: isAvailable 
+                        });
+                    }
+                });
+
+                const authorsSnap = await getDocs(collection(db, "authors"));
+                authorsSnap.forEach(doc => {
+                    const data = doc.data();
+                    if (data.fullname && data.fullname.toLowerCase().includes(queryText)) {
+                        allResults.push({ 
+                            title: data.fullname, 
+                            type: 'مؤلف', 
+                            sub: data.email ? `البريد: ${data.email}` : '', 
+                            isAvailable: null 
+                        });
+                    }
+                });
+
+                const thesesSnap = await getDocs(collection(db, "theses"));
+                thesesSnap.forEach(doc => {
+                    const data = doc.data();
+                    if (data.title && data.title.toLowerCase().includes(queryText)) {
+                        let isAvailable = data.isAvailable !== undefined ? data.isAvailable : true;
+                        allResults.push({ 
+                            title: data.title, 
+                            type: 'رسالة جامعية', 
+                            sub: data.department ? `القسم: ${data.department}` : '', 
+                            isAvailable: isAvailable 
+                        });
+                    }
+                });
+
+                if (allResults.length === 0) {
+                    resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 13px; margin: 5px;">لا توجد نتائج مطابقة.</p>';
+                    return;
+                }
+
+                resultsDiv.innerHTML = '';
+                allResults.forEach(item => {
+                    let badgeColor = '#3b82f6';
+                    if (item.type === 'كتاب') badgeColor = '#10b981';
+                    else if (item.type === 'مؤلف') badgeColor = '#8b5cf6';
+                    else if (item.type === 'رسالة جامعية') badgeColor = '#f59e0b';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = 'padding: 10px; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 4px; cursor: pointer; border-radius: 8px; transition: background 0.2s;';
+                    card.onmouseover = () => card.style.background = '#f8fafc';
+                    card.onmouseout = () => card.style.background = 'transparent';
+                    card.onclick = () => openModal(item, badgeColor);
+
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: bold; color: #1f2937; font-size: 13px;">${item.title}</span>
+                            <span style="background: ${badgeColor}; color: white; font-size: 9px; padding: 2px 6px; border-radius: 8px;">${item.type}</span>
+                        </div>
+                        ${item.sub ? `<span style="color: #64748b; font-size: 11px;">${item.sub}</span>` : ''}
+                    `;
+                    resultsDiv.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("خطأ في جلب البيانات:", error);
+                resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 13px; margin: 5px;">حدث خطأ أثناء الاتصال بقاعدة البيانات.</p>';
+            }
+        }
+
+        window.openModal = function(item, badgeColor) {
+            selectedItemData = item;
+            document.getElementById('modalTitle').innerText = item.title;
+            document.getElementById('modalSub').innerText = item.sub;
+            
+            const badge = document.getElementById('modalTypeBadge');
+            badge.innerText = item.type;
+            badge.style.background = badgeColor;
+
+            const statusContainer = document.getElementById('modalStatusContainer');
+            const statusText = document.getElementById('modalStatusText');
+            const actionBtn = document.getElementById('modalActionBtn');
+
+            if (item.type === 'مؤلف') {
+                statusContainer.style.display = 'none';
+                actionBtn.style.display = 'none';
+            } else {
+                statusContainer.style.display = 'flex';
+                actionBtn.style.display = 'block';
+                if (item.isAvailable) {
+                    statusText.innerText = 'متاح للإعارة ✓';
+                    statusText.style.color = '#10b981';
+                    actionBtn.innerText = 'طلب إعارة';
+                    actionBtn.style.background = '#3b82f6';
+                } else {
+                    statusText.innerText = 'غير متاح (معار حالياً) ✕';
+                    statusText.style.color = '#ef4444';
+                    actionBtn.innerText = 'حجز في قائمة الانتظار';
+                    actionBtn.style.background = '#f59e0b';
+                }
+            }
+
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
+        window.closeModal = function() {
+            document.getElementById('itemModal').style.display = 'none';
+        }
+
+        window.requestLoan = function() {
+            if (!selectedItemData) return;
+            const title = encodeURIComponent(selectedItemData.title);
+            const type = encodeURIComponent(selectedItemData.type);
+            window.location.href = `loans.html?title=${title}&type=${type}`;
+        }
+
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
+        }
+    </script>
+</body>
+</html>

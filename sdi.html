@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدمة البث الانتقائي</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 12px;">
+            
+            <!-- عنوان الصفحة -->
+            <h2 style="text-align: center; color: #1f2937; margin: 0 0 5px 0; font-size: 18px;">خدمة البث الانتقائي</h2>
+
+            <!-- النص الجذاب أعلى الحقول يعبر عن الخدمة -->
+            <p style="text-align: center; color: #64748b; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                اشترك في خدمة البث الانتقائي لتصلك أحدث الإصدارات، الكتب، والرسائل الجامعية في مجالك الأكاديمي مباشرة وبشكل مخصص لك.
+            </p>
+
+            <!-- حقل الاسم -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">الإسم</label>
+                <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- حقل الهاتف -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">الهاتف</label>
+                <input type="tel" id="phone" placeholder="رقم الهاتف للتواصل" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- حقل البريد الإلكتروني الأول -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">البريد الإلكتروني</label>
+                <input type="email" id="email" placeholder="example@domain.com" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- حقل اختيار البريد أو التخصص (قائمة منسدلة) -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">التخصص / القسم</label>
+                <select id="categorySelect" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
+                    <option value="علوم الحاسوب">علوم الحاسوب</option>
+                    <option value="تقنية المعلومات">تقنية المعلومات</option>
+                    <option value="نظم المعلومات">نظم المعلومات</option>
+                </select>
+            </div>
+
+            <!-- حقل النوع والعنوان (مربع نص متعدد الأسطر) -->
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right; padding-top: 8px;">النوع والعنوان</label>
+                <textarea id="notes" placeholder="اكتب تفاصيل اهتماماتك أو المواضيع المطلوبة..." style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; resize: none; height: 70px;"></textarea>
+            </div>
+
+            <!-- زر إشتراك -->
+            <button onclick="submitSubscription()" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">إشتراك</button>
+
+            <!-- زر العودة لصفحة الخدمات (مربوط بـ service.html) -->
+            <button onclick="window.location.href='service.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للخدمات</button>
+
+        </div>
+    </div>
+
+    <!-- كود الربط مع Firebase لحفظ طلب البث الانتقائي -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.submitSubscription = async function() {
+            const subData = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                specialty: document.getElementById('categorySelect').value,
+                details: document.getElementById('notes').value,
+                date: new Date().toISOString().split('T')[0],
+                status: 'pending'
+            };
+
+            if (!subData.fullName || !subData.email) {
+                alert('الرجاء إدخال الاسم والبريد الإلكتروني على الأقل.');
+                return;
+            }
+
+            try {
+                // حفظ البيانات في مجموعة جديدة خاصة بخدمة البث الانتقائي في Firestore
+                await addDoc(collection(db, "broadcast_subscriptions"), subData);
+                alert('تم تقديم طلب الاشتراك في خدمة البث الانتقائي بنجاح!');
+                window.location.href = 'service.html';
+            } catch (error) {
+                console.error("خطأ في حفظ الاشتراكات: ", error);
+                alert('حدث خطأ أثناء إرسال الطلب، تأكد من اتصال الإنترنت.');
+            }
+        }
+    </script>
+</body>
+</html>

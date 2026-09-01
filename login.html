@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشة دخول المستفيد</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+
+    <!-- الحاوية الرئيسية -->
+    <div style="width: 100%; max-width: 440px; background: #f8fafc; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 35px 30px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; border: 1px solid #e2e8f0;">
+
+        <!-- عنوان الصفحة -->
+        <h2 style="color: #1e293b; font-size: 18px; margin-bottom: 30px; font-weight: bold; text-align: center;">شاشة دخول المستفيد</h2>
+
+        <!-- نموذج الإدخال -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- حقل رقم الهاتف -->
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; text-align: right;">رقم الهاتف</label>
+                <input type="text" id="phoneInput" style="width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 12px; font-size: 14px; outline: none; box-sizing: border-box; text-align: left;" dir="ltr" placeholder="0909123456">
+            </div>
+
+            <!-- حقل كلمة المرور -->
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; text-align: right;">كلمة المرور</label>
+                <input type="password" id="passwordInput" style="width: 100%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 12px; font-size: 14px; outline: none; box-sizing: border-box; text-align: left;" dir="ltr" placeholder="********">
+            </div>
+
+        </div>
+
+        <!-- الأزرار (دخول على اليمين، وتسجيل جديد على اليسار) -->
+        <div style="width: 100%; display: flex; justify-content: space-between; gap: 15px; margin-top: 35px;">
+            <button onclick="handleLogin()" style="flex: 1; background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                دخول
+            </button>
+            <button onclick="window.location.href='register.html'" style="flex: 1; background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                تسجيل جديد
+            </button>
+        </div>
+
+    </div>
+
+    <!-- كود الاتصال بـ Firebase ومعالجة تسجيل الدخول -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.handleLogin = async function() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+
+            if (!phone || !password) {
+                alert('الرجاء إدخال رقم الهاتف وكلمة المرور.');
+                return;
+            }
+
+            try {
+                // البحث عن البريد الإلكتروني المرتبط برقم الهاتف في مجموعة uid
+                const q = query(collection(db, "uid"), where("phone", "==", phone));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    alert('رقم الهاتف غير مسجل.');
+                    return;
+                }
+
+                let userEmail = "";
+                querySnapshot.forEach((doc) => {
+                    userEmail = doc.data().email;
+                });
+
+                // تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور
+                await signInWithEmailAndPassword(auth, userEmail, password);
+                
+                // رسالة النجاح والانتقال لصفحة home.html فور الضغط على OK
+                alert('تم تسجيل الدخول بنجاح!');
+                window.location.href = 'home.html';
+
+            } catch (error) {
+                console.error("خطأ في تسجيل الدخول:", error);
+                alert('فشل تسجيل الدخول، تأكد من صحة رقم الهاتف أو كلمة المرور.');
+            }
+        }
+    </script>
+</body>
+</html>

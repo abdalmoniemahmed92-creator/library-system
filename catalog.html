@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>استعراض الكتب والرسائل الجامعية</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .card { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .card h4 { margin: 0 0 8px 0; color: #007bff; }
+        button { background: #17a2b8; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #138496; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>المراجع والرسائل الجامعية المضافة حديثاً</h2>
+    <button onclick="loadCatalog()">تحميل وتحديث القائمة</button>
+    <div id="catalogList" style="margin-top: 20px;"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-firestore.js";
+
+    const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "..." };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.loadCatalog = async function() {
+        const listDiv = document.getElementById('catalogList');
+        listDiv.innerHTML = "جاري جلب المراجع...";
+
+        try {
+            let htmlContent = "";
+
+            // جلب الكتب
+            const booksSnap = await getDocs(collection(db, "books"));
+            booksSnap.forEach(doc => {
+                const data = doc.data();
+                htmlContent += `<div class="card">
+                    <h4>📚 كتاب: ${data.title || 'بدون عنوان'}</h4>
+                    <p>المؤلف: ${data.author || 'غير محدد'} | التصنيف: ${data.categoryId || ''}</p>
+                    <p>الحالة: <strong>${data.isBorrowed ? 'مستعار' : 'متاح'}</strong></p>
+                </div>`;
+            });
+
+            // جلب الرسائل الجامعية
+            const thesesSnap = await getDocs(collection(db, "theses"));
+            thesesSnap.forEach(doc => {
+                const data = doc.data();
+                htmlContent += `<div class="card">
+                    <h4>🎓 رسالة جامعية: ${data.title || 'بدون عنوان'}</h4>
+                    <p>الباحث/المؤلف: ${data.author || 'غير محدد'} | القسم: ${data.department || ''}</p>
+                    <p>الحالة: <strong>${data.isBorrowed ? 'مستعار' : 'متاح'}</strong></p>
+                </div>`;
+            });
+
+            listDiv.innerHTML = htmlContent || "لا توجد مراجع مضافة حالياً.";
+        } catch(e) {
+            listDiv.innerHTML = "حدث خطأ أثناء جلب البيانات: " + e.message;
+        }
+    }
+
+    // تحميل القائمة تلقائياً عند فتح الصفحة
+    loadCatalog();
+</script>
+</body>
+</html>
