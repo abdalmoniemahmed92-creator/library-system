@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشة تسجيل مستفيد جديد</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+
+    <!-- الحاوية الرئيسية -->
+    <div style="width: 100%; max-width: 440px; background: #f8fafc; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 35px 30px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; border: 1px solid #e2e8f0;">
+
+        <!-- عنوان الصفحة -->
+        <h2 style="color: #1e293b; font-size: 18px; margin-bottom: 25px; font-weight: bold; text-align: center;">شاشة تسجيل مستفيد جديد</h2>
+
+        <!-- نموذج الإدخال -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
+            
+            <!-- حقل الاسم -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">الاسم</label>
+                <input type="text" id="nameInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: right;">
+            </div>
+
+            <!-- حقل العنوان -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">العنوان</label>
+                <input type="text" id="addressInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: right;">
+            </div>
+
+            <!-- حقل الصفة -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">الصفة</label>
+                <select id="typeInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; direction: rtl;">
+                    <option value="طالب">طالب</option>
+                    <option value="باحث">باحث</option>
+                    <option value="أستاذ">أستاذ</option>
+                </select>
+            </div>
+
+            <!-- حقل رقم الهاتف -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">رقم الهاتف</label>
+                <input type="text" id="phoneInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: left;" dir="ltr">
+            </div>
+
+            <!-- حقل البريد الإلكتروني -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">البريد الإلكتروني</label>
+                <input type="email" id="emailInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: left;" dir="ltr">
+            </div>
+
+            <!-- حقل كلمة السر -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">كلمة السر</label>
+                <input type="password" id="passwordInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: left;" dir="ltr">
+            </div>
+
+            <!-- حقل تأكيد كلمة السر -->
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">تأكيد كلمة السر</label>
+                <input type="password" id="confirmPasswordInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: left;" dir="ltr">
+            </div>
+
+        </div>
+
+        <!-- زر التسجيل وزر العودة -->
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 30px;">
+            <button onclick="handleRegister()" style="width: 55%; background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                تسجيل
+            </button>
+            <button onclick="window.location.href='login.html'" style="background: none; border: none; color: #3b82f6; font-size: 13px; cursor: pointer; text-decoration: underline;">
+                لديك حساب بالفعل؟ تسجيل الدخول
+            </button>
+        </div>
+
+    </div>
+
+    <!-- كود الاتصال بـ Firebase ومعالجة التسجيل -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.handleRegister = async function() {
+            const name = document.getElementById('nameInput').value.trim();
+            const address = document.getElementById('addressInput').value.trim();
+            const type = document.getElementById('typeInput').value;
+            const phone = document.getElementById('phoneInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
+
+            if (!name || !address || !phone || !email || !password || !confirmPassword) {
+                alert('الرجاء تعبئة جميع الحقول المطلوبة.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('كلمتا السر غير متطابقتين.');
+                return;
+            }
+
+            try {
+                // 1. إنشاء الحساب في Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. حفظ كافة بيانات المستخدم ضمن جدول uid مع الـ uid الخاص به
+                await setDoc(doc(db, "uid", user.uid), {
+                    name: name,
+                    address: address,
+                    type: type,
+                    phone: phone,
+                    email: email,
+                    uid: user.uid
+                });
+
+                alert('تم تسجيل الحساب بنجاح!');
+                window.location.href = 'login.html';
+
+            } catch (error) {
+                console.error("خطأ في التسجيل:", error);
+                alert('فشل التسجيل، تأكد من صحة البريد أو قوة كلمة السر.');
+            }
+        }
+    </script>
+</body>
+</html>
