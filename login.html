@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - مكتبة كلية علوم الحاسوب</title>
+    <title>تسجيل الدخول للفهرس الإلكتروني - كلية علوم الحاسوب</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -32,7 +32,7 @@
             text-align: center;
             color: #2c3e50;
             margin-bottom: 20px;
-            font-size: 22px;
+            font-size: 20px;
         }
         .form-group {
             margin-bottom: 15px;
@@ -89,7 +89,7 @@
 <body>
 
     <div class="login-card">
-        <h2>تسجيل الدخول للنظام</h2>
+        <h2>تسجيل الدخول للفهرس الإلكتروني لكلية علوم الحاسوب</h2>
         <div id="errorMsg" class="error-msg"></div>
         
         <form id="loginForm">
@@ -111,19 +111,20 @@
         </div>
     </div>
 
-    <!-- كود المصادقة والتوجيه الذكي عبر Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -138,25 +139,24 @@
             errorDiv.textContent = "";
 
             try {
-                // 1. تسجيل الدخول عبر Authentication
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. جلب معلومات الحساب من قاعدة البيانات Firestore لمعرفة الـ role
-                const userDocRef = doc(db, "users", user.uid);
+                // البحث داخل مجموعة uid واستخدام حقل type للتحقق من الصلاحية
+                const userDocRef = doc(db, "uid", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     
-                    // 3. التوجيه بناءً على الصلاحية
-                    if (userData.role === "admin") {
-                        window.location.href = "admin-home.html"; // لوحة تحكم المدير
+                    // التوجيه بناءً على قيمة حقل type (سواء كان مشرف، مدير، admin، أو طالب)
+                    if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
+                        window.location.href = "admin-home.html";
                     } else {
-                        window.location.href = "home.html"; // واجهة المستفيد العادي
+                        window.location.href = "home.html";
                     }
                 } else {
-                    errorDiv.textContent = "بيانات الحساب غير موجودة في قاعدة البيانات.";
+                    errorDiv.textContent = "بيانات الحساب غير موجودة في مجموعة uid.";
                 }
             } catch (error) {
                 console.error("خطأ في تسجيل الدخول:", error);
