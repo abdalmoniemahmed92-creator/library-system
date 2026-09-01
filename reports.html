@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير</title>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #printableArea, #printableArea * { visibility: visible; }
+            #printableArea { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <!-- حاوية الأزرار الرئيسية -->
+        <div style="width: 100%; max-width: 480px; background: white; padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; align-items: center;">
+            
+            <h2 style="color: #1f2937; margin: 0 0 10px 0; font-size: 20px; text-align: center;">التقارير</h2>
+
+            <button onclick="generateReport('books')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">تقرير عن الكتب المُعارة</button>
+
+            <button onclick="generateReport('authors')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">تقرير عن مؤلف</button>
+
+            <button onclick="generateReport('theses')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">تقرير عن رسالة جامعية</button>
+
+            <button onclick="navigateTo('admin-home.html')" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px;">العودة لوحة التحكم</button>
+
+        </div>
+    </div>
+
+    <!-- النافذة المنبثقة (Modal) لعرض التقارير -->
+    <div id="reportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box;">
+        <div id="printableArea" style="background: white; width: 100%; max-width: 500px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; max-height: 85vh; box-sizing: border-box; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            
+            <h3 id="modalTitle" style="margin-top: 0; color: #0f172a; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;"></h3>
+            
+            <div id="modalBody" style="overflow-y: auto; flex-grow: 1; margin: 15px 0; font-size: 13px; color: #334155; display: flex; flex-direction: column; gap: 10px;">
+                <!-- البيانات المستخرجة -->
+            </div>
+
+            <!-- أزرار التحكم بالنافذة (إغلاق وطباعة) -->
+            <div class="no-print" style="display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+                <button onclick="window.print()" style="background: #2563eb; color: white; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;">طباعة</button>
+                <button onclick="closeModal()" style="background: #e2e8f0; color: #334155; border: none; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;">إغلاق</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- كود جلب البيانات وإدارة النافذة -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.closeModal = function() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        window.generateReport = async function(type) {
+            const modal = document.getElementById('reportModal');
+            const titleEl = document.getElementById('modalTitle');
+            const bodyEl = document.getElementById('modalBody');
+            
+            modal.style.display = 'flex';
+            bodyEl.innerHTML = 'جاري جلب البيانات...';
+
+            try {
+                if (type === 'books') {
+                    titleEl.textContent = 'تقرير الكتب المُعارة';
+                    const snapshot = await getDocs(collection(db, "loans"));
+                    if (snapshot.empty) {
+                        bodyEl.innerHTML = '<p>لا توجد سجلات إعارة حالياً.</p>';
+                        return;
+                    }
+                    let html = '';
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        html += `<div style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <b>العنصر/الكتاب:</b> ${data.itemId || data.bookTitle || 'غير متوفر'}<br>
+                            <b>معرف المستخدم (UID):</b> ${data.uid || 'غير محدد'}<br>
+                            <b>نوع الإعارة:</b> ${data.loanType || 'عادية'} | <b>الحالة:</b> ${data.status || 'نشط'}
+                        </div>`;
+                    });
+                    bodyEl.innerHTML = html;
+
+                } else if (type === 'authors') {
+                    titleEl.textContent = 'تقرير عن المؤلفين وكتبهم';
+                    
+                    // جلب المؤلفين والكتب دفعة واحدة للربط بينهم
+                    const [authorsSnap, booksSnap] = await Promise.all([
+                        getDocs(collection(db, "authors")),
+                        getDocs(collection(db, "books"))
+                    ]);
+
+                    if (authorsSnap.empty) {
+                        bodyEl.innerHTML = '<p>لا توجد بيانات مؤلفين مسجلة في مجموعة authors.</p>';
+                        return;
+                    }
+
+                    // تجميع الكتب في مصفوفة
+                    const booksList = [];
+                    booksSnap.forEach(doc => {
+                        booksList.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    let html = '';
+                    authorsSnap.forEach(docSnap => {
+                        const authorData = docSnap.data();
+                        const authorId = docSnap.id;
+                        const authorName = authorData.authorName || authorData.name || 'مؤلف غير معروف';
+
+                        // تصفية الكتب الخاصة بهذا المؤلف (عبر authorId أو مطابقة الاسم)
+                        const authorBooks = booksList.filter(b => 
+                            b.authorId === authorId || 
+                            b.author === authorName || 
+                            b.authorId === authorName
+                        );
+
+                        html += `<div style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 8px;">
+                            <b style="color: #1e3a8a; font-size: 14px;">اسم المؤلف: ${authorName}</b><br>
+                            <span style="color: #64748b; font-size: 11px;">معرف المؤلف (ID): ${authorId}</span>
+                            <div style="margin-top: 8px; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+                                <b style="font-size: 12px; color: #334155;">الكتب الخاصة به:</b>`;
+                        
+                        if (authorBooks.length > 0) {
+                            html += `<ul style="margin: 4px 0 0 0; padding-right: 20px; font-size: 12px;">`;
+                            authorBooks.forEach(book => {
+                                html += `<li>${book.title || book.bookTitle || 'كتاب بدون عنوان'}</li>`;
+                            });
+                            html += `</ul>`;
+                        } else {
+                            html += `<div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">لا توجد كتب مسجلة لهذا المؤلف حالياً.</div>`;
+                        }
+
+                        html += `</div></div>`;
+                    });
+
+                    bodyEl.innerHTML = html;
+
+                } else if (type === 'theses') {
+                    titleEl.textContent = 'تقرير عن رسالة جامعية';
+                    const snapshot = await getDocs(collection(db, "theses"));
+                    if (snapshot.empty) {
+                        bodyEl.innerHTML = '<p>لا توجد رسائل جامعية مسجلة حالياً.</p>';
+                        return;
+                    }
+                    let html = '';
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        html += `<div style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                            <b>عنوان الرسالة:</b> ${data.title || 'بدون عنوان'}<br>
+                            <b>الدرجة العلمية:</b> ${data.degree || 'غير محدد'} | <b>القسم:</b> ${data.department || 'غير محدد'}<br>
+                            <b>معرف الطالب (UID/StudentId):</b> ${data.studentId || 'غير متوفر'}
+                        </div>`;
+                    });
+                    bodyEl.innerHTML = html;
+                }
+            } catch (error) {
+                console.error("خطأ في التقرير:", error);
+                bodyEl.innerHTML = '<p style="color: red;">حدث خطأ أثناء الاتصال بقاعدة البيانات.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

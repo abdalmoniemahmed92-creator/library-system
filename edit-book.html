@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل بيانات كتاب</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+
+            <!-- العنوان الرئيسي -->
+            <h2 style="color: #1f2937; margin-bottom: 0px; text-align: center;">تعديل بيانات كتاب</h2>
+
+            <!-- اختيار الكتاب -->
+            <div style="width: 100%; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
+                <label style="font-size: 13px; font-weight: bold; color: #334155;">اختر الكتاب للتعديل:</label>
+                <select id="bookSelect" onchange="loadBookData()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; background: #fff;">
+                    <option value="">جاري تحميل الكتب...</option>
+                </select>
+            </div>
+
+            <!-- نموذج تعديل البيانات -->
+            <div id="editFormContainer" style="width: 100%; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: none; flex-direction: column; gap: 12px; box-sizing: border-box;">
+                
+                <input type="hidden" id="bookDocId">
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #334155;">عنوان الكتاب</label>
+                    <input type="text" id="bookTitle" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #334155;">المؤلف</label>
+                    <input type="text" id="bookAuthor" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #334155;">التصنيف أو القسم</label>
+                    <input type="text" id="bookCategory" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #334155;">رابط الكتاب أو الملف (URL)</label>
+                    <input type="text" id="bookUrl" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                </div>
+
+                <!-- زر حفظ التعديلات -->
+                <button onclick="updateBook()" style="width: 100%; background: #22c55e; color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">حفظ التعديلات</button>
+            </div>
+
+            <!-- زر العودة لوحة التحكم -->
+            <button onclick="window.location.href='admin-home.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">العودة إلى لوحة التحكم</button>
+
+        </div>
+    </div>
+
+    <!-- Firebase والسكربت البرمجي -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let booksMap = {};
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                fetchAllBooks();
+            }
+        });
+
+        async function fetchAllBooks() {
+            const select = document.getElementById('bookSelect');
+            select.innerHTML = '<option value="">اختر كتاباً للتعديل...</option>';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "books"));
+                if (querySnapshot.empty) {
+                    select.innerHTML = '<option value="">لا توجد كتب مضافة حالياً</option>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    booksMap[docSnap.id] = data; // تخزين البيانات محلياً
+                    
+                    const option = document.createElement('option');
+                    option.value = docSnap.id;
+                    option.textContent = data.title || data.bookTitle || 'كتاب بدون عنوان';
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error("خطأ في جلب الكتب:", error);
+                select.innerHTML = '<option value="">خطأ في جلب الكتب</option>';
+            }
+        }
+
+        window.loadBookData = function() {
+            const selectedId = document.getElementById('bookSelect').value;
+            const formContainer = document.getElementById('editFormContainer');
+
+            if (!selectedId) {
+                formContainer.style.display = 'none';
+                return;
+            }
+
+            const book = booksMap[selectedId];
+            if (book) {
+                document.getElementById('bookDocId').value = selectedId;
+                document.getElementById('bookTitle').value = book.title || book.bookTitle || '';
+                document.getElementById('bookAuthor').value = book.author || '';
+                document.getElementById('bookCategory').value = book.category || '';
+                document.getElementById('bookUrl').value = book.url || book.link || '';
+                
+                formContainer.style.display = 'flex';
+            }
+        }
+
+        window.updateBook = async function() {
+            const docId = document.getElementById('bookDocId').value;
+            if (!docId) return;
+
+            const updatedData = {
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                category: document.getElementById('bookCategory').value,
+                url: document.getElementById('bookUrl').value
+            };
+
+            try {
+                const bookRef = doc(db, "books", docId);
+                await updateDoc(bookRef, updatedData);
+                alert('تم تحديث بيانات الكتاب بنجاح!');
+                fetchAllBooks(); // تحديث القائمة
+                document.getElementById('editFormContainer').style.display = 'none';
+                document.getElementById('bookSelect').value = "";
+            } catch (error) {
+                console.error("خطأ في تحديث الكتاب:", error);
+                alert('فشل حفظ التعديلات.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استمارة إضافة كتاب جديد</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+
+            <h2 style="color: #1f2937; margin-bottom: 5px; text-align: center;">استمارة إضافة كتاب جديد</h2>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); box-sizing: border-box;">
+                
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">رقم الكتاب</label>
+                    <input type="text" id="bookId" placeholder="أدخل رقم الكتاب..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">العنوان</label>
+                    <input type="text" id="title" placeholder="أدخل عنوان الكتاب..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">المؤلف</label>
+                    <input type="text" id="author" placeholder="أدخل اسم المؤلف..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">الطبعة</label>
+                    <input type="text" id="edition" placeholder="أدخل رقم أو اسم الطبعة..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">الناشر</label>
+                    <input type="text" id="publisher" placeholder="أدخل اسم دار النشر..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">تاريخ النشر</label>
+                    <input type="date" id="puplishDate" style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right; color: #334155;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">عدد النسخ</label>
+                    <input type="number" id="copiesCount" placeholder="أدخل عدد النسخ المتاحة..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">مكان النشر</label>
+                    <input type="text" id="puplishLocation" placeholder="أدخل مكان النشر (المدينة/الدولة)..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; color: #334155; font-weight: bold; text-align: right;">الرقم الدولي (ISBN)</label>
+                    <input type="text" id="isbn" placeholder="أدخل الرقم الدولي الموحد للكتاب..." style="background: #f1f5f9; border: none; border-radius: 15px; padding: 10px 15px; outline: none; font-size: 13px; text-align: right;">
+                </div>
+
+                <button onclick="saveBook()" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">إدخال</button>
+                
+                <button onclick="navigateTo('admin-home.html')" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">العودة إلى لوحة التحكم</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.saveBook = async function() {
+            const bookId = document.getElementById('bookId').value.trim();
+            const title = document.getElementById('title').value.trim();
+            const author = document.getElementById('author').value.trim();
+            const edition = document.getElementById('edition').value.trim();
+            const publisher = document.getElementById('publisher').value.trim();
+            const puplishDate = document.getElementById('puplishDate').value;
+            const copiesCount = parseInt(document.getElementById('copiesCount').value) || 0;
+            const puplishLocation = document.getElementById('puplishLocation').value.trim();
+            const isbn = document.getElementById('isbn').value.trim();
+
+            if (!title) {
+                alert('الرجاء إدخال عنوان الكتاب على الأقل.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "books"), {
+                    bookId: bookId,
+                    title: title,
+                    author: author,
+                    edition: edition,
+                    publisher: publisher,
+                    puplishDate: puplishDate,
+                    copiesCount: copiesCount,
+                    puplishLocation: puplishLocation,
+                    isbn: isbn,
+                    isBorrowed: false,
+                    createdAt: new Date()
+                });
+                alert('تم إدخال الكتاب بنجاح وسيظهر مباشرة في واجهة المستخدمين!');
+                
+                document.querySelectorAll('input').forEach(input => input.value = '');
+            } catch (error) {
+                console.error("خطأ في الإضافة:", error);
+                alert('حدث خطأ أثناء حفظ الكتاب.');
+            }
+        }
+
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
+        }
+    </script>
+</body>
+</html>

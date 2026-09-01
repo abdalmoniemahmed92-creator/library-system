@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة طلبات الإعارة والبث الانتقائي</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+
+            <!-- العنوان الرئيسي -->
+            <h2 style="color: #1f2937; margin-bottom: 0px; text-align: center;">إدارة طلبات الإعارة والبث الانتقائي</h2>
+
+            <!-- عداد الطلبات الواردة -->
+            <div style="width: 100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); box-sizing: border-box;">
+                <span style="font-size: 14px; font-weight: bold;">إجمالي الطلبات الواردة:</span>
+                <span id="requestsCount" style="font-size: 18px; font-weight: bold; background: rgba(255, 255, 255, 0.2); padding: 3px 15px; border-radius: 10px;">0</span>
+            </div>
+
+            <!-- حاوية عرض الطلبات -->
+            <div id="requestsContainer" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <p style="text-align: center; color: #64748b; font-size: 14px;">جاري تحميل الطلبات الواردة...</p>
+            </div>
+
+            <!-- زر العودة لوحة التحكم -->
+            <button onclick="navigateTo('admin-home.html')" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px;">العودة إلى لوحة التحكم</button>
+
+        </div>
+    </div>
+
+    <!-- Firebase والسكربت البرمجي -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loadRequests();
+            }
+        });
+
+        async function loadRequests() {
+            const container = document.getElementById('requestsContainer');
+            const countBadge = document.getElementById('requestsCount');
+            container.innerHTML = '';
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "loans"));
+                
+                // تحديث العداد بإجمالي عدد الطلبات
+                const totalRequests = querySnapshot.size;
+                countBadge.textContent = totalRequests;
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px; background: white; padding: 20px; border-radius: 15px;">لا توجد طلبات إعارة حالياً.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const req = docSnap.data();
+                    const reqId = docSnap.id;
+
+                    const loanId = req.loanId || req.id || 'LN-XXXX';
+                    const loanType = req.loanType || req.type || 'إعارة عادية';
+                    const itemId = req.itemId || req.bookId || req.thesesId || 'غير متوفر';
+                    const uid = req.uid || req.userId || req.userEmail || 'غير محدد';
+                    const borrowDate = req.borrowDate || req.date || '---';
+                    const returnDate = req.returnDate || '---';
+                    const quantity = req.quantity || req.count || '1';
+                    const penalty = req.penalty || 'لا توجد';
+                    const status = req.status || 'pending';
+
+                    let statusColor = '#d97706'; // معلق
+                    if (status === 'approved' || status === 'مقبول' || status === 'active') statusColor = '#16a34a';
+                    if (status === 'rejected' || status === 'مرفوض') statusColor = '#dc2626';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;";
+
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 10px; font-weight: bold;">رقم الإعارة: ${loanId}</span>
+                            <span style="font-size: 12px; color: #64748b;">النوع: ${loanType}</span>
+                        </div>
+                        <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">معرف العنصر: ${itemId}</h4>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">معرف المستخدم (UID): <b>${uid}</b></p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">تاريخ الإعارة: ${borrowDate} | تاريخ الإرجاع: ${returnDate}</p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الكمية: ${quantity} | الغرامة: ${penalty}</p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة الحالية: <b style="color: ${statusColor};">${status}</b></p>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                            <button onclick="updateRequestStatus('${reqId}', 'approved')" style="flex: 1; background: #22c55e; color: white; border: none; border-radius: 12px; padding: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">قبول</button>
+                            <button onclick="updateRequestStatus('${reqId}', 'rejected')" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 12px; padding: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("خطأ في جلب الطلبات:", error);
+                container.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 14px;">حدث خطأ أثناء تحميل الطلبات.</p>';
+            }
+        }
+
+        window.updateRequestStatus = async function(reqId, newStatus) {
+            try {
+                const reqRef = doc(db, "loans", reqId);
+                await updateDoc(reqRef, { status: newStatus });
+                alert(`تم تحديث حالة الطلب إلى: ${newStatus}`);
+                loadRequests(); // تحديث القائمة والعداد مباشرة
+            } catch (error) {
+                console.error("خطأ في تحديث الحالة:", error);
+                alert('فشل تحديث حالة الطلب.');
+            }
+        }
+
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة رسالة جامعية</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 450px; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;">
+
+            <!-- العنوان الرئيسي -->
+            <h2 style="color: #1f2937; margin: 0 0 10px 0; font-size: 18px; text-align: center;">إضافة رسالة جامعية</h2>
+
+            <!-- رقم الرسالة -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">رقم الرسالة (thesesId)</label>
+                <input type="text" id="thesesId" placeholder="أدخل رقم الرسالة..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- عنوان الرسالة -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">عنوان الرسالة (title)</label>
+                <input type="text" id="title" placeholder="أدخل عنوان الرسالة الجامعية..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- معرف المؤلف/المشرف -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">معرف المؤلف/المشرف (authorId)</label>
+                <input type="text" id="authorId" placeholder="أدخل معرف المؤلف (مثال: AUTH-01)..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- معرف الطالب -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">معرف الطالب (studentId)</label>
+                <input type="text" id="studentId" placeholder="أدخل معرف الطالب الباحث..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- القسم الأكاديمي -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">القسم الأكاديمي (department)</label>
+                <select id="department" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff;">
+                    <option value="">اختر القسم الأكاديمي...</option>
+                    <option value="علوم الحاسوب">علوم الحاسوب</option>
+                    <option value="تقنية المعلومات">تقنية المعلومات</option>
+                    <option value="هندسة البرمجيات">هندسة البرمجيات</option>
+                    <option value="نظم المعلومات الإدارية">نظم المعلومات الإدارية</option>
+                    <option value="نظم المعلومات المحاسبية">نظم المعلومات المحاسبية</option>
+                    <option value="نظم معلومات المكتبات">نظم معلومات المكتبات</option>
+                </select>
+            </div>
+
+            <!-- حقل الدرجة العلمية الجديد -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">الدرجة العلمية (degree)</label>
+                <select id="degree" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff;">
+                    <option value="">اختر الدرجة العلمية...</option>
+                    <option value="دبلوم">دبلوم</option>
+                    <option value="بكالوريوس">بكالوريوس</option>
+                    <option value="ماجستير">ماجستير</option>
+                    <option value="دكتوراه">دكتوراه</option>
+                </select>
+            </div>
+
+            <!-- سنة النشر (توليد تلقائي من 1995 إلى 2026) -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">سنة النشر (publicationYear)</label>
+                <select id="publicationYear" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: #fff;">
+                    <option value="">اختر سنة النشر...</option>
+                </select>
+            </div>
+
+            <!-- معرف التصنيف -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">معرف التصنيف (categoryId)</label>
+                <input type="text" id="categoryId" placeholder="أدخل رمز التصنيف..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+
+            <!-- ملخص الرسالة -->
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; font-weight: bold; color: #334155;">ملخص الرسالة (summary)</label>
+                <textarea id="summary" rows="3" placeholder="أدخل ملخصاً موجزاً عن الرسالة..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; resize: vertical;"></textarea>
+            </div>
+
+            <!-- زر الإدخال -->
+            <button onclick="addThesis()" style="width: 100%; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">إدخال</button>
+
+            <!-- زر العودة لوحة التحكم -->
+            <button onclick="navigateTo('admin-home.html')" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 10px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة لوحة التحكم</button>
+
+        </div>
+    </div>
+
+    <!-- كود الربط مع Firebase وتعبئة السنوات -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
+        };
+
+        // توليد سنوات النشر من 1995 إلى 2026
+        const yearSelect = document.getElementById('publicationYear');
+        for (let year = 2026; year >= 1995; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.addThesis = async function() {
+            const thesesId = document.getElementById('thesesId').value.trim();
+            const title = document.getElementById('title').value.trim();
+            const authorId = document.getElementById('authorId').value.trim();
+            const studentId = document.getElementById('studentId').value.trim();
+            const department = document.getElementById('department').value;
+            const degree = document.getElementById('degree').value;
+            const publicationYear = document.getElementById('publicationYear').value;
+            const categoryId = document.getElementById('categoryId').value.trim();
+            const summary = document.getElementById('summary').value.trim();
+
+            if (!thesesId || !title) {
+                alert('الرجاء إدخال رقم الرسالة وعنوانها على الأقل.');
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, "theses", thesesId), {
+                    thesesId: thesesId,
+                    title: title,
+                    authorId: authorId,
+                    studentId: studentId,
+                    department: department,
+                    degree: degree,
+                    publicationYear: publicationYear,
+                    categoryId: categoryId,
+                    summary: summary,
+                    createdAt: new Date().toISOString()
+                });
+
+                alert('تمت إضافة الرسالة الجامعية بنجاح!');
+                document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+                document.getElementById('department').value = '';
+                document.getElementById('degree').value = '';
+                document.getElementById('publicationYear').value = '';
+            } catch (error) {
+                console.error("خطأ في الإضافة: ", error);
+                alert('فشل في حفظ البيانات.');
+            }
+        }
+    </script>
+</body>
+</html>
