@@ -54,41 +54,47 @@
             try {
                 allOrders = [];
 
-                // 1. جلب طلبات الإعارة (من مجموعة loans أو book_loans)
+                // 1. جلب طلبات الإعارة من مجموعة loans
                 const loansSnap = await getDocs(collection(db, "loans"));
                 loansSnap.forEach(doc => {
                     const data = doc.data();
+                    const loanDateVal = data.loanDate || data.date || data.startDate || data.borrowDate || 'غير محدد';
+                    const loanTypeVal = data.loanType || data.type || 'عادية';
+                    const bookTitleVal = data.bookTitle || data.title || data.name || 'طلب إعارة كتاب';
+
                     allOrders.push({
                         id: doc.id,
                         category: 'loan',
-                        title: data.bookTitle || data.title || 'طلب إعارة كتاب',
-                        details: `تاريخ الإعارة: ${data.loanDate || 'غير محدد'} | النوع: ${data.loanType || 'عادية'}`,
-                        date: data.date || data.loanDate || 'حديث',
-                        status: data.status || 'pending' // pending, approved, rejected
-                    });
-                });
-
-                // 2. جلب طلبات اشتراكات البث الانتقائي (من مجموعة broadcast_subscriptions)
-                const broadcastSnap = await getDocs(collection(db, "broadcast_subscriptions"));
-                broadcastSnap.forEach(doc => {
-                    const data = doc.data();
-                    allOrders.push({
-                        id: doc.id,
-                        category: 'broadcast',
-                        title: `اشتراك بث انتقائي: ${data.specialty || 'عام'}`,
-                        details: `الاسم: ${data.fullName} | البريد: ${data.email}`,
-                        date: data.date || 'حديث',
+                        title: bookTitleVal,
+                        details: `تاريخ الإعارة: ${loanDateVal} | النوع: ${loanTypeVal}`,
+                        date: data.createdAt || data.date || loanDateVal,
                         status: data.status || 'pending'
                     });
                 });
 
-                // إذا كانت القوائم فارغة، نعرض أمثلة توضيحية للتصميم
-                if (allOrders.length === 0) {
-                    allOrders = [
-                        { id: '1', category: 'loan', title: 'هندسة البرمجيات المتقدمة', details: 'تاريخ الإعارة: 2026-06-01', date: '2026-06-01', status: 'approved' },
-                        { id: '2', category: 'broadcast', title: 'اشتراك بث انتقائي: علوم الحاسوب', details: 'الاسم: أحمد محمد', date: '2026-06-02', status: 'pending' },
-                        { id: '3', category: 'loan', title: 'قواعد البيانات الموزعة', details: 'تاريخ الإعارة: 2026-05-20', date: '2026-05-20', status: 'rejected' }
-                    ];
+                // 2. جلب طلبات البث الانتقائي (من مجموعة selective_requests أو subscription أو broadcast_subscriptions)
+                // سنجرب جلب المجموعات المحتملة لتغطية كل الخيارات الموجودة في قاعدة بياناتك
+                const collectionsToTry = ["selective_requests", "subscription", "broadcast_subscriptions"];
+                for (const colName of collectionsToTry) {
+                    try {
+                        const snap = await getDocs(collection(db, colName));
+                        snap.forEach(doc => {
+                            const data = doc.data();
+                            // نتأكد ألا يتم تكرار نفس الطلب إذا كان من نفس المجموعة
+                            if (!allOrders.some(o => o.id === doc.id)) {
+                                allOrders.push({
+                                    id: doc.id,
+                                    category: 'broadcast',
+                                    title: `اشتراك بث انتقائي: ${data.specialty || data.title || data.category || 'عام'}`,
+                                    details: `الاسم: ${data.fullName || data.name || 'غير محدد'} | البريد: ${data.email || 'غير متوفر'}`,
+                                    date: data.date || data.createdAt || 'حديث',
+                                    status: data.status || 'pending'
+                                });
+                            }
+                        });
+                    } catch (e) {
+                        // تجاهل المجموعة إذا لم تكن موجودة
+                    }
                 }
 
                 renderOrders(allOrders);
@@ -111,17 +117,16 @@
             orders.forEach(order => {
                 const card = document.createElement('div');
                 
-                // تحديد ألوان حالة الطلب (قبول، رفض، قيد الانتظار)
-                let statusBg = '#fef3c7'; // أصفر (قيد الانتظار)
+                let statusBg = '#fef3c7'; 
                 let statusColor = '#92400e';
                 let statusText = 'قيد المراجعة ⏳';
 
-                if (order.status === 'approved' || order.status === 'مقبول') {
-                    statusBg = '#dcfce7'; // أخضر (مقبول)
+                if (order.status === 'approved' || order.status === 'مقبول' || order.status === 'accepted') {
+                    statusBg = '#dcfce7'; 
                     statusColor = '#166534';
                     statusText = 'مقبول ✓';
                 } else if (order.status === 'rejected' || order.status === 'مرفوض') {
-                    statusBg = '#fee2e2'; // أحمر (مرفوض)
+                    statusBg = '#fee2e2'; 
                     statusColor = '#991b1b';
                     statusText = 'مرفوض ✕';
                 }
