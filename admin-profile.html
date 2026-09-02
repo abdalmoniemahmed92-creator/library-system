@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <!-- الحاوية الرئيسية -->
+        <div style="width: 100%; max-width: 480px; background: #ffffff; padding: 25px 20px 35px 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box; border: 1px solid #e2e8f0;">
+            
+            <!-- شريط العنوان العلوي -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 5px;">
+                <div style="display: flex; gap: 6px;">
+                    <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; display: inline-block; cursor: pointer;" onclick="navigateToAdminHome()"></span>
+                    <span style="width: 12px; height: 12px; background: #eab308; border-radius: 50%; display: inline-block;"></span>
+                    <span style="width: 12px; height: 12px; background: #22c55e; border-radius: 50%; display: inline-block;"></span>
+                </div>
+                <h3 style="color: #1e293b; margin: 0; font-size: 16px; font-weight: bold;">الملف الشخصي</h3>
+            </div>
+
+            <div id="messageBox" style="display: none; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center;"></div>
+
+            <!-- حقل الإسم -->
+            <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                <label style="font-size: 13px; font-weight: bold; color: #334155; text-align: right;">الإسم</label>
+                <input type="text" id="nameInput" placeholder="أدخل الاسم" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; box-sizing: border-box;" />
+            </div>
+
+            <!-- حقل الهاتف -->
+            <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                <label style="font-size: 13px; font-weight: bold; color: #334155; text-align: right;">الهاتف</label>
+                <input type="text" id="phoneInput" placeholder="رقم الهاتف" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; box-sizing: border-box;" />
+            </div>
+
+            <!-- حقل البريد الإلكتروني -->
+            <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                <label style="font-size: 13px; font-weight: bold; color: #334155; text-align: right;">البريد الإلكتروني</label>
+                <input type="email" id="emailInput" placeholder="البريد الإلكتروني" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; box-sizing: border-box;" />
+            </div>
+
+            <!-- حقل كلمة السر -->
+            <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                <label style="font-size: 13px; font-weight: bold; color: #334155; text-align: right;">كلمة السر الجديدة</label>
+                <input type="password" id="passwordInput" placeholder="كلمة السر الجديدة" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; box-sizing: border-box;" />
+            </div>
+
+            <!-- حقل تأكيد كلمة السر -->
+            <div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+                <label style="font-size: 13px; font-weight: bold; color: #334155; text-align: right;">تأكيد كلمة السر</label>
+                <input type="password" id="confirmPasswordInput" placeholder="تأكيد كلمة السر" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; box-sizing: border-box;" />
+            </div>
+
+            <!-- زر تحديث البيانات -->
+            <button onclick="updateProfile()" style="width: 100%; background: #2563eb; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);">تحديث البيانات</button>
+
+            <!-- زر العودة لوحة التحكم -->
+            <button onclick="navigateToAdminHome()" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center;">العودة إلى لوحة التحكم</button>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, updatePassword, updateEmail, updateProfile as updateAuthProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // دالة الانتقال للوحة التحكم
+        window.navigateToAdminHome = function() {
+            window.location.href = 'admin-home.html';
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('emailInput').value = user.email || '';
+                document.getElementById('nameInput').value = user.displayName || '';
+
+                try {
+                    const userDocRef = doc(db, "admins", user.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        if (data.name) document.getElementById('nameInput').value = data.name;
+                        if (data.phone) document.getElementById('phoneInput').value = data.phone;
+                    }
+                } catch (e) {
+                    console.log("جاري جلب البيانات الأساسية");
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.updateProfile = async function() {
+            const name = document.getElementById('nameInput').value.trim();
+            const phone = document.getElementById('phoneInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+            const messageBox = document.getElementById('messageBox');
+
+            messageBox.style.display = 'block';
+            messageBox.style.background = '#e2e8f0';
+            messageBox.style.color = '#334155';
+            messageBox.textContent = 'جاري التحديث...';
+
+            try {
+                if (!currentUser) throw new Error("الرجاء تسجيل الدخول مرة أخرى.");
+
+                if (password) {
+                    if (password !== confirmPassword) {
+                        throw new Error("كلمة السر وتأكيد كلمة السر غير متطابقين.");
+                    }
+                    if (password.length < 6) {
+                        throw new Error("كلمة السر يجب ألا تقل عن 6 أحرف.");
+                    }
+                    await updatePassword(currentUser, password);
+                }
+
+                if (email && email !== currentUser.email) {
+                    await updateEmail(currentUser, email);
+                }
+
+                if (name) {
+                    await updateAuthProfile(currentUser, { displayName: name });
+                }
+
+                const adminRef = doc(db, "admins", currentUser.uid);
+                await setDoc(adminRef, {
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    updatedAt: new Date()
+                }, { merge: true });
+
+                messageBox.style.background = '#dcfce7';
+                messageBox.style.color = '#166534';
+                messageBox.textContent = 'تم تحديث البيانات بنجاح!';
+                
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('confirmPasswordInput').value = '';
+
+            } catch (error) {
+                console.error(error);
+                messageBox.style.background = '#fee2e2';
+                messageBox.style.color = '#991b1b';
+                messageBox.textContent = 'حدث خطأ: ' + (error.message || 'يرجى إعادة تسجيل الدخول لتنفيذ هذه العملية.');
+            }
+        };
+    </script>
+</body>
+</html>
