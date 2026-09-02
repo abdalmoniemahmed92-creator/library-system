@@ -108,7 +108,7 @@
                         id: doc.id, 
                         type: 'book', 
                         title: data.title || data.name || data.bookName || 'بدون عنوان',
-                        author: data.author || data.writer || 'مؤلف غير معروف',
+                        author: data.author || data.writer || data.creator || 'مؤلف غير معروف',
                         category: data.category || data.department || 'عام',
                         description: data.description || data.desc || 'لا يوجد وصف متاح.',
                         fileUrl: data.fileUrl || data.url || '#'
@@ -123,9 +123,9 @@
                         id: doc.id, 
                         type: 'thesis', 
                         title: data.title || data.name || data.thesisName || 'بدون عنوان',
-                        researcher: data.researcher || data.author || data.studentName || 'باحث غير معروف',
+                        researcher: data.researcher || data.author || data.studentName || data.student || data.writer || data.name || 'باحث غير معروف',
                         degree: data.degree || 'ماجستير / دكتوراه',
-                        supervisor: data.supervisor || 'غير متوفر',
+                        supervisor: data.supervisor || data.supervisorName || 'غير متوفر',
                         department: data.department || 'علوم الحاسوب',
                         abstract: data.abstract || data.description || 'لا يتوفر ملخص لهذه الرسالة.',
                         fileUrl: data.fileUrl || data.url || '#'
