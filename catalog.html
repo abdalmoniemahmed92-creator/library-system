@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <!-- جافاسكريبت للاتصال بـ Firebase وجلب البيانات والربط الشامل -->
+    <!-- جافاسكريبت المحدث لجلب الربط الصحيح تماماً -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -97,25 +97,28 @@
             try {
                 allItems = [];
                 
-                // 1. جلب المؤلفين وإنشاء قاموس شامل للأسماء
+                // 1. بناء قاموس المؤلفين مع تتبع كافة أسماء الحقول المحتملة داخل المستند
                 const authorsMap = {};
                 const authorsSnapshot = await getDocs(collection(db, "authors"));
                 authorsSnapshot.forEach(doc => {
                     const data = doc.data();
-                    const authorName = data.fullname || data.name || data.authorName;
+                    // البحث عن أي حقل قد يحتوي على اسم المؤلف الحقيقي
+                    const authorName = data.name || data.fullname || data.authorName || data.title;
+                    
                     if (authorName) {
-                        authorsMap[doc.id] = authorName; // مثل AUTH-101
-                        if (data.authorId) authorsMap[data.authorId] = authorName;
+                        authorsMap[doc.id] = authorName; // ربط باسم وثيقة المستند (مثل AUTH-101)
+                        if (data.authorId) authorsMap[data.authorId] = authorName; // ربط بقيمة حقل authorId الداخلي إن وجد
                     }
                 });
-                console.log("قاموس المؤلفين المستخرج:", authorsMap);
+                console.log("القاموس المستخرج للمؤلفين:", authorsMap);
 
-                // 2. جلب الكتب من مجموعة books
+                // 2. جلب الكتب
                 const booksSnapshot = await getDocs(collection(db, "books"));
                 booksSnapshot.forEach(doc => {
                     const data = doc.data();
                     let authorName = data.author || data.writer;
                     const lookupKey = data.authorId || data.author;
+                    
                     if (lookupKey && authorsMap[lookupKey]) {
                         authorName = authorsMap[lookupKey];
                     }
@@ -131,23 +134,21 @@
                     });
                 });
 
-                // 3. جلب الرسائل الجامعية من مجموعة theses ومطابقة الحقول بدقة
+                // 3. جلب الرسائل الجامعية
                 const thesesSnapshot = await getDocs(collection(db, "theses"));
                 thesesSnapshot.forEach(doc => {
                     const data = doc.data();
-                    console.log("بيانات الرسالة الحالية:", data);
-
                     let researcherName = 'باحث غير معروف';
                     
-                    // فحص الحقول المحتملة لتخزين معرف المؤلف أو الطالب
+                    // فحص جميع الحقول المحتملة التي قد تخزن معرف أو اسم الباحث في الرسائل
                     const possibleKeys = [data.authorId, data.studentId, data.researcherId, data.author, data.student];
                     
                     for (let key of possibleKeys) {
                         if (key && authorsMap[key]) {
                             researcherName = authorsMap[key];
                             break;
-                        } else if (key && typeof key === 'string' && !key.startsWith('AUTH-') && !key.startsWith('STU-') && !key.startsWith('UAER-')) {
-                            // إذا كان الحقل يحتوي على اسم نصي مباشر
+                        } else if (key && typeof key === 'string' && !key.includes('AUTH-')) {
+                            // لو الحقل مخزن فيه اسم الباحث نصاً بشكل مباشر
                             researcherName = key;
                             break;
                         }
