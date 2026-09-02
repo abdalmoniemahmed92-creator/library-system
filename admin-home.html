@@ -5,62 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم الرئيسية</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
 
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
         
-        <div style="width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+        <!-- حاوية الأزرار الرئيسية -->
+        <div style="width: 100%; max-width: 480px; background: white; padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box; align-items: center;">
+            
+            <h2 style="color: #1f2937; margin: 0 0 5px 0; font-size: 22px; text-align: center;">لوحة التحكم</h2>
+            <p style="color: #64748b; margin: 0 0 15px 0; font-size: 13px; text-align: center;">إدارة النظام وصلاحيات المدير</p>
 
-            <!-- العنوان الرئيسي -->
-            <h2 style="color: #1f2937; margin-bottom: 5px; text-align: center;">لوحة التحكم</h2>
-            <p style="color: #64748b; font-size: 13px; margin-top: 0; text-align: center;">إدارة النظام وصلاحيات المدير</p>
+            <button onclick="navigateTo('add-book.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                📖 إضافة كتاب
+            </button>
 
-            <!-- أزرار الإدارة والتحكم -->
-            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px;">
-                
-                <button onclick="navigateTo('add-book.html')" style="width: 100%; background: white; color: #1f2937; border: none; border-radius: 15px; padding: 15px 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <span>إضافة كتاب</span>
-                    <span>📖</span>
-                </button>
+            <button onclick="navigateTo('add-thesis.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                📜 إضافة رسالة جامعية
+            </button>
 
-                <button onclick="navigateTo('add-thesis.html')" style="width: 100%; background: white; color: #1f2937; border: none; border-radius: 15px; padding: 15px 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <span>إضافة رسالة جامعية</span>
-                    <span>📜</span>
-                </button>
+            <button onclick="navigateTo('manage-requests.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                📋 إدارة طلبات الإعارة والبث الانتقائي
+            </button>
 
-                <!-- زر إدارة طلبات الإعارة والبث الانتقائي المربوط بالصفحة المطلوبة -->
-                <button onclick="navigateTo('manage-requests.html')" style="width: 100%; background: white; color: #1f2937; border: none; border-radius: 15px; padding: 15px 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <span>إدارة طلبات الإعارة والبث الانتقائي</span>
-                    <span>📋</span>
-                </button>
+            <button onclick="navigateTo('edit-book.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                ✏️ تعديل بيانات كتاب
+            </button>
 
-                <button onclick="navigateTo('edit-book.html')" style="width: 100%; background: white; color: #1f2937; border: none; border-radius: 15px; padding: 15px 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <span>تعديل بيانات كتاب</span>
-                    <span>✏️</span>
-                </button>
+            <button onclick="navigateTo('delete-thesis.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                🗑️ حذف رسالة جامعية
+            </button>
 
-                <button onclick="navigateTo('delete-thesis.html')" style="width: 100%; background: white; color: #1f2937; border: none; border-radius: 15px; padding: 15px 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <span>حذف رسالة جامعية</span>
-                    <span>🗑️</span>
-                </button>
+            <button onclick="navigateTo('reports.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                📊 التقارير
+            </button>
 
-                <button onclick="navigateTo('reports.html')" style="width: 100%; background: white; color: #1f2937; border: none; border-radius: 15px; padding: 15px 20px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
-                    <span>التقارير</span>
-                    <span>📊</span>
-                </button>
-
-            </div>
+            <!-- زر الملف الشخصي -->
+            <button onclick="navigateTo('admin-profile.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                👤 الملف الشخصي
+            </button>
 
             <!-- زر تسجيل الخروج -->
-            <button onclick="logout()" style="width: 100%; background: #fee2e2; color: #dc2626; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 15px;">تسجيل الخروج</button>
+            <button onclick="logout()" style="width: 100%; background: #fee2e2; color: #991b1b; border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                تسجيل الخروج
+            </button>
 
         </div>
     </div>
 
-    <!-- Firebase والسكربت البرمجي -->
+    <!-- كود التحقق والتحويلات -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -76,6 +71,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        // التحقق من حالة تسجيل الدخول
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
@@ -84,15 +80,15 @@
 
         window.navigateTo = function(pageUrl) {
             window.location.href = pageUrl;
-        }
+        };
 
         window.logout = function() {
             signOut(auth).then(() => {
                 window.location.href = 'login.html';
             }).catch((error) => {
-                console.error("خطأ في تسجيل الخروج:", error);
+                console.error("خطأ أثناء تسجيل الخروج:", error);
             });
-        }
+        };
     </script>
 </body>
 </html>
