@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <!-- جافاسكريبت للاتصال بـ Firebase وجلب البيانات -->
+    <!-- جافاسكريبت للاتصال بـ Firebase وجلب البيانات والربط بين المجموعات -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -97,31 +97,62 @@
             try {
                 allItems = [];
                 
-                // جلب الكتب من مجموعة books
+                // 1. جلب المؤلفين أولاً وتخزين أسمائهم باستخدام المعرّف (ID أو authorId) كـ مفتاح
+                const authorsMap = {};
+                const authorsSnapshot = await getDocs(collection(db, "authors"));
+                authorsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const authorName = data.fullname || data.name || 'مؤلف غير معروف';
+                    // حفظ الاسم بناءً على معرف وثيقة الفايربيس وبناءً على حقل authorId إن وجد
+                    authorsMap[doc.id] = authorName;
+                    if (data.authorId) {
+                        authorsMap[data.authorId] = authorName;
+                    }
+                });
+
+                // 2. جلب الكتب من مجموعة books
                 const booksSnapshot = await getDocs(collection(db, "books"));
                 booksSnapshot.forEach(doc => {
                     const data = doc.data();
+                    // مطابقة المؤلف إذا كان مخزناً كمعرّف في جدول الكتب أو كاسم مباشر
+                    let authorName = data.author || data.writer;
+                    if (authorsMap[data.authorId]) {
+                        authorName = authorsMap[data.authorId];
+                    } else if (authorsMap[authorName]) {
+                        authorName = authorsMap[authorName];
+                    }
+
                     allItems.push({ 
                         id: doc.id, 
                         type: 'book', 
                         title: data.title || 'بدون عنوان',
-                        author: data.author || data.writer || 'مؤلف غير معروف',
+                        author: authorName || 'مؤلف غير معروف',
                         category: data.category || 'عام',
                         description: data.description || 'لا يوجد وصف متاح.',
                         fileUrl: data.fileUrl || data.url || '#'
                     });
                 });
 
-                // جلب الرسائل الجامعية من مجموعة theses مع مطابقة الحقول الظاهرة في الصورة
+                // 3. جلب الرسائل الجامعية من مجموعة theses ومطابقة authorId مع جدول authors
                 const thesesSnapshot = await getDocs(collection(db, "theses"));
                 thesesSnapshot.forEach(doc => {
                     const data = doc.data();
+                    
+                    // البحث عن اسم الباحث باستخدام authorId أو studentId عبر الخريطة
+                    let researcherName = 'باحث غير معروف';
+                    const targetId = data.authorId || data.studentId;
+                    
+                    if (targetId && authorsMap[targetId]) {
+                        researcherName = authorsMap[targetId];
+                    } else if (data.researcher) {
+                        researcherName = data.researcher;
+                    }
+
                     allItems.push({ 
                         id: doc.id, 
                         type: 'thesis', 
                         title: data.title || 'بدون عنوان',
-                        // استخدام الحقول الموجودة في قاعدة البيانات (studentId أو authorId)
-                        researcher: data.studentId || data.authorId || data.studentName || data.researcher || 'باحث غير معروف',
+                        researcher: researcherName,
                         department: data.department || 'علوم الحاسوب',
                         abstract: data.summary || data.abstract || data.description || 'لا يتوفر ملخص لهذه الرسالة.',
                         fileUrl: data.fileUrl || data.url || '#'
