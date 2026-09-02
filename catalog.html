@@ -26,7 +26,6 @@
 
             <!-- قائمة العناصر المستعرضة -->
             <div id="itemsList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
-                <!-- سيتم تعبئة العناصر ديناميكياً من Firebase -->
                 <div style="text-align: center; color: #64748b; padding: 30px;">جاري تحميل المحتوى...</div>
             </div>
 
@@ -62,8 +61,6 @@
             </div>
             <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
                 <p style="margin: 0;"><strong>الباحث / الطالب:</strong> <span id="modalThesisResearcher"></span></p>
-                <p style="margin: 0;"><strong>الدرجة العلمية:</strong> <span id="modalThesisDegree"></span></p>
-                <p style="margin: 0;"><strong>المشرف:</strong> <span id="modalThesisSupervisor"></span></p>
                 <p style="margin: 0;"><strong>القسم:</strong> <span id="modalThesisDepartment"></span></p>
                 <p style="margin: 0; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;"><strong>الملخص:</strong> <br><span id="modalThesisAbstract"></span></p>
             </div>
@@ -107,27 +104,26 @@
                     allItems.push({ 
                         id: doc.id, 
                         type: 'book', 
-                        title: data.title || data.name || data.bookName || 'بدون عنوان',
-                        author: data.author || data.writer || data.creator || 'مؤلف غير معروف',
-                        category: data.category || data.department || 'عام',
-                        description: data.description || data.desc || 'لا يوجد وصف متاح.',
+                        title: data.title || 'بدون عنوان',
+                        author: data.author || data.writer || 'مؤلف غير معروف',
+                        category: data.category || 'عام',
+                        description: data.description || 'لا يوجد وصف متاح.',
                         fileUrl: data.fileUrl || data.url || '#'
                     });
                 });
 
-                // جلب الرسائل الجامعية من مجموعة theses
+                // جلب الرسائل الجامعية من مجموعة theses مع مطابقة الحقول الظاهرة في الصورة
                 const thesesSnapshot = await getDocs(collection(db, "theses"));
                 thesesSnapshot.forEach(doc => {
                     const data = doc.data();
                     allItems.push({ 
                         id: doc.id, 
                         type: 'thesis', 
-                        title: data.title || data.name || data.thesisName || 'بدون عنوان',
-                        researcher: data.researcher || data.author || data.studentName || data.student || data.writer || data.name || 'باحث غير معروف',
-                        degree: data.degree || 'ماجستير / دكتوراه',
-                        supervisor: data.supervisor || data.supervisorName || 'غير متوفر',
+                        title: data.title || 'بدون عنوان',
+                        // استخدام الحقول الموجودة في قاعدة البيانات (studentId أو authorId)
+                        researcher: data.studentId || data.authorId || data.studentName || data.researcher || 'باحث غير معروف',
                         department: data.department || 'علوم الحاسوب',
-                        abstract: data.abstract || data.description || 'لا يتوفر ملخص لهذه الرسالة.',
+                        abstract: data.summary || data.abstract || data.description || 'لا يتوفر ملخص لهذه الرسالة.',
                         fileUrl: data.fileUrl || data.url || '#'
                     });
                 });
@@ -215,8 +211,6 @@
         function openThesisModal(thesis) {
             document.getElementById('modalThesisTitle').innerText = thesis.title;
             document.getElementById('modalThesisResearcher').innerText = thesis.researcher;
-            document.getElementById('modalThesisDegree').innerText = thesis.degree;
-            document.getElementById('modalThesisSupervisor').innerText = thesis.supervisor;
             document.getElementById('modalThesisDepartment').innerText = thesis.department;
             document.getElementById('modalThesisAbstract').innerText = thesis.abstract;
 
