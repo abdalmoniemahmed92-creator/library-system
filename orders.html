@@ -13,7 +13,7 @@
             
             <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <h2 style="color: #1f2937; margin: 0; font-size: 18px;">متابعة الطلبات والردود</h2>
-                <button onclick="window.location.href='home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">الرئيسية</button>
+                <button onclick="window.location.href='service.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">الخدمات</button>
             </div>
 
             <div style="display: flex; gap: 8px;">
@@ -23,7 +23,7 @@
             </div>
 
             <div id="ordersList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
-                <div style="text-align: center; color: #64748b; padding: 30px;">جاري جلب الطلبات...</div>
+                <div style="text-align: center; color: #64748b; padding: 30px;">جاري جلب طلباتك...</div>
             </div>
 
         </div>
@@ -31,7 +31,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -45,63 +46,100 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
         let allOrders = [];
+        let currentUser = null;
 
-        async function fetchOrders() {
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                currentUser = user;
+                fetchUserOrders(user);
+            }
+        });
+
+        async function fetchUserOrders(user) {
             const listContainer = document.getElementById('ordersList');
+
             try {
                 allOrders = [];
 
-                // 1. جلب طلبات الإعارة من مجموعة loans
-                const loansSnap = await getDocs(collection(db, "loans"));
-                loansSnap.forEach(doc => {
+                // 1. جلب الكتب وتخزين عناوينها
+                const booksSnapshot = await getDocs(collection(db, "books"));
+                const booksMap = {};
+                
+                booksSnapshot.forEach(doc => {
                     const data = doc.data();
-                    const loanDateVal = data.loanDate || data.date || data.startDate || data.borrowDate || 'غير محدد';
-                    const loanTypeVal = data.loanType || data.type || 'عادية';
-                    const bookTitleVal = data.bookTitle || data.title || data.name || 'طلب إعارة كتاب';
+                    const title = data.title || data.name || data.bookTitle || data.bookName;
+                    
+                    if (title) {
+                        booksMap[doc.id] = title;
+                        if (data.bookId) booksMap[data.bookId] = title;
+                        if (data.itemId) booksMap[data.itemId] = title;
+                    }
+                });
+
+                // 2. جلب طلبات الإعارة
+                const loansSnap = await getDocs(collection(db, "loans"));
+                loansSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    
+                    // التحقق من أن الطلب يخص المستخدم الحالي (إذا كان هناك حقل userId)
+                    if (data.userId && data.userId !== user.uid) return;
+
+                    const targetBookId = data.bookId || data.itemId || data.bookCode || data.id;
+                    let bookTitle = '';
+
+                    if (targetBookId && booksMap[targetBookId]) {
+                        bookTitle = booksMap[targetBookId];
+                    } else if (data.bookTitle || data.title || data.bookName || data.name || data.itemTitle) {
+                        bookTitle = data.bookTitle || data.title || data.bookName || data.name || data.itemTitle;
+                    } else if (targetBookId && !targetBookId.toLowerCase().startsWith('fs')) {
+                        bookTitle = targetBookId;
+                    } else {
+                        bookTitle = 'كتاب مكتبة علوم الحاسوب';
+                    }
 
                     allOrders.push({
-                        id: doc.id,
+                        id: docSnap.id,
+                        collectionName: 'loans',
                         category: 'loan',
-                        title: bookTitleVal,
-                        details: `تاريخ الإعارة: ${loanDateVal} | النوع: ${loanTypeVal}`,
-                        date: data.createdAt || data.date || loanDateVal,
+                        title: `طلب إعارة: ${bookTitle}`,
+                        details: `تاريخ الإعارة: ${data.borrowDate || data.date || 'حديث'} | النوع: ${data.loanType || data.borrowType || 'خارجية'}`,
+                        date: data.borrowDate || 'حديث',
                         status: data.status || 'pending'
                     });
                 });
 
-                // 2. جلب طلبات البث الانتقائي (من مجموعة selective_requests أو subscription أو broadcast_subscriptions)
-                // سنجرب جلب المجموعات المحتملة لتغطية كل الخيارات الموجودة في قاعدة بياناتك
-                const collectionsToTry = ["selective_requests", "subscription", "broadcast_subscriptions"];
-                for (const colName of collectionsToTry) {
-                    try {
-                        const snap = await getDocs(collection(db, colName));
-                        snap.forEach(doc => {
-                            const data = doc.data();
-                            // نتأكد ألا يتم تكرار نفس الطلب إذا كان من نفس المجموعة
-                            if (!allOrders.some(o => o.id === doc.id)) {
-                                allOrders.push({
-                                    id: doc.id,
-                                    category: 'broadcast',
-                                    title: `اشتراك بث انتقائي: ${data.specialty || data.title || data.category || 'عام'}`,
-                                    details: `الاسم: ${data.fullName || data.name || 'غير محدد'} | البريد: ${data.email || 'غير متوفر'}`,
-                                    date: data.date || data.createdAt || 'حديث',
-                                    status: data.status || 'pending'
-                                });
-                            }
+                // 3. جلب طلبات البث الانتقائي
+                try {
+                    const sdiSnap = await getDocs(collection(db, "selective_requests"));
+                    sdiSnap.forEach(docSnap => {
+                        const data = docSnap.data();
+                        if (data.userId && data.userId !== user.uid) return;
+
+                        allOrders.push({
+                            id: docSnap.id,
+                            collectionName: 'selective_requests',
+                            category: 'broadcast',
+                            title: `بث انتقائي (SDI): ${data.department || 'عام'}`,
+                            details: `الاسم: ${data.fullName || 'مستفيد'} | الاهتمامات: ${data.interests || '---'}`,
+                            date: 'حديث',
+                            status: data.status || 'pending'
                         });
-                    } catch (e) {
-                        // تجاهل المجموعة إذا لم تكن موجودة
-                    }
+                    });
+                } catch (err) {
+                    console.log("لا توجد مجموعة بث انتقائي مسجلة حالياً");
                 }
 
                 renderOrders(allOrders);
 
             } catch (error) {
                 console.error("خطأ في جلب الطلبات:", error);
-                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب الطلبات، تحقق من الاتصال.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب الطلبات، تحقق من الاتصال وقواعد الأمان.</div>';
             }
         }
 
@@ -110,7 +148,7 @@
             listContainer.innerHTML = '';
 
             if (orders.length === 0) {
-                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">لا توجد طلبات مسجلة حالياً.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات مسجلة لك حتى الآن.</div>';
                 return;
             }
 
@@ -120,8 +158,9 @@
                 let statusBg = '#fef3c7'; 
                 let statusColor = '#92400e';
                 let statusText = 'قيد المراجعة ⏳';
+                let isPending = false;
 
-                if (order.status === 'approved' || order.status === 'مقبول' || order.status === 'accepted') {
+                if (order.status === 'approved' || order.status === 'مقبول' || order.status === 'active') {
                     statusBg = '#dcfce7'; 
                     statusColor = '#166534';
                     statusText = 'مقبول ✓';
@@ -129,24 +168,42 @@
                     statusBg = '#fee2e2'; 
                     statusColor = '#991b1b';
                     statusText = 'مرفوض ✕';
+                } else {
+                    isPending = true; // الطلب معلق وقيد المراجعة ويمكن إلغاؤه
                 }
 
                 card.style.cssText = "background: white; padding: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px;";
                 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 10px; background: ${order.category === 'loan' ? '#dbeafe' : '#f3e8ff'}; color: ${order.category === 'loan' ? '#1e40af' : '#6b21a8'}; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${order.category === 'loan' ? 'إعارة كتاب' : 'بث انتقائي'}</span>
+                        <span style="font-size: 10px; background: ${order.category === 'loan' ? '#dbeafe' : '#f3e8ff'}; color: ${order.category === 'loan' ? '#1e40af' : '#6b21a8'}; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${order.category === 'loan' ? 'إعارة كتاب' : 'بث انتقائي (SDI)'}</span>
                         <span style="font-size: 11px; background: ${statusBg}; color: ${statusColor}; padding: 3px 8px; border-radius: 6px; font-weight: bold;">${statusText}</span>
                     </div>
                     <h4 style="margin: 0; color: #1e293b; font-size: 14px;">${order.title}</h4>
                     <p style="margin: 0; color: #64748b; font-size: 12px;">${order.details}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 6px; margin-top: 4px;">
-                        <span style="font-size: 10px; color: #94a3b8;">تاريخ التقديم: ${order.date}</span>
-                    </div>
+                    ${isPending ? `<button onclick="cancelOrder('${order.id}', '${order.collectionName}')" style="margin-top: 5px; background: #fee2e2; color: #991b1b; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;">إلغاء الطلب</button>` : ''}
                 `;
 
                 listContainer.appendChild(card);
             });
+        }
+
+        window.cancelOrder = async function(orderId, collectionName) {
+            if (confirm("هل أنت متأكد من رغبتك في إلغاء هذا الطلب؟")) {
+                try {
+                    await deleteDoc(doc(db, collectionName, orderId));
+                    allOrders = allOrders.filter(o => o.id !== orderId);
+                    
+                    // إعادة تطبيق الفلتر الحالي
+                    const activeBtn = document.querySelector('button[style*="background: rgb(59, 130, 246)"]');
+                    // استدعاء عرض الكل أو الفلتر النشط افتراضياً
+                    renderOrders(allOrders);
+                    alert("تم إلغاء الطلب بنجاح.");
+                } catch (error) {
+                    console.error("خطأ أثناء إلغاء الطلب:", error);
+                    alert("تعذر إلغاء الطلب، يرجى المحاولة لاحقاً.");
+                }
+            }
         }
 
         window.filterOrders = function(category) {
@@ -165,8 +222,6 @@
                 renderOrders(allOrders.filter(o => o.category === category));
             }
         }
-
-        fetchOrders();
     </script>
 </body>
 </html>
