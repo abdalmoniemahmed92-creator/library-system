@@ -17,8 +17,7 @@
             </div>
 
             <div style="display: flex; gap: 8px;">
-                <button onclick="filterOrders('all')" id="btn-all" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الكل</button>
-                <button onclick="filterOrders('loan')" id="btn-loan" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الإعارة</button>
+                <button onclick="filterOrders('loan')" id="btn-loan" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الإعارة</button>
                 <button onclick="filterOrders('broadcast')" id="btn-broadcast" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">البث الانتقائي</button>
             </div>
 
@@ -51,6 +50,7 @@
 
         let allOrders = [];
         let currentUser = null;
+        let currentCategory = 'loan'; // البدء بافتراض عرض طلبات الإعارة مباشرة
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -87,7 +87,6 @@
                 loansSnap.forEach(docSnap => {
                     const data = docSnap.data();
                     
-                    // التحقق من أن الطلب يخص المستخدم الحالي (إذا كان هناك حقل userId)
                     if (data.userId && data.userId !== user.uid) return;
 
                     const targetBookId = data.bookId || data.itemId || data.bookCode || data.id;
@@ -135,7 +134,7 @@
                     console.log("لا توجد مجموعة بث انتقائي مسجلة حالياً");
                 }
 
-                renderOrders(allOrders);
+                filterOrders(currentCategory);
 
             } catch (error) {
                 console.error("خطأ في جلب الطلبات:", error);
@@ -148,7 +147,7 @@
             listContainer.innerHTML = '';
 
             if (orders.length === 0) {
-                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات مسجلة لك حتى الآن.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات مسجلة في هذا القسم حتى الآن.</div>';
                 return;
             }
 
@@ -169,7 +168,7 @@
                     statusColor = '#991b1b';
                     statusText = 'مرفوض ✕';
                 } else {
-                    isPending = true; // الطلب معلق وقيد المراجعة ويمكن إلغاؤه
+                    isPending = true;
                 }
 
                 card.style.cssText = "background: white; padding: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px;";
@@ -193,11 +192,7 @@
                 try {
                     await deleteDoc(doc(db, collectionName, orderId));
                     allOrders = allOrders.filter(o => o.id !== orderId);
-                    
-                    // إعادة تطبيق الفلتر الحالي
-                    const activeBtn = document.querySelector('button[style*="background: rgb(59, 130, 246)"]');
-                    // استدعاء عرض الكل أو الفلتر النشط افتراضياً
-                    renderOrders(allOrders);
+                    filterOrders(currentCategory);
                     alert("تم إلغاء الطلب بنجاح.");
                 } catch (error) {
                     console.error("خطأ أثناء إلغاء الطلب:", error);
@@ -207,20 +202,17 @@
         }
 
         window.filterOrders = function(category) {
-            document.getElementById('btn-all').style.background = category === 'all' ? '#3b82f6' : 'white';
-            document.getElementById('btn-all').style.color = category === 'all' ? 'white' : '#64748b';
+            currentCategory = category;
             
             document.getElementById('btn-loan').style.background = category === 'loan' ? '#3b82f6' : 'white';
             document.getElementById('btn-loan').style.color = category === 'loan' ? 'white' : '#64748b';
+            document.getElementById('btn-loan').style.border = category === 'loan' ? 'none' : '1px solid #cbd5e1';
             
             document.getElementById('btn-broadcast').style.background = category === 'broadcast' ? '#3b82f6' : 'white';
             document.getElementById('btn-broadcast').style.color = category === 'broadcast' ? 'white' : '#64748b';
+            document.getElementById('btn-broadcast').style.border = category === 'broadcast' ? 'none' : '1px solid #cbd5e1';
 
-            if (category === 'all') {
-                renderOrders(allOrders);
-            } else {
-                renderOrders(allOrders.filter(o => o.category === category));
-            }
+            renderOrders(allOrders.filter(o => o.category === category));
         }
     </script>
 </body>
