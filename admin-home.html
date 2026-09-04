@@ -13,7 +13,18 @@
         <div style="width: 100%; max-width: 480px; background: white; padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box; align-items: center;">
             
             <h2 style="color: #1f2937; margin: 0 0 5px 0; font-size: 22px; text-align: center;">لوحة التحكم</h2>
-            <p style="color: #64748b; margin: 0 0 15px 0; font-size: 13px; text-align: center;">إدارة النظام وصلاحيات المدير</p>
+            <p style="color: #64748b; margin: 0 0 10px 0; font-size: 13px; text-align: center;">إدارة النظام وصلاحيات المدير</p>
+
+            <!-- بطاقة إحصائية لعدد الطلاب المسجلين -->
+            <div style="width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; margin-bottom: 5px;">
+                <div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: bold;">إجمالي الطلاب المسجلين</div>
+                    <div id="totalStudentsCount" style="font-size: 22px; font-weight: bold; color: #1e293b; margin-top: 3px;">...</div>
+                </div>
+                <div style="background: #e0f2fe; color: #0284c7; padding: 10px; border-radius: 8px; font-size: 18px;">
+                    👨‍🎓
+                </div>
+            </div>
 
             <button onclick="navigateTo('add-book.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
                 📖 إضافة كتاب
@@ -45,17 +56,18 @@
             </button>
 
             <!-- زر تسجيل الخروج -->
-            <button onclick="logout()" style="width: 100%; background: #fee2e2; color: #991b1b; border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <button onclick="logout()" style="width: 100%; background: #fee2e2; color: #991b1b; border: none; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 تسجيل الخروج
             </button>
 
         </div>
     </div>
 
-    <!-- كود التحقق والتحويلات -->
+    <!-- كود التحقق والتحويلات وجلب إحصائيات الطلاب -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -70,13 +82,29 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // التحقق من حالة تسجيل الدخول
+        // التحقق من حالة تسجيل الدخول وجلب البيانات عند التأكد من المصادقة
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
+            } else {
+                fetchTotalStudentsCount();
             }
         });
+
+        // دالة لجلب عدد الطلاب من قاعدة البيانات
+        async function fetchTotalStudentsCount() {
+            const counterElement = document.getElementById('totalStudentsCount');
+            try {
+                // استبدل "users" باسم المجموعة لديك إن كانت مسماة بـ "students" أو غيرها
+                const querySnapshot = await getDocs(collection(db, "users"));
+                counterElement.innerText = querySnapshot.size;
+            } catch (error) {
+                console.error("خطأ في جلب عدد الطلاب:", error);
+                counterElement.innerText = "0";
+            }
+        }
 
         window.navigateTo = function(pageUrl) {
             window.location.href = pageUrl;
