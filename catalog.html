@@ -3,78 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استعراض الكتب والرسائل الجامعية</title>
+    <title>مكتبة كلية علوم الحاسوب</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
 
     <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh;">
         
-        <div style="width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 15px;">
+        <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px;">
             
-            <!-- رأس الصفحة -->
-            <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <h2 style="color: #1f2937; margin: 0; font-size: 18px;">المكتبة الشاملة</h2>
-                <button onclick="window.location.href='home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">الرئيسية</button>
+            <!-- أزرار التبديل بين الكتب والرسائل الجامعية -->
+            <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 10px;">
+                <button id="btnBooks" onclick="switchTab('books')" style="flex: 1; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">📚 الكتب</button>
+                <button id="btnTheses" onclick="switchTab('theses')" style="flex: 1; background: #e2e8f0; color: #475569; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">🎓 الرسائل الجامعية</button>
             </div>
 
-            <!-- تبديل العرض (الكتب أولاً ثم الرسائل الجامعية) -->
-            <div style="display: flex; gap: 8px;">
-                <button onclick="filterItems('book')" id="btn-book" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">الكتب</button>
-                <button onclick="filterItems('thesis')" id="btn-thesis" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">الرسائل الجامعية</button>
-            </div>
-
-            <!-- قائمة العناصر المستعرضة -->
-            <div id="itemsList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
-                <div style="text-align: center; color: #64748b; padding: 30px;">جاري تحميل المحتوى...</div>
+            <!-- حاوية عرض النتائج -->
+            <div id="contentContainer" style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="text-align: center; color: #64748b; padding: 20px;">جاري التحميل...</div>
             </div>
 
         </div>
     </div>
 
-    <!-- نافذة منبثقة لعرض تفاصيل الكتاب -->
-    <div id="bookModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; z-index: 1000;">
-        <div style="background: white; width: 100%; max-width: 380px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                <span style="font-size: 11px; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-weight: bold;">كتاب</span>
-                <h3 id="modalBookTitle" style="margin: 0; color: #1f2937; font-size: 16px; text-align: right; flex: 1; margin-right: 10px;"></h3>
-            </div>
-            <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
-                <p style="margin: 0;"><strong>المؤلف:</strong> <span id="modalBookAuthor"></span></p>
-                <p style="margin: 0;"><strong>التخصص:</strong> <span id="modalBookCategory"></span></p>
-                <p style="margin: 0;"><strong>الوصف:</strong> <span id="modalBookDesc"></span></p>
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-                <button id="borrowBtn" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;">طلب إعارة</button>
-                <button id="downloadBookBtn" style="flex: 1; background: #10b981; color: white; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;">تحميل الكتاب</button>
-            </div>
-            <button onclick="closeModal('bookModal')" style="background: #e2e8f0; color: #334155; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">إغلاق</button>
+    <!-- النافذة المنبثقة العامة (Modal) -->
+    <div id="customModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; z-index: 1000;">
+        <div style="background: white; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
+            <h3 id="modalTitle" style="margin: 0; color: #1f2937; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;"></h3>
+            <div id="modalBody" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #4b5563;"></div>
+            <div id="modalFooter" style="display: flex; gap: 10px; margin-top: 10px;"></div>
         </div>
     </div>
 
-    <!-- نافذة منبثقة لعرض تفاصيل الرسالة الجامعية -->
-    <div id="thesisModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; z-index: 1000;">
-        <div style="background: white; width: 100%; max-width: 380px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                <span style="font-size: 11px; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-weight: bold;">رسالة جامعية</span>
-                <h3 id="modalThesisTitle" style="margin: 0; color: #1f2937; font-size: 16px; text-align: right; flex: 1; margin-right: 10px;"></h3>
-            </div>
-            <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
-                <p style="margin: 0;"><strong>الباحث / الطالب:</strong> <span id="modalThesisResearcher"></span></p>
-                <p style="margin: 0;"><strong>رقم الطالب:</strong> <span id="modalThesisStudentId"></span></p>
-                <p style="margin: 0;"><strong>القسم:</strong> <span id="modalThesisDepartment"></span></p>
-                <p style="margin: 0; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;"><strong>الملخص:</strong> <br><span id="modalThesisAbstract"></span></p>
-            </div>
-            <div style="display: flex; gap: 8px; margin-top: 10px;">
-                <button id="downloadThesisBtn" style="flex: 1; background: #8b5cf6; color: white; border: none; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;">تحميل النص الكامل (PDF)</button>
-            </div>
-            <button onclick="closeModal('thesisModal')" style="background: #e2e8f0; color: #334155; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">إغلاق</button>
-        </div>
-    </div>
-
-    <!-- كود الجافاسكريبت المربوط بالـ Firebase -->
+    <!-- كود الجافاسكريبت -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -90,178 +53,212 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let allItems = [];
+        let currentTab = 'books';
 
-        async function fetchCatalog() {
-            const listContainer = document.getElementById('itemsList');
+        window.switchTab = function(tab) {
+            currentTab = tab;
+            const btnBooks = document.getElementById('btnBooks');
+            const btnTheses = document.getElementById('btnTheses');
+
+            if (tab === 'books') {
+                btnBooks.style.background = '#3b82f6';
+                btnBooks.style.color = 'white';
+                btnTheses.style.background = '#e2e8f0';
+                btnTheses.style.color = '#475569';
+                loadBooks();
+            } else {
+                btnTheses.style.background = '#3b82f6';
+                btnTheses.style.color = 'white';
+                btnBooks.style.background = '#e2e8f0';
+                btnBooks.style.color = '#475569';
+                loadTheses();
+            }
+        }
+
+        async function loadBooks() {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">جاري تحميل الكتب...</div>';
+
             try {
-                allItems = [];
+                const querySnapshot = await getDocs(collection(db, "books"));
                 
-                const authorsMap = {};
-                const authorsSnapshot = await getDocs(collection(db, "authors"));
-                authorsSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    const authorName = data.name || data.fullname || data.authorName || data.studentName || data.title;
-                    const studentIdVal = data.studentId || data.studentid || data.id || doc.id;
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; background: white; border-radius: 10px;">لا توجد كتب مسجلة حالياً.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                querySnapshot.forEach((docSnap) => {
+                    const book = docSnap.data();
+                    const title = book.title || 'بدون عنوان';
+                    const author = book.author || book.fullname || book.authorName || book.authorId || 'مؤلف غير معروف';
+                    const department = book.department || 'القسم غير محدد';
+                    const publisher = book.publisher || 'غير معروف';
+                    const copiesCount = book.copiesCount !== undefined ? book.copiesCount : 'غير متوفر';
+                    const edition = book.edition || 'غير متوفرة';
+                    const isbn = book.isbn || 'غير متوفر';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 4px solid #3b82f6; display: flex; flex-direction: column; gap: 6px; cursor: pointer;";
                     
-                    if (authorName) {
-                        const authorInfo = { name: authorName, studentId: studentIdVal };
-                        authorsMap[doc.id] = authorInfo;
-                        authorsMap[String(doc.id).trim()] = authorInfo;
-                        if (data.id) {
-                            authorsMap[String(data.id).trim()] = authorInfo;
-                        }
-                    }
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 11px; color: #2563eb; font-weight: bold;">📚 كتاب (${department})</span>
+                            <span style="font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">نسخ: ${copiesCount}</span>
+                        </div>
+                        <div style="font-size: 15px; font-weight: bold; color: #1f2937;">${title}</div>
+                        <div style="font-size: 13px; color: #4b5563;">المؤلف: <strong>${author}</strong></div>
+                        <div style="font-size: 13px; color: #6b7280;">دار النشر: ${publisher}</div>
+                    `;
+
+                    card.onclick = () => {
+                        openModal(
+                            title,
+                            `
+                            <div><strong>المؤلف:</strong> ${author}</div>
+                            <div><strong>القسم:</strong> ${department}</div>
+                            <div><strong>دار النشر:</strong> ${publisher}</div>
+                            <div><strong>الطبعة:</strong> ${edition}</div>
+                            <div><strong>الرقم المعياري (ISBN):</strong> ${isbn}</div>
+                            <div><strong>عدد النسخ المتاحة:</strong> ${copiesCount}</div>
+                            `,
+                            [
+                                { text: "طلب الإعارة", bg: "#10b981", color: "white", action: () => { window.location.href = 'loans.html'; } },
+                                { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
+                            ]
+                        );
+                    };
+
+                    container.appendChild(card);
                 });
-
-                const booksSnapshot = await getDocs(collection(db, "books"));
-                booksSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    let authorName = 'مؤلف غير معروف';
-                    const authorKey = data.authorId || data.authorid || data.author_id || data.writer || data.studentId || data.studentid || data.author;
-                    
-                    if (authorKey && authorsMap[String(authorKey).trim()]) {
-                        authorName = authorsMap[String(authorKey).trim()].name;
-                    } else if (authorKey && typeof authorKey === 'string' && authorKey.trim() !== '') {
-                        authorName = authorKey; 
-                    }
-
-                    allItems.push({ 
-                        id: doc.id, 
-                        type: 'book', 
-                        title: data.title || 'بدون عنوان',
-                        author: authorName,
-                        category: data.category || 'عام',
-                        description: data.description || 'لا يوجد وصف متاح.',
-                        fileUrl: data.fileUrl || data.url || '#'
-                    });
-                });
-
-                const thesesSnapshot = await getDocs(collection(db, "theses"));
-                thesesSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    let researcherName = 'باحث غير معروف';
-                    let studentIdNum = data.studentId || data.studentid || 'غير متوفر';
-                    const studentKey = data.authorId || data.authorid || data.author_id || data.writer || data.studentId || data.studentid || data.author;
-                    
-                    if (studentKey && authorsMap[String(studentKey).trim()]) {
-                        researcherName = authorsMap[String(studentKey).trim()].name;
-                        if (authorsMap[String(studentKey).trim()].studentId) {
-                            studentIdNum = authorsMap[String(studentKey).trim()].studentId;
-                        }
-                    } else if (studentKey && typeof studentKey === 'string' && studentKey.trim() !== '') {
-                        researcherName = studentKey; 
-                    }
-
-                    allItems.push({ 
-                        id: doc.id, 
-                        type: 'thesis', 
-                        title: data.title || 'بدون عنوان',
-                        researcher: researcherName,
-                        studentId: studentIdNum,
-                        department: data.department || 'علوم الحاسوب',
-                        abstract: data.summary || data.abstract || data.description || 'لا يتوفر ملخص لهذه الرسالة.',
-                        fileUrl: data.fileUrl || data.url || '#'
-                    });
-                });
-
-                window.filterItems('book');
             } catch (error) {
-                console.error("خطأ في جلب البيانات:", error);
-                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب البيانات، تحقق من اتصال الإنترنت وقواعد الأمان.</div>';
+                console.error(error);
+                container.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px; background: white; border-radius: 10px;">حدث خطأ أثناء جلب الكتب.</div>';
             }
         }
 
-        window.renderList = function(items) {
-            const listContainer = document.getElementById('itemsList');
-            listContainer.innerHTML = '';
+        async function loadTheses() {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">جاري تحميل الرسائل...</div>';
 
-            if (items.length === 0) {
-                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">لا توجد عناصر مطابقة حالياً.</div>';
-                return;
-            }
-
-            items.forEach(item => {
-                const card = document.createElement('div');
-                const isBook = item.type === 'book';
+            try {
+                const querySnapshot = await getDocs(collection(db, "theses"));
                 
-                card.style.cssText = "background: white; padding: 12px 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; cursor: pointer; border-right: 4px solid " + (isBook ? "#3b82f6" : "#f59e0b") + ";";
-                
-                card.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                        <span style="font-size: 10px; color: ${isBook ? '#1d4ed8' : '#b45309'}; font-weight: bold;">${isBook ? '📚 كتاب' : '🎓 رسالة جامعية'}</span>
-                        <h4 style="margin: 0; color: #1e293b; font-size: 14px;">${item.title}</h4>
-                        <span style="font-size: 11px; color: #64748b;"><strong>${isBook ? 'المؤلف:' : 'الباحث:'}</strong> ${isBook ? item.author : item.researcher}</span>
-                        ${!isBook ? `<span style="font-size: 10px; color: #94a3b8;"><strong>الرقم الجامعي:</strong> ${item.studentId}</span>` : ''}
-                    </div>
-                `;
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; background: white; border-radius: 10px;">لا توجد رسائل جامعية مسجلة حالياً.</div>';
+                    return;
+                }
 
-                card.onclick = () => {
-                    if (isBook) {
-                        openBookModal(item);
-                    } else {
-                        openThesisModal(item);
+                container.innerHTML = '';
+
+                for (const docSnap of querySnapshot.docs) {
+                    const thesis = docSnap.data();
+                    
+                    const title = thesis.title || 'بدون عنوان';
+                    const department = thesis.department || 'القسم غير محدد';
+                    const degree = thesis.degree || '';
+                    const publicationYear = thesis.publicationYear || '';
+                    const summary = thesis.summary || 'لا يوجد ملخص متاحة.';
+
+                    // قيم افتراضية مبدئية من وثيقة الرسالة مباشرة إن وجدت
+                    let authorName = thesis.fullname || thesis.authorName || thesis.author || 'باحث غير معروف';
+                    let studentId = thesis.studentId || thesis.student_id || 'غير متوفر';
+
+                    // محاولة جلب المعرف المرتبط بمجموعة authors بأي اسم محتمل للحقل
+                    const authorIdRef = thesis.authorId || thesis.author || thesis.author_id || thesis.authorRef || thesis.writerId || thesis.studentId;
+
+                    if (authorIdRef) {
+                        try {
+                            const authorDocRef = doc(db, "authors", String(authorIdRef));
+                            const authorDocSnap = await getDoc(authorDocRef);
+                            if (authorDocSnap.exists()) {
+                                const authorData = authorDocSnap.data();
+                                authorName = authorData.fullname || authorName;
+                                studentId = authorData.studentId || studentId;
+                            }
+                        } catch (err) {
+                            console.log("خطأ في جلب المؤلف عبر المعرف:", err);
+                        }
                     }
-                };
 
-                listContainer.appendChild(card);
+                    // إذا لم يتم العثور على الاسم وكان المعرف غير كافٍ، نقوم بالبحث داخل مجموعة authors برقم الطالب أو بمعرف المستند نفسه
+                    if (authorName === 'باحث غير معروف' || studentId === 'غير متوفر') {
+                        try {
+                            const authorsSnapshot = await getDocs(collection(db, "authors"));
+                            authorsSnapshot.forEach(authDoc => {
+                                const authData = authDoc.data();
+                                // مطابقة الوثيقة في authors إما عبر معرف المستند أو الحقول الداخلية
+                                if (authDoc.id === authorIdRef || authData.studentId === thesis.studentId || authDoc.id === docSnap.id) {
+                                    if (authData.fullname) authorName = authData.fullname;
+                                    if (authData.studentId) studentId = authData.studentId;
+                                }
+                            });
+                        } catch (e) {
+                            console.log("خطأ في البحث الاحتياطي بالمؤلفين:", e);
+                        }
+                    }
+
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 4px solid #f59e0b; display: flex; flex-direction: column; gap: 6px; cursor: pointer;";
+                    
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 11px; color: #d97706; font-weight: bold;">🎓 رسالة جامعية (${department} - ${degree})</span>
+                            <span style="font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${publicationYear}</span>
+                        </div>
+                        <div style="font-size: 15px; font-weight: bold; color: #1f2937;">${title}</div>
+                        <div style="font-size: 13px; color: #4b5563;">الباحث: <strong>${authorName}</strong></div>
+                        <div style="font-size: 13px; color: #6b7280;">الرقم الجامعي: <strong>${studentId}</strong></div>
+                    `;
+
+                    card.onclick = () => {
+                        openModal(
+                            title,
+                            `
+                            <div><strong>الباحث:</strong> ${authorName}</div>
+                            <div><strong>الرقم الجامعي:</strong> ${studentId}</div>
+                            <div><strong>الدرجة العلمية:</strong> ${degree} (${department})</div>
+                            <div><strong>سنة النشر:</strong> ${publicationYear}</div>
+                            <div style="margin-top: 5px; background: #f8fafc; padding: 8px; border-radius: 6px;"><strong>الملخص:</strong><br>${summary}</div>
+                            `,
+                            [
+                                { text: "الاطلاع عليها", bg: "#3b82f6", color: "white", action: () => { alert("جاري فتح محتوى الرسالة للاطلاع..."); } },
+                                { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
+                            ]
+                        );
+                    };
+
+                    container.appendChild(card);
+                }
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px; background: white; border-radius: 10px;">حدث خطأ أثناء جلب الرسائل.</div>';
+            }
+        }
+
+        window.openModal = function(title, htmlBody, buttons) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerHTML = htmlBody;
+            
+            const footer = document.getElementById('modalFooter');
+            footer.innerHTML = '';
+            
+            buttons.forEach(btnInfo => {
+                const b = document.createElement('button');
+                b.innerText = btnInfo.text;
+                b.style.cssText = `flex: 1; background: ${btnInfo.bg}; color: ${btnInfo.color}; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;`;
+                b.onclick = btnInfo.action;
+                footer.appendChild(b);
             });
+
+            document.getElementById('customModal').style.display = 'flex';
         }
 
-        window.filterItems = function(type) {
-            document.getElementById('btn-book').style.background = type === 'book' ? '#3b82f6' : 'white';
-            document.getElementById('btn-book').style.color = type === 'book' ? 'white' : '#64748b';
-            
-            document.getElementById('btn-thesis').style.background = type === 'thesis' ? '#3b82f6' : 'white';
-            document.getElementById('btn-thesis').style.color = type === 'thesis' ? 'white' : '#64748b';
-
-            window.renderList(allItems.filter(i => i.type === type));
+        window.closeModal = function() {
+            document.getElementById('customModal').style.display = 'none';
         }
 
-        function openBookModal(book) {
-            document.getElementById('modalBookTitle').innerText = book.title;
-            document.getElementById('modalBookAuthor').innerText = book.author;
-            document.getElementById('modalBookCategory').innerText = book.category;
-            document.getElementById('modalBookDesc').innerText = book.description;
-            
-            document.getElementById('borrowBtn').onclick = () => {
-                window.location.href = `loans.html?title=${encodeURIComponent(book.title)}`;
-            };
-
-            document.getElementById('downloadBookBtn').onclick = () => {
-                if (book.fileUrl && book.fileUrl !== '#') {
-                    window.open(book.fileUrl, '_blank');
-                } else {
-                    alert('ملف التحميل غير متوفر حالياً لهذا الكتاب.');
-                }
-            };
-
-            document.getElementById('bookModal').style.display = 'flex';
-        }
-
-        function openThesisModal(thesis) {
-            document.getElementById('modalThesisTitle').innerText = thesis.title;
-            document.getElementById('modalThesisResearcher').innerText = thesis.researcher;
-            document.getElementById('modalThesisStudentId').innerText = thesis.studentId;
-            document.getElementById('modalThesisDepartment').innerText = thesis.department;
-            document.getElementById('modalThesisAbstract').innerText = thesis.abstract;
-
-            document.getElementById('downloadThesisBtn').onclick = () => {
-                if (thesis.fileUrl && thesis.fileUrl !== '#') {
-                    window.open(thesis.fileUrl, '_blank');
-                } else {
-                    alert('ملف النص الكامل للرسالة غير متوفر للتحميل حالياً.');
-                }
-            };
-
-            document.getElementById('thesisModal').style.display = 'flex';
-        }
-
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        fetchCatalog();
+        loadBooks();
     </script>
 </body>
 </html>
