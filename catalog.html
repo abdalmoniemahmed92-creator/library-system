@@ -17,11 +17,10 @@
                 <button onclick="window.location.href='home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">الرئيسية</button>
             </div>
 
-            <!-- تبديل العرض (الكل / الكتب / الرسائل) -->
+            <!-- تبديل العرض (الكتب أولاً ثم الرسائل الجامعية) -->
             <div style="display: flex; gap: 8px;">
-                <button onclick="filterItems('all')" id="btn-all" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الكل</button>
-                <button onclick="filterItems('book')" id="btn-book" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الكتب</button>
-                <button onclick="filterItems('thesis')" id="btn-thesis" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الرسائل الجامعية</button>
+                <button onclick="filterItems('book')" id="btn-book" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">الكتب</button>
+                <button onclick="filterItems('thesis')" id="btn-thesis" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">الرسائل الجامعية</button>
             </div>
 
             <!-- قائمة العناصر المستعرضة -->
@@ -61,6 +60,7 @@
             </div>
             <div style="font-size: 13px; color: #475569; display: flex; flex-direction: column; gap: 6px;">
                 <p style="margin: 0;"><strong>الباحث / الطالب:</strong> <span id="modalThesisResearcher"></span></p>
+                <p style="margin: 0;"><strong>رقم الطالب:</strong> <span id="modalThesisStudentId"></span></p>
                 <p style="margin: 0;"><strong>القسم:</strong> <span id="modalThesisDepartment"></span></p>
                 <p style="margin: 0; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;"><strong>الملخص:</strong> <br><span id="modalThesisAbstract"></span></p>
             </div>
@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <!-- جافاسكريبت المحدث لجلب الربط الصحيح تماماً -->
+    <!-- كود الجافاسكريبت المربوط بالـ Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -97,61 +97,60 @@
             try {
                 allItems = [];
                 
-                // 1. بناء قاموس المؤلفين مع تتبع كافة أسماء الحقول المحتملة داخل المستند
                 const authorsMap = {};
                 const authorsSnapshot = await getDocs(collection(db, "authors"));
                 authorsSnapshot.forEach(doc => {
                     const data = doc.data();
-                    // البحث عن أي حقل قد يحتوي على اسم المؤلف الحقيقي
-                    const authorName = data.name || data.fullname || data.authorName || data.title;
+                    const authorName = data.name || data.fullname || data.authorName || data.studentName || data.title;
+                    const studentIdVal = data.studentId || data.studentid || data.id || doc.id;
                     
                     if (authorName) {
-                        authorsMap[doc.id] = authorName; // ربط باسم وثيقة المستند (مثل AUTH-101)
-                        if (data.authorId) authorsMap[data.authorId] = authorName; // ربط بقيمة حقل authorId الداخلي إن وجد
+                        const authorInfo = { name: authorName, studentId: studentIdVal };
+                        authorsMap[doc.id] = authorInfo;
+                        authorsMap[String(doc.id).trim()] = authorInfo;
+                        if (data.id) {
+                            authorsMap[String(data.id).trim()] = authorInfo;
+                        }
                     }
                 });
-                console.log("القاموس المستخرج للمؤلفين:", authorsMap);
 
-                // 2. جلب الكتب
                 const booksSnapshot = await getDocs(collection(db, "books"));
                 booksSnapshot.forEach(doc => {
                     const data = doc.data();
-                    let authorName = data.author || data.writer;
-                    const lookupKey = data.authorId || data.author;
+                    let authorName = 'مؤلف غير معروف';
+                    const authorKey = data.authorId || data.authorid || data.author_id || data.writer || data.studentId || data.studentid || data.author;
                     
-                    if (lookupKey && authorsMap[lookupKey]) {
-                        authorName = authorsMap[lookupKey];
+                    if (authorKey && authorsMap[String(authorKey).trim()]) {
+                        authorName = authorsMap[String(authorKey).trim()].name;
+                    } else if (authorKey && typeof authorKey === 'string' && authorKey.trim() !== '') {
+                        authorName = authorKey; 
                     }
 
                     allItems.push({ 
                         id: doc.id, 
                         type: 'book', 
                         title: data.title || 'بدون عنوان',
-                        author: authorName || 'مؤلف غير معروف',
+                        author: authorName,
                         category: data.category || 'عام',
                         description: data.description || 'لا يوجد وصف متاح.',
                         fileUrl: data.fileUrl || data.url || '#'
                     });
                 });
 
-                // 3. جلب الرسائل الجامعية
                 const thesesSnapshot = await getDocs(collection(db, "theses"));
                 thesesSnapshot.forEach(doc => {
                     const data = doc.data();
                     let researcherName = 'باحث غير معروف';
+                    let studentIdNum = data.studentId || data.studentid || 'غير متوفر';
+                    const studentKey = data.authorId || data.authorid || data.author_id || data.writer || data.studentId || data.studentid || data.author;
                     
-                    // فحص جميع الحقول المحتملة التي قد تخزن معرف أو اسم الباحث في الرسائل
-                    const possibleKeys = [data.authorId, data.studentId, data.researcherId, data.author, data.student];
-                    
-                    for (let key of possibleKeys) {
-                        if (key && authorsMap[key]) {
-                            researcherName = authorsMap[key];
-                            break;
-                        } else if (key && typeof key === 'string' && !key.includes('AUTH-')) {
-                            // لو الحقل مخزن فيه اسم الباحث نصاً بشكل مباشر
-                            researcherName = key;
-                            break;
+                    if (studentKey && authorsMap[String(studentKey).trim()]) {
+                        researcherName = authorsMap[String(studentKey).trim()].name;
+                        if (authorsMap[String(studentKey).trim()].studentId) {
+                            studentIdNum = authorsMap[String(studentKey).trim()].studentId;
                         }
+                    } else if (studentKey && typeof studentKey === 'string' && studentKey.trim() !== '') {
+                        researcherName = studentKey; 
                     }
 
                     allItems.push({ 
@@ -159,16 +158,17 @@
                         type: 'thesis', 
                         title: data.title || 'بدون عنوان',
                         researcher: researcherName,
+                        studentId: studentIdNum,
                         department: data.department || 'علوم الحاسوب',
                         abstract: data.summary || data.abstract || data.description || 'لا يتوفر ملخص لهذه الرسالة.',
                         fileUrl: data.fileUrl || data.url || '#'
                     });
                 });
 
-                renderList(allItems);
+                window.filterItems('book');
             } catch (error) {
                 console.error("خطأ في جلب البيانات:", error);
-                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب البيانات، تحقق من اتصال الإنترنت وقواعد الصلاحيات.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب البيانات، تحقق من اتصال الإنترنت وقواعد الأمان.</div>';
             }
         }
 
@@ -191,7 +191,8 @@
                     <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
                         <span style="font-size: 10px; color: ${isBook ? '#1d4ed8' : '#b45309'}; font-weight: bold;">${isBook ? '📚 كتاب' : '🎓 رسالة جامعية'}</span>
                         <h4 style="margin: 0; color: #1e293b; font-size: 14px;">${item.title}</h4>
-                        <span style="font-size: 11px; color: #64748b;">${isBook ? item.author : item.researcher}</span>
+                        <span style="font-size: 11px; color: #64748b;"><strong>${isBook ? 'المؤلف:' : 'الباحث:'}</strong> ${isBook ? item.author : item.researcher}</span>
+                        ${!isBook ? `<span style="font-size: 10px; color: #94a3b8;"><strong>الرقم الجامعي:</strong> ${item.studentId}</span>` : ''}
                     </div>
                 `;
 
@@ -208,20 +209,13 @@
         }
 
         window.filterItems = function(type) {
-            document.getElementById('btn-all').style.background = type === 'all' ? '#3b82f6' : 'white';
-            document.getElementById('btn-all').style.color = type === 'all' ? 'white' : '#64748b';
-            
             document.getElementById('btn-book').style.background = type === 'book' ? '#3b82f6' : 'white';
             document.getElementById('btn-book').style.color = type === 'book' ? 'white' : '#64748b';
             
             document.getElementById('btn-thesis').style.background = type === 'thesis' ? '#3b82f6' : 'white';
             document.getElementById('btn-thesis').style.color = type === 'thesis' ? 'white' : '#64748b';
 
-            if (type === 'all') {
-                renderList(allItems);
-            } else {
-                renderList(allItems.filter(i => i.type === type));
-            }
+            window.renderList(allItems.filter(i => i.type === type));
         }
 
         function openBookModal(book) {
@@ -248,6 +242,7 @@
         function openThesisModal(thesis) {
             document.getElementById('modalThesisTitle').innerText = thesis.title;
             document.getElementById('modalThesisResearcher').innerText = thesis.researcher;
+            document.getElementById('modalThesisStudentId').innerText = thesis.studentId;
             document.getElementById('modalThesisDepartment').innerText = thesis.department;
             document.getElementById('modalThesisAbstract').innerText = thesis.abstract;
 
