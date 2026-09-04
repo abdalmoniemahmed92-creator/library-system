@@ -9,20 +9,28 @@
 
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
         
-        <!-- حاوية الأزرار الرئيسية -->
+        <!-- حاوية لوحة التحكم -->
         <div style="width: 100%; max-width: 480px; background: white; padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box; align-items: center;">
             
             <h2 style="color: #1f2937; margin: 0 0 5px 0; font-size: 22px; text-align: center;">لوحة التحكم</h2>
             <p style="color: #64748b; margin: 0 0 10px 0; font-size: 13px; text-align: center;">إدارة النظام وصلاحيات المدير</p>
 
-            <!-- بطاقة إحصائية لعدد الطلاب المسجلين -->
-            <div style="width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; margin-bottom: 5px;">
-                <div>
-                    <div style="font-size: 12px; color: #64748b; font-weight: bold;">إجمالي الطلاب المسجلين</div>
-                    <div id="totalStudentsCount" style="font-size: 22px; font-weight: bold; color: #1e293b; margin-top: 3px;">...</div>
+            <!-- حاوية الإحصائيات (الطلاب، الكتب، الرسائل) -->
+            <div style="width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                <!-- بطاقة الطلاب -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; font-weight: bold;">الطلاب</div>
+                    <div id="totalStudentsCount" style="font-size: 18px; font-weight: bold; color: #1e293b; margin-top: 4px;">...</div>
                 </div>
-                <div style="background: #e0f2fe; color: #0284c7; padding: 10px; border-radius: 8px; font-size: 18px;">
-                    👨‍🎓
+                <!-- بطاقة الكتب -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; font-weight: bold;">الكتب</div>
+                    <div id="totalBooksCount" style="font-size: 18px; font-weight: bold; color: #1e293b; margin-top: 4px;">...</div>
+                </div>
+                <!-- بطاقة الرسائل الجامعية -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 11px; color: #64748b; font-weight: bold;">الرسائل</div>
+                    <div id="totalThesesCount" style="font-size: 18px; font-weight: bold; color: #1e293b; margin-top: 4px;">...</div>
                 </div>
             </div>
 
@@ -63,7 +71,7 @@
         </div>
     </div>
 
-    <!-- كود التحقق والتحويلات وجلب إحصائيات الطلاب -->
+    <!-- كود جلب الإحصائيات الشاملة -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -84,25 +92,37 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // التحقق من حالة تسجيل الدخول وجلب البيانات عند التأكد من المصادقة
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
             } else {
-                fetchTotalStudentsCount();
+                fetchAllStats();
             }
         });
 
-        // دالة لجلب عدد الطلاب من قاعدة البيانات
-        async function fetchTotalStudentsCount() {
-            const counterElement = document.getElementById('totalStudentsCount');
+        async function fetchAllStats() {
+            // جلب عداد الطلاب من مجموعة uid
             try {
-                // استبدل "users" باسم المجموعة لديك إن كانت مسماة بـ "students" أو غيرها
-                const querySnapshot = await getDocs(collection(db, "users"));
-                counterElement.innerText = querySnapshot.size;
-            } catch (error) {
-                console.error("خطأ في جلب عدد الطلاب:", error);
-                counterElement.innerText = "0";
+                const studentsSnap = await getDocs(collection(db, "uid"));
+                document.getElementById('totalStudentsCount').innerText = studentsSnap.size;
+            } catch (e) {
+                document.getElementById('totalStudentsCount').innerText = "0";
+            }
+
+            // جلب عداد الكتب من مجموعة books
+            try {
+                const booksSnap = await getDocs(collection(db, "books"));
+                document.getElementById('totalBooksCount').innerText = booksSnap.size;
+            } catch (e) {
+                document.getElementById('totalBooksCount').innerText = "0";
+            }
+
+            // جلب عداد الرسائل الجامعية من مجموعة theses
+            try {
+                const thesesSnap = await getDocs(collection(db, "theses"));
+                document.getElementById('totalThesesCount').innerText = thesesSnap.size;
+            } catch (e) {
+                document.getElementById('totalThesesCount').innerText = "0";
             }
         }
 
