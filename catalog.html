@@ -11,6 +11,12 @@
         
         <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px;">
             
+            <!-- شريط العنوان وزر الرجوع للصفحة الرئيسية -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <span style="font-size: 16px; font-weight: bold; color: #1f2937;">تصفح المكتبة</span>
+                <button onclick="window.location.href='home.html'" style="background: #e2e8f0; color: #475569; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-weight: bold;">الرئيسية 🏠</button>
+            </div>
+
             <!-- أزرار التبديل بين الكتب والرسائل الجامعية -->
             <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 10px;">
                 <button id="btnBooks" onclick="switchTab('books')" style="flex: 1; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">📚 الكتب</button>
@@ -160,11 +166,9 @@
                     const publicationYear = thesis.publicationYear || '';
                     const summary = thesis.summary || 'لا يوجد ملخص متاحة.';
 
-                    // قيم افتراضية مبدئية من وثيقة الرسالة مباشرة إن وجدت
                     let authorName = thesis.fullname || thesis.authorName || thesis.author || 'باحث غير معروف';
                     let studentId = thesis.studentId || thesis.student_id || 'غير متوفر';
 
-                    // محاولة جلب المعرف المرتبط بمجموعة authors بأي اسم محتمل للحقل
                     const authorIdRef = thesis.authorId || thesis.author || thesis.author_id || thesis.authorRef || thesis.writerId || thesis.studentId;
 
                     if (authorIdRef) {
@@ -181,13 +185,11 @@
                         }
                     }
 
-                    // إذا لم يتم العثور على الاسم وكان المعرف غير كافٍ، نقوم بالبحث داخل مجموعة authors برقم الطالب أو بمعرف المستند نفسه
                     if (authorName === 'باحث غير معروف' || studentId === 'غير متوفر') {
                         try {
                             const authorsSnapshot = await getDocs(collection(db, "authors"));
                             authorsSnapshot.forEach(authDoc => {
                                 const authData = authDoc.data();
-                                // مطابقة الوثيقة في authors إما عبر معرف المستند أو الحقول الداخلية
                                 if (authDoc.id === authorIdRef || authData.studentId === thesis.studentId || authDoc.id === docSnap.id) {
                                     if (authData.fullname) authorName = authData.fullname;
                                     if (authData.studentId) studentId = authData.studentId;
