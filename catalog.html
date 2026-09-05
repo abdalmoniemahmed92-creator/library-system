@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت -->
+    <!-- كود الجافاسكريبت المحدث للربط بملف firebase.js المركزي -->
     <script type="module">
         import { db } from "./firebase.js";
         import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -74,7 +74,7 @@
             if (timestamp) {
                 const itemDate = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
                 const diffHours = (new Date() - itemDate) / (1000 * 60 * 60);
-                return diffHours <= 48; // يُعتبر جديداً إذا أضيف خلال أقل من يومين
+                return diffHours <= 48;
             }
             return false;
         }
