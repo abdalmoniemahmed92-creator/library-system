@@ -43,29 +43,15 @@
         </div>
     </div>
 
+    <!-- استيراد الاتصال بملف firebase.js المركزي -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
-            authDomain: "library-catalog-5d1ee.firebaseapp.com",
-            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
-            projectId: "library-catalog-5d1ee",
-            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
-            messagingSenderId: "208558639650",
-            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
-            measurementId: "G-BHYSZHJLTR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        import { db, auth } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, getDocs, doc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let thesesMap = {};
 
-        // تعريف دالة التنقل العامة لحل مشكلة الـ ReferenceError
+        // تعريف دالة التنقل العامة
         window.navigateTo = function(pageUrl) {
             window.location.href = pageUrl;
         };
@@ -129,13 +115,13 @@
                     // 1. حذف الرسالة من مجموعة theses
                     await deleteDoc(doc(db, "theses", selectedId));
 
-                    // 2. إضافة إشعار في مجموعة الطلبات أو الإشعارات ليراها المستخدم في تطبيقه (orders.html)
+                    // 2. إضافة إشعار في مجموعة الطلبات أو الإشعارات
                     await addDoc(collection(db, "loans"), {
                         itemId: thesisData.title || "رسالة جامعية",
-                        status: "مذشوفة / محذوفة",
+                        status: "محذوفة",
                         loanType: "رسالة جامعية",
                         borrowDate: new Date().toISOString().split('T')[0],
-                        uid: thesisData.studentId || "all" // موجهة للطالب صاحب المعرف أو عامة
+                        uid: thesisData.studentId || "all"
                     });
 
                     alert('تم حذف الرسالة الجامعية وإرسال التنبيه بنجاح.');
