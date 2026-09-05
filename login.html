@@ -49,10 +49,6 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 15px;
-            outline: none;
-        }
-        input:focus {
-            border-color: #3498db;
         }
         .login-btn {
             background: #3498db;
@@ -96,32 +92,30 @@
         <h2>تسجيل الدخول للفهرس الإلكتروني لكلية علوم الحاسوب</h2>
         <div id="errorMsg" class="error-msg"></div>
         
-        <div>
+        <form id="loginForm">
             <div class="form-group">
                 <label for="email">البريد الإلكتروني</label>
-                <input type="email" id="email" placeholder="example@domain.com">
+                <input type="email" id="email" required placeholder="example@domain.com">
             </div>
             
             <div class="form-group">
                 <label for="password">كلمة المرور</label>
-                <input type="password" id="password" placeholder="********">
+                <input type="password" id="password" required placeholder="********">
             </div>
             
-            <button type="button" class="login-btn" id="submitBtn" onclick="handleLogin()">دخول</button>
-        </div>
+            <button type="submit" class="login-btn" id="submitBtn">دخول</button>
+        </form>
 
         <div class="register-link">
             ليس لديك حساب؟ <a href="register.html">تسجيل جديد</a>
         </div>
     </div>
 
-    <!-- استدعاء المكتبات بدون async لضمان تحميلها بالترتيب الصحيح وتجنب خطأ undefined -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <script>
-        // إعدادات الاتصال بقاعدة بيانات الفايربيس
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
             authDomain: "library-catalog-5d1ee.firebaseapp.com",
@@ -133,61 +127,42 @@
             measurementId: "G-BHYSZHJLTR"
         };
 
-        // تهيئة الفايربيس إن لم تكن مفعلة مسبقاً
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        async function handleLogin() {
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value.trim();
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
             const errorDiv = document.getElementById("errorMsg");
-            const btn = document.getElementById("submitBtn");
-            
             errorDiv.textContent = "";
 
-            if (!email || !password) {
-                errorDiv.textContent = "يرجى إدخال البريد الإلكتروني وكلمة المرور.";
-                return;
-            }
-
-            btn.textContent = "جاري التحقق...";
-            btn.disabled = true;
-
             try {
-                // 1. تسجيل الدخول عبر نظام المصادقة Authentication
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. جلب صلاحية المستخدم من مجموعة uid في قاعدة البيانات Firestore
-                const userDoc = await db.collection("uid").doc(user.uid).get();
+                // البحث داخل مجموعة uid واستخدام حقل type للتحقق من الصلاحية
+                const userDocRef = doc(db, "uid", user.uid);
+                const userDoc = await getDoc(userDocRef);
 
-                if (userDoc.exists) {
+                if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    const userType = userData.type ? userData.type.trim().toLowerCase() : "";
-
-                    // 3. التوجيه الشرطي حسب نوع المستخدم
-                    if (userType === "admin" || userType === "مشرف" || userType === "مدير") {
+                    
+                    // التوجيه بناءً على قيمة حقل type (سواء كان مشرف، مدير، admin، أو طالب)
+                    if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
                         window.location.href = "admin-home.html";
                     } else {
                         window.location.href = "home.html";
                     }
                 } else {
-                    // في حال الحساب مسجل في Auth لكنه غير مضاف في مجموعة uid
-                    errorDiv.textContent = "بيانات الحساب غير موجودة في جدول الصلاحيات.";
-                    btn.textContent = "دخول";
-                    btn.disabled = false;
+                    errorDiv.textContent = "بيانات الحساب غير موجودة في مجموعة uid.";
                 }
             } catch (error) {
-                console.error("خطأ تسجيل الدخول:", error);
+                console.error("خطأ في تسجيل الدخول:", error);
                 errorDiv.textContent = "خطأ في البريد الإلكتروني أو كلمة المرور.";
-                btn.textContent = "دخول";
-                btn.disabled = false;
             }
-        }
+        });
     </script>
 </body>
 </html>
