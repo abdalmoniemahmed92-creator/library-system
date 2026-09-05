@@ -103,11 +103,11 @@
         </div>
     </div>
 
-    <!-- جافاسكريبت لحفظ البيانات ورفع الملف -->
+    <!-- جافاسكريبت لحفظ البيانات ورفع الملف باستخدام ملف الاتصال المركزي -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { db, storage } from "./firebase.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         // تعبئة سنوات النشر تلقائياً
         const yearSelect = document.getElementById('publicationYearInput');
@@ -117,22 +117,6 @@
             option.textContent = year;
             yearSelect.appendChild(option);
         }
-
-        // إعدادات Firebase المحدثة والصحيحة
-        const firebaseConfig = {
-          apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
-          authDomain: "library-catalog-5d1ee.firebaseapp.com",
-          databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
-          projectId: "library-catalog-5d1ee",
-          storageBucket: "library-catalog-5d1ee.firebasestorage.app",
-          messagingSenderId: "208558639650",
-          appId: "1:208558639650:web:564ef91d341bbb23ef587b",
-          measurementId: "G-BHYSZHJLTR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
 
         document.getElementById('saveThesisBtn').onclick = async function() {
             const thesesId = document.getElementById('thesesIdInput').value.trim();
