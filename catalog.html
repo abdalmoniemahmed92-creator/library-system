@@ -36,7 +36,7 @@
         <div style="background: white; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative;">
             <h3 id="modalTitle" style="margin: 0; color: #1f2937; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;"></h3>
             <div id="modalBody" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #4b5563;"></div>
-            <div id="modalFooter" style="display: flex; gap: 10px; margin-top: 10px;"></div>
+            <div id="modalFooter" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
         </div>
     </div>
 
@@ -103,6 +103,8 @@
                     const copiesCount = book.copiesCount !== undefined ? book.copiesCount : 'غير متوفر';
                     const edition = book.edition || 'غير متوفرة';
                     const isbn = book.isbn || 'غير متوفر';
+                    const fileUrl = book.fileUrl || '';
+                    const accessType = book.accessType || 'public'; // افتراضي عام إذا لم يُحدد
 
                     const card = document.createElement('div');
                     card.style.cssText = "background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 4px solid #3b82f6; display: flex; flex-direction: column; gap: 6px; cursor: pointer;";
@@ -118,9 +120,45 @@
                     `;
 
                     card.onclick = () => {
+                        let modalButtons = [
+                            { text: "طلب الإعارة", bg: "#10b981", color: "white", action: () => { window.location.href = `loans.html?title=${encodeURIComponent(title)}`; } },
+                            { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
+                        ];
+
+                        if (fileUrl) {
+                            if (accessType === 'internal') {
+                                modalButtons.unshift({ 
+                                    text: "تصفح داخلي أونلاين 👁️", 
+                                    bg: "#f59e0b", 
+                                    color: "white", 
+                                    action: () => { window.open(fileUrl, '_blank'); } 
+                                });
+                            } else {
+                                modalButtons.unshift(
+                                    { 
+                                        text: "تصفح أونلاين 🌐", 
+                                        bg: "#3b82f6", 
+                                        color: "white", 
+                                        action: () => { window.open(fileUrl, '_blank'); } 
+                                    },
+                                    { 
+                                        text: "تحميل الملف 📥", 
+                                        bg: "#059669", 
+                                        color: "white", 
+                                        action: () => { const a = document.createElement('a'); a.href = fileUrl; a.download = ''; a.target = '_blank'; a.click(); } 
+                                    }
+                                );
+                            }
+                        }
+
+                        let accessBadge = accessType === 'internal' 
+                            ? '<div style="background: #fef3c7; color: #b45309; padding: 6px; border-radius: 6px; font-size: 12px; text-align: center;">🔒 نوع الإعارة: <strong>داخلية فقط</strong> (التحميل محظور)</div>' 
+                            : '<div style="background: #ecfdf5; color: #047857; padding: 6px; border-radius: 6px; font-size: 12px; text-align: center;">🌐 نوع الإعارة: <strong>عامة / متاحة للتحميل والتصفح</strong></div>';
+
                         openModal(
                             title,
                             `
+                            ${accessBadge}
                             <div><strong>المؤلف:</strong> ${author}</div>
                             <div><strong>القسم:</strong> ${department}</div>
                             <div><strong>دار النشر:</strong> ${publisher}</div>
@@ -128,10 +166,7 @@
                             <div><strong>الرقم المعياري (ISBN):</strong> ${isbn}</div>
                             <div><strong>عدد النسخ المتاحة:</strong> ${copiesCount}</div>
                             `,
-                            [
-                                { text: "طلب الإعارة", bg: "#10b981", color: "white", action: () => { window.location.href = 'loans.html'; } },
-                                { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
-                            ]
+                            modalButtons
                         );
                     };
 
@@ -165,6 +200,8 @@
                     const degree = thesis.degree || '';
                     const publicationYear = thesis.publicationYear || '';
                     const summary = thesis.summary || 'لا يوجد ملخص متاحة.';
+                    const fileUrl = thesis.fileUrl || '';
+                    const accessType = thesis.accessType || 'public'; // افتراضي عام
 
                     let authorName = thesis.fullname || thesis.authorName || thesis.author || 'باحث غير معروف';
                     let studentId = thesis.studentId || thesis.student_id || 'غير متوفر';
@@ -185,21 +222,6 @@
                         }
                     }
 
-                    if (authorName === 'باحث غير معروف' || studentId === 'غير متوفر') {
-                        try {
-                            const authorsSnapshot = await getDocs(collection(db, "authors"));
-                            authorsSnapshot.forEach(authDoc => {
-                                const authData = authDoc.data();
-                                if (authDoc.id === authorIdRef || authData.studentId === thesis.studentId || authDoc.id === docSnap.id) {
-                                    if (authData.fullname) authorName = authData.fullname;
-                                    if (authData.studentId) studentId = authData.studentId;
-                                }
-                            });
-                        } catch (e) {
-                            console.log("خطأ في البحث الاحتياطي بالمؤلفين:", e);
-                        }
-                    }
-
                     const card = document.createElement('div');
                     card.style.cssText = "background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 4px solid #f59e0b; display: flex; flex-direction: column; gap: 6px; cursor: pointer;";
                     
@@ -214,19 +236,51 @@
                     `;
 
                     card.onclick = () => {
+                        let modalButtons = [
+                            { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
+                        ];
+
+                        if (fileUrl) {
+                            if (accessType === 'internal') {
+                                modalButtons.unshift({ 
+                                    text: "تصفح داخلي أونلاين 👁️", 
+                                    bg: "#f59e0b", 
+                                    color: "white", 
+                                    action: () => { window.open(fileUrl, '_blank'); } 
+                                });
+                            } else {
+                                modalButtons.unshift(
+                                    { 
+                                        text: "تصفح أونلاين 🌐", 
+                                        bg: "#3b82f6", 
+                                        color: "white", 
+                                        action: () => { window.open(fileUrl, '_blank'); } 
+                                    },
+                                    { 
+                                        text: "تحميل الملف 📥", 
+                                        bg: "#059669", 
+                                        color: "white", 
+                                        action: () => { const a = document.createElement('a'); a.href = fileUrl; a.download = ''; a.target = '_blank'; a.click(); } 
+                                    }
+                                );
+                            }
+                        }
+
+                        let accessBadge = accessType === 'internal' 
+                            ? '<div style="background: #fef3c7; color: #b45309; padding: 6px; border-radius: 6px; font-size: 12px; text-align: center;">🔒 نوع الإعارة: <strong>داخلية فقط</strong> (التحميل محظور)</div>' 
+                            : '<div style="background: #ecfdf5; color: #047857; padding: 6px; border-radius: 6px; font-size: 12px; text-align: center;">🌐 نوع الإعارة: <strong>عامة / متاحة للتحميل والتصفح</strong></div>';
+
                         openModal(
                             title,
                             `
+                            ${accessBadge}
                             <div><strong>الباحث:</strong> ${authorName}</div>
                             <div><strong>الرقم الجامعي:</strong> ${studentId}</div>
                             <div><strong>الدرجة العلمية:</strong> ${degree} (${department})</div>
                             <div><strong>سنة النشر:</strong> ${publicationYear}</div>
                             <div style="margin-top: 5px; background: #f8fafc; padding: 8px; border-radius: 6px;"><strong>الملخص:</strong><br>${summary}</div>
                             `,
-                            [
-                                { text: "الاطلاع عليها", bg: "#3b82f6", color: "white", action: () => { alert("جاري فتح محتوى الرسالة للاطلاع..."); } },
-                                { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
-                            ]
+                            modalButtons
                         );
                     };
 
@@ -248,7 +302,7 @@
             buttons.forEach(btnInfo => {
                 const b = document.createElement('button');
                 b.innerText = btnInfo.text;
-                b.style.cssText = `flex: 1; background: ${btnInfo.bg}; color: ${btnInfo.color}; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;`;
+                b.style.cssText = `flex: 1; min-width: 120px; background: ${btnInfo.bg}; color: ${btnInfo.color}; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;`;
                 b.onclick = btnInfo.action;
                 footer.appendChild(b);
             });
