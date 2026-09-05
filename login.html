@@ -49,6 +49,10 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 15px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #3498db;
         }
         .login-btn {
             background: #3498db;
@@ -111,35 +115,38 @@
         </div>
     </div>
 
-    <!-- استدعاء المكتبات بخاصية async لتحميلها بسلاسة دون تجميد التطبيق -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" async></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" async></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" async></script>
+    <!-- استدعاء المكتبات بدون async لضمان تحميلها بالترتيب الصحيح وتجنب خطأ undefined -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // الانتظار حتى تحميل مكتبات الفايربيس تماماً لتجنب أي تعليق
-        window.addEventListener('DOMContentLoaded', () => {
-            const firebaseConfig = {
-                apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
-                authDomain: "library-catalog-5d1ee.firebaseapp.com",
-                databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
-                projectId: "library-catalog-5d1ee",
-                storageBucket: "library-catalog-5d1ee.firebasestorage.app",
-                messagingSenderId: "208558639650",
-                appId: "1:208558639650:web:564ef91d341bbb23ef587b",
-                measurementId: "G-BHYSZHJLTR"
-            };
+        // إعدادات الاتصال بقاعدة بيانات الفايربيس
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
 
-            // التحقق من عدم تهيئة التطبيق مسبقاً لتفادي الأخطاء والثقل
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-        });
+        // تهيئة الفايربيس إن لم تكن مفعلة مسبقاً
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         async function handleLogin() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value.trim();
             const errorDiv = document.getElementById("errorMsg");
+            const btn = document.getElementById("submitBtn");
+            
             errorDiv.textContent = "";
 
             if (!email || !password) {
@@ -147,33 +154,35 @@
                 return;
             }
 
-            const btn = document.getElementById("submitBtn");
-            btn.textContent = "جاري الدخول...";
+            btn.textContent = "جاري التحقق...";
             btn.disabled = true;
 
             try {
-                const auth = firebase.auth();
-                const db = firebase.firestore();
-
+                // 1. تسجيل الدخول عبر نظام المصادقة Authentication
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
+                // 2. جلب صلاحية المستخدم من مجموعة uid في قاعدة البيانات Firestore
                 const userDoc = await db.collection("uid").doc(user.uid).get();
 
                 if (userDoc.exists) {
                     const userData = userDoc.data();
-                    if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
+                    const userType = userData.type ? userData.type.trim().toLowerCase() : "";
+
+                    // 3. التوجيه الشرطي حسب نوع المستخدم
+                    if (userType === "admin" || userType === "مشرف" || userType === "مدير") {
                         window.location.href = "admin-home.html";
                     } else {
                         window.location.href = "home.html";
                     }
                 } else {
-                    errorDiv.textContent = "بيانات الحساب غير موجودة في قاعدة البيانات.";
+                    // في حال الحساب مسجل في Auth لكنه غير مضاف في مجموعة uid
+                    errorDiv.textContent = "بيانات الحساب غير موجودة في جدول الصلاحيات.";
                     btn.textContent = "دخول";
                     btn.disabled = false;
                 }
             } catch (error) {
-                console.error("خطأ:", error);
+                console.error("خطأ تسجيل الدخول:", error);
                 errorDiv.textContent = "خطأ في البريد الإلكتروني أو كلمة المرور.";
                 btn.textContent = "دخول";
                 btn.disabled = false;
