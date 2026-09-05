@@ -2,18 +2,142 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=login.html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مكتبة كلية علوم الحاسوب - جاري التحويل...</title>
+    <title>شاشة تسجيل مستفيد جديد</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <div style="text-align: center; color: #475569; display: flex; flex-direction: column; gap: 10px;">
-        <span style="font-size: 16px; font-weight: bold;">جاري تحويلك إلى نظام المكتبة...</span>
-        <a href="login.html" style="color: #3b82f6; font-size: 13px; text-decoration: none;">إذا لم يتم تحويلك تلقائياً، اضغط هنا</a>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+
+    <div style="background: white; width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box; margin: 20px;">
+        
+        <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px; font-size: 18px;">شاشة تسجيل مستفيد جديد</h2>
+        
+        <p id="errorMsg" style="color: #ef4444; font-size: 13px; text-align: center; margin-bottom: 10px; display: none;"></p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">الاسم</label>
+                <input type="text" id="nameInput" placeholder="الاسم الكامل" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">العنوان</label>
+                <input type="text" id="addressInput" placeholder="العنوان" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">الصفة</label>
+                <select id="typeInput" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+                    <option value="طالب">طالب</option>
+                    <option value="باحث">باحث</option>
+                    <option value="أستاذ">أستاذ</option>
+                </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">رقم الهاتف</label>
+                <input type="text" id="phoneInput" placeholder="رقم الهاتف" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">البريد الإلكتروني</label>
+                <input type="email" id="emailInput" placeholder="البريد الإلكتروني" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">كلمة السر</label>
+                <input type="password" id="passwordInput" placeholder="كلمة المرور (6 أحرف على الأقل)" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 13px; color: #475569; font-weight: bold;">تأكيد كلمة السر</label>
+                <input type="password" id="confirmPasswordInput" placeholder="إعادة كتابة كلمة المرور" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+            </div>
+
+            <button onclick="handleRegister()" style="background: #3b82f6; color: white; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">تسجيل</button>
+
+            <a href="login.html" style="text-align: center; color: #3b82f6; font-size: 13px; text-decoration: none; margin-top: 5px;">لديك حساب بالفعل؟ تسجيل الدخول</a>
+        </div>
     </div>
 
+    <!-- استدعاء مكتبات Firebase بنظام الـ Compatibility -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <script>
-        window.location.href = "login.html";
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        window.handleRegister = async function() {
+            const name = document.getElementById('nameInput').value.trim();
+            const address = document.getElementById('addressInput').value.trim();
+            const type = document.getElementById('typeInput').value;
+            const phone = document.getElementById('phoneInput').value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            errorMsg.style.display = 'none';
+
+            if (!name || !email || !password || !phone) {
+                errorMsg.innerText = "الرجاء تعبئة الحقول الأساسية المطلوبة.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMsg.innerText = "كلمتا المرور غير متطابقتين.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMsg.innerText = "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                // إنشاء المستخدم في Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // حفظ بيانات المستخدم في مجموعة uid بنفس الـ UID لربط الصلاحيات تلقائياً
+                await db.collection("uid").doc(user.uid).set({
+                    name: name,
+                    email: email,
+                    address: address,
+                    type: type,
+                    phone: phone,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                alert("تم تسجيل الحساب بنجاح!");
+                window.location.href = "home.html";
+
+            } catch (error) {
+                console.error("خطأ في التسجيل:", error);
+                errorMsg.innerText = "خطأ في التسجيل: " + error.message;
+                errorMsg.style.display = 'block';
+            }
+        }
     </script>
 </body>
 </html>
