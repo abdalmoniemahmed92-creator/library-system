@@ -57,11 +57,26 @@
         </div>
     </div>
 
-    <!-- Firebase والسكربت البرمجي المرتبط بالملف المركزي -->
+    <!-- Firebase والسكربت البرمجي -->
     <script type="module">
-        import { db, auth } from "./firebase.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         let booksMap = {};
 
@@ -112,9 +127,9 @@
             if (book) {
                 document.getElementById('bookDocId').value = selectedId;
                 document.getElementById('bookTitle').value = book.title || book.bookTitle || '';
-                document.getElementById('bookAuthor').value = book.author || book.fullname || '';
-                document.getElementById('bookCategory').value = book.category || book.department || '';
-                document.getElementById('bookUrl').value = book.url || book.link || book.fileUrl || '';
+                document.getElementById('bookAuthor').value = book.author || '';
+                document.getElementById('bookCategory').value = book.category || '';
+                document.getElementById('bookUrl').value = book.url || book.link || '';
                 
                 formContainer.style.display = 'flex';
             }
