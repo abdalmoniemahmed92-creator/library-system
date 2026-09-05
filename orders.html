@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متابعة الطلبات</title>
+    <title>متابعة الطلبات المحدثة</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
 
@@ -11,16 +11,32 @@
         
         <div style="width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 15px;">
             
+            <!-- رأس الصفحة وزر الخدمات -->
             <div style="display: flex; align-items: center; justify-content: space-between; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <h2 style="color: #1f2937; margin: 0; font-size: 18px;">متابعة الطلبات والردود</h2>
-                <button onclick="window.location.href='service.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">الخدمات</button>
+                <button onclick="window.location.href='service.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">الخدمات 🏠</button>
             </div>
 
+            <!-- تبويبات الأقسام الرئيسية (إعارة / بث انتقائي) -->
             <div style="display: flex; gap: 8px;">
-                <button onclick="filterOrders('loan')" id="btn-loan" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الإعارة</button>
-                <button onclick="filterOrders('broadcast')" id="btn-broadcast" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">البث الانتقائي</button>
+                <button onclick="switchCategory('loan')" id="btn-loan" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الإعارة</button>
+                <button onclick="switchCategory('broadcast')" id="btn-broadcast" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">البث الانتقائي</button>
             </div>
 
+            <!-- شريط البحث السريع -->
+            <div>
+                <input type="text" id="searchInput" placeholder="بحث برقم الطلب أو اسم الكتاب..." oninput="filterAndRender()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none; background: white;">
+            </div>
+
+            <!-- أزرار الفلترة حسب الحالة -->
+            <div style="display: flex; gap: 5px; overflow-x: auto; padding-bottom: 2px;">
+                <button onclick="setStatusFilter('all')" id="filter-all" style="padding: 6px 12px; background: #1e293b; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">الكل</button>
+                <button onclick="setStatusFilter('pending')" id="filter-pending" style="padding: 6px 12px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">قيد المراجعة ⏳</button>
+                <button onclick="setStatusFilter('approved')" id="filter-approved" style="padding: 6px 12px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">مقبولة ✓</button>
+                <button onclick="setStatusFilter('rejected')" id="filter-rejected" style="padding: 6px 12px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">مرفوضة ✕</button>
+            </div>
+
+            <!-- حاوية عرض القائمة -->
             <div id="ordersList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
                 <div style="text-align: center; color: #64748b; padding: 30px;">جاري جلب طلباتك...</div>
             </div>
@@ -49,14 +65,13 @@
         const db = getFirestore(app);
 
         let allOrders = [];
-        let currentUser = null;
-        let currentCategory = 'loan'; // البدء بافتراض عرض طلبات الإعارة مباشرة
+        let currentCategory = 'loan'; 
+        let currentStatusFilter = 'all';
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
             } else {
-                currentUser = user;
                 fetchUserOrders(user);
             }
         });
@@ -67,16 +82,14 @@
             try {
                 allOrders = [];
 
-                // 1. جلب الكتب وتخزين عناوينها
+                // 1. جلب الكتب لربط العناوين بدقة
                 const booksSnapshot = await getDocs(collection(db, "books"));
                 const booksMap = {};
-                
-                booksSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    const title = data.title || data.name || data.bookTitle || data.bookName;
-                    
+                booksSnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const title = data.title || data.name || data.bookTitle;
                     if (title) {
-                        booksMap[doc.id] = title;
+                        booksMap[docSnap.id] = title;
                         if (data.bookId) booksMap[data.bookId] = title;
                         if (data.itemId) booksMap[data.itemId] = title;
                     }
@@ -86,30 +99,30 @@
                 const loansSnap = await getDocs(collection(db, "loans"));
                 loansSnap.forEach(docSnap => {
                     const data = docSnap.data();
-                    
                     if (data.userId && data.userId !== user.uid) return;
 
-                    const targetBookId = data.bookId || data.itemId || data.bookCode || data.id;
-                    let bookTitle = '';
+                    const targetBookId = data.bookId || data.itemId || data.bookCode;
+                    let bookTitle = booksMap[targetBookId] || data.bookTitle || data.title || targetBookId || 'كتاب مكتبة علوم الحاسوب';
 
-                    if (targetBookId && booksMap[targetBookId]) {
-                        bookTitle = booksMap[targetBookId];
-                    } else if (data.bookTitle || data.title || data.bookName || data.name || data.itemTitle) {
-                        bookTitle = data.bookTitle || data.title || data.bookName || data.name || data.itemTitle;
-                    } else if (targetBookId && !targetBookId.toLowerCase().startsWith('fs')) {
-                        bookTitle = targetBookId;
-                    } else {
-                        bookTitle = 'كتاب مكتبة علوم الحاسوب';
-                    }
+                    // توحيد الحالة برمجياً
+                    let rawStatus = data.status || 'pending';
+                    let normalizedStatus = 'pending';
+                    if (rawStatus === 'approved' || rawStatus === 'مقبول' || rawStatus === 'active') normalizedStatus = 'approved';
+                    else if (rawStatus === 'rejected' || rawStatus === 'مرفوض') normalizedStatus = 'rejected';
 
                     allOrders.push({
                         id: docSnap.id,
                         collectionName: 'loans',
                         category: 'loan',
-                        title: `طلب إعارة: ${bookTitle}`,
-                        details: `تاريخ الإعارة: ${data.borrowDate || data.date || 'حديث'} | النوع: ${data.loanType || data.borrowType || 'خارجية'}`,
-                        date: data.borrowDate || 'حديث',
-                        status: data.status || 'pending'
+                        loanId: data.loanId || 'غير متوفر',
+                        title: `إعارة: ${bookTitle}`,
+                        details: `تاريخ الإعارة: ${data.borrowDate || '---'} | الإرجاع: ${data.returnDate || '---'}`,
+                        returnDateStr: data.returnDate || '',
+                        type: data.loanType || 'خارجية',
+                        penalty: data.penalty || 'لا توجد',
+                        adminNote: data.adminNote || data.rejectionReason || '',
+                        status: normalizedStatus,
+                        rawStatusText: rawStatus
                     });
                 });
 
@@ -120,71 +133,134 @@
                         const data = docSnap.data();
                         if (data.userId && data.userId !== user.uid) return;
 
+                        let rawStatus = data.status || 'pending';
+                        let normalizedStatus = 'pending';
+                        if (rawStatus === 'approved' || rawStatus === 'مقبول') normalizedStatus = 'approved';
+                        else if (rawStatus === 'rejected' || rawStatus === 'مرفوض') normalizedStatus = 'rejected';
+
                         allOrders.push({
                             id: docSnap.id,
                             collectionName: 'selective_requests',
                             category: 'broadcast',
-                            title: `بث انتقائي (SDI): ${data.department || 'عام'}`,
+                            loanId: 'SDI-' + docSnap.id.substring(0, 5),
+                            title: `بث انتقائي: ${data.department || 'عام'}`,
                             details: `الاسم: ${data.fullName || 'مستفيد'} | الاهتمامات: ${data.interests || '---'}`,
-                            date: 'حديث',
-                            status: data.status || 'pending'
+                            returnDateStr: '',
+                            type: 'خدمة معلومات',
+                            penalty: '---',
+                            adminNote: data.adminNote || '',
+                            status: normalizedStatus,
+                            rawStatusText: rawStatus
                         });
                     });
-                } catch (err) {
-                    console.log("لا توجد مجموعة بث انتقائي مسجلة حالياً");
-                }
+                } catch (e) {}
 
-                filterOrders(currentCategory);
+                filterAndRender();
 
             } catch (error) {
-                console.error("خطأ في جلب الطلبات:", error);
-                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب الطلبات، تحقق من الاتصال وقواعد الأمان.</div>';
+                console.error(error);
+                listContainer.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">تعذر جلب الطلبات.</div>';
             }
         }
 
-        window.renderOrders = function(orders) {
+        window.filterAndRender = function() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            const filtered = allOrders.filter(order => {
+                const matchCategory = order.category === currentCategory;
+                const matchStatus = currentStatusFilter === 'all' || order.status === currentStatusFilter;
+                const matchSearch = order.title.toLowerCase().includes(searchVal) || order.loanId.toLowerCase().includes(searchVal) || order.details.toLowerCase().includes(searchVal);
+                return matchCategory && matchStatus && matchSearch;
+            });
+
+            renderOrdersList(filtered);
+        }
+
+        function renderOrdersList(orders) {
             const listContainer = document.getElementById('ordersList');
             listContainer.innerHTML = '';
 
             if (orders.length === 0) {
-                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات مسجلة في هذا القسم حتى الآن.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات مطابقة للبحث أو التصفية الحالية.</div>';
                 return;
             }
+
+            const today = new Date().toISOString().split('T')[0];
 
             orders.forEach(order => {
                 const card = document.createElement('div');
                 
-                let statusBg = '#fef3c7'; 
-                let statusColor = '#92400e';
-                let statusText = 'قيد المراجعة ⏳';
-                let isPending = false;
-
-                if (order.status === 'approved' || order.status === 'مقبول' || order.status === 'active') {
-                    statusBg = '#dcfce7'; 
-                    statusColor = '#166534';
-                    statusText = 'مقبول ✓';
-                } else if (order.status === 'rejected' || order.status === 'مرفوض') {
-                    statusBg = '#fee2e2'; 
-                    statusColor = '#991b1b';
-                    statusText = 'مرفوض ✕';
-                } else {
-                    isPending = true;
+                let statusBg = '#fef3c7', statusColor = '#92400e', statusText = 'قيد المراجعة ⏳';
+                if (order.status === 'approved') {
+                    statusBg = '#dcfce7'; statusColor = '#166534'; statusText = 'مقبول ✓';
+                } else if (order.status === 'rejected') {
+                    statusBg = '#fee2e2'; statusColor = '#991b1b'; statusText = 'مرفوض ✕';
                 }
 
-                card.style.cssText = "background: white; padding: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px;";
+                // فحص قرب موعد الإرجاع (إذا بقي 3 أيام أو أقل)
+                let nearDueAlert = '';
+                if (order.status === 'approved' && order.returnDateStr) {
+                    if (order.returnDateStr <= today) {
+                        nearDueAlert = `<div style="background: #fee2e2; color: #b91c1c; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-top: 4px;">⚠️ تنبيه: تجاوز تاريخ الإرجاع أو وصل موعده!</div>`;
+                    }
+                }
+
+                // لون تمييز نوع الإعارة (داخلية / خارجية)
+                let typeBadgeBg = order.type.includes('داخل') ? '#e0f2fe' : '#f3e8ff';
+                let typeBadgeColor = order.type.includes('داخل') ? '#0369a1' : '#6b21a8';
+
+                card.style.cssText = "background: white; padding: 15px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; border-right: 4px solid #3b82f6;";
                 
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 10px; background: ${order.category === 'loan' ? '#dbeafe' : '#f3e8ff'}; color: ${order.category === 'loan' ? '#1e40af' : '#6b21a8'}; padding: 2px 8px; border-radius: 4px; font-weight: bold;">${order.category === 'loan' ? 'إعارة كتاب' : 'بث انتقائي (SDI)'}</span>
+                        <span style="font-size: 11px; color: #2563eb; font-weight: bold;">رقم الطلب: ${order.loanId}</span>
                         <span style="font-size: 11px; background: ${statusBg}; color: ${statusColor}; padding: 3px 8px; border-radius: 6px; font-weight: bold;">${statusText}</span>
                     </div>
-                    <h4 style="margin: 0; color: #1e293b; font-size: 14px;">${order.title}</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="margin: 0; color: #1e293b; font-size: 14px;">${order.title}</h4>
+                        <span style="font-size: 10px; background: ${typeBadgeBg}; color: ${typeBadgeColor}; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${order.type}</span>
+                    </div>
                     <p style="margin: 0; color: #64748b; font-size: 12px;">${order.details}</p>
-                    ${isPending ? `<button onclick="cancelOrder('${order.id}', '${order.collectionName}')" style="margin-top: 5px; background: #fee2e2; color: #991b1b; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;">إلغاء الطلب</button>` : ''}
+                    
+                    ${order.adminNote ? `<div style="background: #f8fafc; border-right: 3px solid #cbd5e1; padding: 6px; font-size: 11px; color: #475569;"><strong>ملاحظة المشرف:</strong> ${order.adminNote}</div>` : ''}
+                    
+                    ${nearDueAlert}
+
+                    ${order.status === 'pending' ? `<button onclick="cancelOrder('${order.id}', '${order.collectionName}')" style="margin-top: 4px; background: #fee2e2; color: #991b1b; border: none; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; text-align: center;">إلغاء الطلب</button>` : ''}
                 `;
 
                 listContainer.appendChild(card);
             });
+        }
+
+        window.switchCategory = function(cat) {
+            currentCategory = cat;
+            document.getElementById('btn-loan').style.background = cat === 'loan' ? '#3b82f6' : 'white';
+            document.getElementById('btn-loan').style.color = cat === 'loan' ? 'white' : '#64748b';
+            document.getElementById('btn-loan').style.border = cat === 'loan' ? 'none' : '1px solid #cbd5e1';
+            
+            document.getElementById('btn-broadcast').style.background = cat === 'broadcast' ? '#3b82f6' : 'white';
+            document.getElementById('btn-broadcast').style.color = cat === 'broadcast' ? 'white' : '#64748b';
+            document.getElementById('btn-broadcast').style.border = cat === 'broadcast' ? 'none' : '1px solid #cbd5e1';
+            
+            filterAndRender();
+        }
+
+        window.setStatusFilter = function(status) {
+            currentStatusFilter = status;
+            ['all', 'pending', 'approved', 'rejected'].forEach(s => {
+                const btn = document.getElementById('filter-' + s);
+                if (s === status) {
+                    btn.style.background = '#1e293b';
+                    btn.style.color = 'white';
+                    btn.style.border = 'none';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.color = '#64748b';
+                    btn.style.border = '1px solid #cbd5e1';
+                }
+            });
+            filterAndRender();
         }
 
         window.cancelOrder = async function(orderId, collectionName) {
@@ -192,27 +268,12 @@
                 try {
                     await deleteDoc(doc(db, collectionName, orderId));
                     allOrders = allOrders.filter(o => o.id !== orderId);
-                    filterOrders(currentCategory);
+                    filterAndRender();
                     alert("تم إلغاء الطلب بنجاح.");
                 } catch (error) {
-                    console.error("خطأ أثناء إلغاء الطلب:", error);
-                    alert("تعذر إلغاء الطلب، يرجى المحاولة لاحقاً.");
+                    alert("تعذر إلغاء الطلب.");
                 }
             }
-        }
-
-        window.filterOrders = function(category) {
-            currentCategory = category;
-            
-            document.getElementById('btn-loan').style.background = category === 'loan' ? '#3b82f6' : 'white';
-            document.getElementById('btn-loan').style.color = category === 'loan' ? 'white' : '#64748b';
-            document.getElementById('btn-loan').style.border = category === 'loan' ? 'none' : '1px solid #cbd5e1';
-            
-            document.getElementById('btn-broadcast').style.background = category === 'broadcast' ? '#3b82f6' : 'white';
-            document.getElementById('btn-broadcast').style.color = category === 'broadcast' ? 'white' : '#64748b';
-            document.getElementById('btn-broadcast').style.border = category === 'broadcast' ? 'none' : '1px solid #cbd5e1';
-
-            renderOrders(allOrders.filter(o => o.category === category));
         }
     </script>
 </body>
