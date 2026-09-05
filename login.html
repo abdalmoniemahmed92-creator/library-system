@@ -92,32 +92,32 @@
         <h2>تسجيل الدخول للفهرس الإلكتروني لكلية علوم الحاسوب</h2>
         <div id="errorMsg" class="error-msg"></div>
         
-        <form id="loginForm">
+        <!-- تم تحويل النموذج إلى div عادي لمنع أي إعادة تحميل تلقائية -->
+        <div id="loginForm">
             <div class="form-group">
                 <label for="email">البريد الإلكتروني</label>
-                <input type="email" id="email" required placeholder="example@domain.com">
+                <input type="email" id="email" placeholder="example@domain.com">
             </div>
             
             <div class="form-group">
                 <label for="password">كلمة المرور</label>
-                <input type="password" id="password" required placeholder="********">
+                <input type="password" id="password" placeholder="********">
             </div>
             
-            <button type="submit" class="login-btn" id="submitBtn">دخول</button>
-        </form>
+            <button type="button" class="login-btn" id="submitBtn" onclick="handleLogin()">دخول</button>
+        </div>
 
         <div class="register-link">
             ليس لديك حساب؟ <a href="register.html">تسجيل جديد</a>
         </div>
     </div>
 
-    <!-- استدعاء مكتبات Firebase بنظام الـ Compatibility المتوافق مع تطبيقات الموبايل -->
+    <!-- استدعاء مكتبات Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // إعدادات Firebase الخاصة بمشروعك
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
             authDomain: "library-catalog-5d1ee.firebaseapp.com",
@@ -129,30 +129,29 @@
             measurementId: "G-BHYSZHJLTR"
         };
 
-        // تهيئة الـ Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+        async function handleLogin() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
             const errorDiv = document.getElementById("errorMsg");
             errorDiv.textContent = "";
 
+            if (!email || !password) {
+                errorDiv.textContent = "يرجى إدخال البريد الإلكتروني وكلمة المرور.";
+                return;
+            }
+
             try {
-                // تسجيل الدخول عبر Auth
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
-                // البحث داخل مجموعة uid لاستخدام حقل type للتحقق من الصلاحية
                 const userDoc = await db.collection("uid").doc(user.uid).get();
 
                 if (userDoc.exists) {
                     const userData = userDoc.data();
-                    
-                    // التوجيه بناءً على قيمة حقل type
                     if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
                         window.location.href = "admin-home.html";
                     } else {
@@ -165,7 +164,7 @@
                 console.error("خطأ في تسجيل الدخول:", error);
                 errorDiv.textContent = "خطأ في البريد الإلكتروني أو كلمة المرور.";
             }
-        });
+        }
     </script>
 </body>
 </html>
