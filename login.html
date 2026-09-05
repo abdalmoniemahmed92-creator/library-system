@@ -92,8 +92,7 @@
         <h2>تسجيل الدخول للفهرس الإلكتروني لكلية علوم الحاسوب</h2>
         <div id="errorMsg" class="error-msg"></div>
         
-        <!-- تم تحويل النموذج إلى div عادي لمنع أي إعادة تحميل تلقائية -->
-        <div id="loginForm">
+        <div>
             <div class="form-group">
                 <label for="email">البريد الإلكتروني</label>
                 <input type="email" id="email" placeholder="example@domain.com">
@@ -112,26 +111,30 @@
         </div>
     </div>
 
-    <!-- استدعاء مكتبات Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- استدعاء المكتبات بخاصية async لتحميلها بسلاسة دون تجميد التطبيق -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" async></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" async></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" async></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
-            authDomain: "library-catalog-5d1ee.firebaseapp.com",
-            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
-            projectId: "library-catalog-5d1ee",
-            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
-            messagingSenderId: "208558639650",
-            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
-            measurementId: "G-BHYSZHJLTR"
-        };
+        // الانتظار حتى تحميل مكتبات الفايربيس تماماً لتجنب أي تعليق
+        window.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+                authDomain: "library-catalog-5d1ee.firebaseapp.com",
+                databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+                projectId: "library-catalog-5d1ee",
+                storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+                messagingSenderId: "208558639650",
+                appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+                measurementId: "G-BHYSZHJLTR"
+            };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+            // التحقق من عدم تهيئة التطبيق مسبقاً لتفادي الأخطاء والثقل
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+        });
 
         async function handleLogin() {
             const email = document.getElementById("email").value.trim();
@@ -144,7 +147,14 @@
                 return;
             }
 
+            const btn = document.getElementById("submitBtn");
+            btn.textContent = "جاري الدخول...";
+            btn.disabled = true;
+
             try {
+                const auth = firebase.auth();
+                const db = firebase.firestore();
+
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
@@ -158,11 +168,15 @@
                         window.location.href = "home.html";
                     }
                 } else {
-                    errorDiv.textContent = "بيانات الحساب غير موجودة في مجموعة uid.";
+                    errorDiv.textContent = "بيانات الحساب غير موجودة في قاعدة البيانات.";
+                    btn.textContent = "دخول";
+                    btn.disabled = false;
                 }
             } catch (error) {
-                console.error("خطأ في تسجيل الدخول:", error);
+                console.error("خطأ:", error);
                 errorDiv.textContent = "خطأ في البريد الإلكتروني أو كلمة المرور.";
+                btn.textContent = "دخول";
+                btn.disabled = false;
             }
         }
     </script>
