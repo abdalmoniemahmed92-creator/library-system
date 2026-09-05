@@ -70,20 +70,39 @@
         </div>
     </div>
 
-    <!-- استدعاء ملف firebase.js المركزي والوظائف البرمجية -->
-    <script type="module">
-        import { db, auth } from "./firebase.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- استدعاء مكتبات Firebase بنظام الـ Compatibility الخفيف والمتوافق -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-        // التحقق من حالة المستخدم وجلب بياناته من مجموعة uid لعرض اسمه وصفته
-        onAuthStateChanged(auth, async (user) => {
+    <script>
+        // إعدادات Firebase الخاصة بمشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        // منع تكرار تهيئة التطبيق إذا كانت مفعلة مسبقاً
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // التحقق من حالة المستخدم وجلب بياناته من مجموعة uid
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 try {
-                    const userDocRef = doc(db, "uid", user.uid);
-                    const userDocSnap = await getDoc(userDocRef);
+                    const userDocSnap = await db.collection("uid").doc(user.uid).get();
 
-                    if (userDocSnap.exists()) {
+                    if (userDocSnap.exists) {
                         const userData = userDocSnap.data();
                         document.getElementById('welcomeUserText').innerText = `أهلاً بك، ${userData.name} (${userData.type})`;
                     } else {
@@ -94,14 +113,13 @@
                     document.getElementById('welcomeUserText').innerText = `أهلاً بك`;
                 }
             } else {
-                // إذا لم يكن مسجلاً الدخول، يتم تحويله لصفحة تسجيل الدخول
                 window.location.href = 'login.html';
             }
         });
 
         let selectedItemData = null;
 
-        window.performSearch = async function() {
+        async function performSearch() {
             const queryText = document.getElementById('searchInput').value.trim().toLowerCase();
             const resultsDiv = document.getElementById('searchResults');
 
@@ -117,7 +135,7 @@
             try {
                 let allResults = [];
 
-                const booksSnap = await getDocs(collection(db, "books"));
+                const booksSnap = await db.collection("books").get();
                 booksSnap.forEach(doc => {
                     const data = doc.data();
                     if ((data.title && data.title.toLowerCase().includes(queryText)) || 
@@ -132,7 +150,7 @@
                     }
                 });
 
-                const authorsSnap = await getDocs(collection(db, "authors"));
+                const authorsSnap = await db.collection("authors").get();
                 authorsSnap.forEach(doc => {
                     const data = doc.data();
                     if (data.fullname && data.fullname.toLowerCase().includes(queryText)) {
@@ -145,7 +163,7 @@
                     }
                 });
 
-                const thesesSnap = await getDocs(collection(db, "theses"));
+                const thesesSnap = await db.collection("theses").get();
                 thesesSnap.forEach(doc => {
                     const data = doc.data();
                     if (data.title && data.title.toLowerCase().includes(queryText)) {
@@ -193,7 +211,7 @@
             }
         }
 
-        window.openModal = function(item, badgeColor) {
+        function openModal(item, badgeColor) {
             selectedItemData = item;
             document.getElementById('modalTitle').innerText = item.title;
             document.getElementById('modalSub').innerText = item.sub;
@@ -228,18 +246,18 @@
             document.getElementById('itemModal').style.display = 'flex';
         }
 
-        window.closeModal = function() {
+        function closeModal() {
             document.getElementById('itemModal').style.display = 'none';
         }
 
-        window.requestLoan = function() {
+        function requestLoan() {
             if (!selectedItemData) return;
             const title = encodeURIComponent(selectedItemData.title);
             const type = encodeURIComponent(selectedItemData.type);
             window.location.href = `loans.html?title=${title}&type=${type}`;
         }
 
-        window.navigateTo = function(pageUrl) {
+        function navigateTo(pageUrl) {
             window.location.href = pageUrl;
         }
     </script>
