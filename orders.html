@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متابعة الطلبات المحدثة</title>
+    <title>متابعة الطلبات</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
 
@@ -21,11 +21,6 @@
             <div style="display: flex; gap: 8px;">
                 <button onclick="switchCategory('loan')" id="btn-loan" style="flex: 1; padding: 8px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">الإعارة</button>
                 <button onclick="switchCategory('broadcast')" id="btn-broadcast" style="flex: 1; padding: 8px; background: white; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">البث الانتقائي</button>
-            </div>
-
-            <!-- شريط البحث السريع -->
-            <div>
-                <input type="text" id="searchInput" placeholder="بحث برقم الطلب أو اسم الكتاب..." oninput="filterAndRender()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none; background: white;">
             </div>
 
             <!-- أزرار الفلترة حسب الحالة -->
@@ -104,7 +99,6 @@
                     const targetBookId = data.bookId || data.itemId || data.bookCode;
                     let bookTitle = booksMap[targetBookId] || data.bookTitle || data.title || targetBookId || 'كتاب مكتبة علوم الحاسوب';
 
-                    // توحيد الحالة برمجياً
                     let rawStatus = data.status || 'pending';
                     let normalizedStatus = 'pending';
                     if (rawStatus === 'approved' || rawStatus === 'مقبول' || rawStatus === 'active') normalizedStatus = 'approved';
@@ -164,13 +158,10 @@
         }
 
         window.filterAndRender = function() {
-            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-            
             const filtered = allOrders.filter(order => {
                 const matchCategory = order.category === currentCategory;
                 const matchStatus = currentStatusFilter === 'all' || order.status === currentStatusFilter;
-                const matchSearch = order.title.toLowerCase().includes(searchVal) || order.loanId.toLowerCase().includes(searchVal) || order.details.toLowerCase().includes(searchVal);
-                return matchCategory && matchStatus && matchSearch;
+                return matchCategory && matchStatus;
             });
 
             renderOrdersList(filtered);
@@ -181,7 +172,7 @@
             listContainer.innerHTML = '';
 
             if (orders.length === 0) {
-                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات مطابقة للبحث أو التصفية الحالية.</div>';
+                listContainer.innerHTML = '<div style="text-align: center; color: #64748b; padding: 30px; background: white; border-radius: 10px;">لا توجد طلبات في هذا القسم أو الحالة الحالية.</div>';
                 return;
             }
 
@@ -197,7 +188,6 @@
                     statusBg = '#fee2e2'; statusColor = '#991b1b'; statusText = 'مرفوض ✕';
                 }
 
-                // فحص قرب موعد الإرجاع (إذا بقي 3 أيام أو أقل)
                 let nearDueAlert = '';
                 if (order.status === 'approved' && order.returnDateStr) {
                     if (order.returnDateStr <= today) {
@@ -205,7 +195,6 @@
                     }
                 }
 
-                // لون تمييز نوع الإعارة (داخلية / خارجية)
                 let typeBadgeBg = order.type.includes('داخل') ? '#e0f2fe' : '#f3e8ff';
                 let typeBadgeColor = order.type.includes('داخل') ? '#0369a1' : '#6b21a8';
 
