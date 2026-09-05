@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -33,7 +32,7 @@
                     <input type="text" id="titleInput" placeholder="أدخل عنوان الرسالة الجامعية..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
                 </div>
 
-                <!-- authorName (بدلاً من معرف المؤلف) -->
+                <!-- authorName -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">اسم الباحث (authorName)</label>
                     <input type="text" id="authorNameInput" placeholder="أدخل اسم الباحث الثلاثي..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
@@ -91,6 +90,12 @@
                     <textarea id="summaryInput" rows="3" placeholder="أدخل ملخص الرسالة..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none; resize: none;"></textarea>
                 </div>
 
+                <!-- حقل اختيار ملف الـ PDF -->
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #374155;">ملف الرسالة (PDF)</label>
+                    <input type="file" id="thesisFile" accept=".pdf" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #f8fafc; text-align: right; outline: none;">
+                </div>
+
                 <!-- زر الحفظ -->
                 <button id="saveThesisBtn" style="background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 5px;">حفظ الرسالة</button>
             </div>
@@ -98,10 +103,11 @@
         </div>
     </div>
 
-    <!-- جافاسكريبت لحفظ البيانات -->
+    <!-- جافاسكريبت لحفظ البيانات ورفع الملف -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         // تعبئة سنوات النشر تلقائياً
         const yearSelect = document.getElementById('publicationYearInput');
@@ -125,17 +131,19 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         document.getElementById('saveThesisBtn').onclick = async function() {
             const thesesId = document.getElementById('thesesIdInput').value.trim();
             const title = document.getElementById('titleInput').value.trim();
-            const authorName = document.getElementById('authorNameInput').value.trim(); // اسم الباحث
+            const authorName = document.getElementById('authorNameInput').value.trim();
             const studentId = document.getElementById('studentIdInput').value.trim();
             const categoryId = document.getElementById('categoryIdInput').value.trim();
             const department = document.getElementById('departmentInput').value;
             const degree = document.getElementById('degreeInput').value;
             const publicationYear = document.getElementById('publicationYearInput').value;
             const summary = document.getElementById('summaryInput').value.trim();
+            const fileInput = document.getElementById('thesisFile');
 
             if (!title || !authorName) {
                 alert('يرجى إدخال عنوان الرسالة واسم الباحث على الأقل.');
@@ -143,28 +151,40 @@
             }
 
             const btn = document.getElementById('saveThesisBtn');
-            btn.innerText = 'جاري الحفظ...';
+            btn.innerText = 'جاري الرفع والحفظ...';
             btn.disabled = true;
 
             try {
+                let fileUrl = "";
+
+                // رفع ملف الـ PDF إلى Storage إذا تم اختياره
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const storageRef = ref(storage, 'theses_files/' + Date.now() + '_' + file.name);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    fileUrl = await getDownloadURL(snapshot.ref);
+                }
+
+                // حفظ البيانات ورابط الملف في مجموعة theses
                 await addDoc(collection(db, "theses"), {
                     thesesId: thesesId || '',
                     title: title,
-                    authorName: authorName, // حفظ اسم الباحث مباشرة في قاعدة البيانات
+                    authorName: authorName,
                     studentId: studentId || '',
                     categoryId: categoryId || '',
                     department: department || '',
                     degree: degree || '',
                     publicationYear: publicationYear || '',
                     summary: summary || '',
+                    fileUrl: fileUrl, // تخزين رابط الـ PDF هنا تلقائياً
                     createdAt: new Date().toISOString()
                 });
 
-                alert('تم حفظ الرسالة الجامعية بنجاح!');
+                alert('تم حفظ الرسالة الجامعية ورفع الملف بنجاح!');
                 window.location.href = 'index.html'; 
             } catch (error) {
                 console.error("خطأ في حفظ البيانات:", error);
-                alert('حدث خطأ أثناء الحفظ، يرجى التحقق من اتصال الإنترنت.');
+                alert('حدث خطأ أثناء الرفع أو الحفظ، يرجى التحقق من اتصال الإنترنت.');
                 btn.innerText = 'حفظ الرسالة';
                 btn.disabled = false;
             }
