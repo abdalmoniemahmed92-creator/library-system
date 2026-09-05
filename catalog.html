@@ -42,22 +42,8 @@
 
     <!-- كود الجافاسكريبت -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
-            authDomain: "library-catalog-5d1ee.firebaseapp.com",
-            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
-            projectId: "library-catalog-5d1ee",
-            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
-            messagingSenderId: "208558639650",
-            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
-            measurementId: "G-BHYSZHJLTR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        import { db } from "./firebase.js";
+        import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let currentTab = 'books';
 
@@ -123,8 +109,7 @@
                     const isNew = checkIfNew(book);
 
                     const card = document.createElement('div');
-                    // تخصيص الألوان والإطار في حال كان الكتاب مضافاً حديثاً
-                    const cardBg = isNew ? '#fefce8' : 'white'; // خلفية صفراء فاتحة خفيفة جداً للجديد
+                    const cardBg = isNew ? '#fefce8' : 'white';
                     const borderRightColor = isNew ? '#eab308' : '#3b82f6';
                     
                     card.style.cssText = `background: ${cardBg}; padding: 16px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 4px solid ${borderRightColor}; display: flex; flex-direction: column; gap: 6px; cursor: pointer; position: relative;`;
