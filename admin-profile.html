@@ -63,30 +63,16 @@
         </div>
     </div>
 
+    <!-- كود الجافاسكريبت المحدث للربط بملف firebase.js المركزي -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, updatePassword, updateEmail, updateProfile as updateAuthProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { db, auth } from "./firebase.js";
+        import { onAuthStateChanged, updatePassword, updateEmail, updateProfile as updateAuthProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // دالة الانتقال للوحة التحكم
         window.navigateToAdminHome = function() {
             window.location.href = 'admin-home.html';
         };
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
-            authDomain: "library-catalog-5d1ee.firebaseapp.com",
-            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
-            projectId: "library-catalog-5d1ee",
-            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
-            messagingSenderId: "208558639650",
-            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
-            measurementId: "G-BHYSZHJLTR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
 
         let currentUser = null;
 
