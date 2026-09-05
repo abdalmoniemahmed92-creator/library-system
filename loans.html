@@ -3,125 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خدمة الإعارة</title>
+    <title>حذف رسالة جامعية</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
 
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; min-height: 100vh;">
         
-        <div style="width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 12px;">
+        <div style="width: 100%; max-width: 420px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;">
             
-            <h2 style="text-align: center; color: #1f2937; margin: 0 0 5px 0; font-size: 18px;">خدمة الإعارة</h2>
+            <h2 style="color: #1f2937; margin: 0 0 10px 0; font-size: 18px; text-align: center;">حذف رسالة جامعية</h2>
 
-            <p style="text-align: center; color: #64748b; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                اطلب استعارة كتابك المفضل بكل سهولة لتصلك الموافقة لحظة بلحظة.
-            </p>
-
-            <!-- حقل رقم الإعارة -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">رقم الإعارة</label>
-                <input type="text" id="loanId" placeholder="تلقائي أو أدخل الرقم" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-
-            <!-- حقل عنوان الكتاب -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">عنوان الكتاب</label>
-                <input type="text" id="itemId" placeholder="عنوان الكتاب أو العنصر" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-
-            <!-- حقل تاريخ الإعارة -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">تاريخ الإعارة</label>
-                <input type="date" id="borrowDate" style="flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-
-            <!-- حقل العدد -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">العدد</label>
-                <input type="number" id="quantity" value="1" min="1" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-
-            <!-- حقل نوع الإعارة (قائمة منسدلة) -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">نوع الإعارة</label>
-                <select id="loanType" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
-                    <option value="داخلية">إعارة داخلية</option>
-                    <option value="خارجية">إعارة خارجية</option>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 13px; color: #334155; font-weight: bold;">رقم الرسالة</label>
+                <select id="thesisSelect" onchange="loadThesisData()" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: #fff;">
+                    <option value="">اختر رقم الرسالة للحذف...</option>
                 </select>
             </div>
 
-            <!-- حقل تاريخ الإرجاع -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">تاريخ الإرجاع</label>
-                <input type="date" id="returnDate" style="flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 13px; color: #334155; font-weight: bold;">العنوان</label>
+                <input type="text" id="thesisTitle" readonly placeholder="عنوان الرسالة" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: #f8fafc; color: #64748b;">
             </div>
 
-            <!-- حقل العقوبة -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">العقوبة</label>
-                <input type="text" id="penalty" value="لا توجد" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 13px; color: #334155; font-weight: bold;">التحصيل</label>
+                <input type="text" id="thesisDegree" readonly placeholder="التحصيل العلمي" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: #f8fafc; color: #64748b;">
             </div>
 
-            <!-- زر الإرسال -->
-            <button onclick="submitLoan()" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">إرسال</button>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 13px; color: #334155; font-weight: bold;">التاريخ</label>
+                <input type="text" id="thesisDate" readonly placeholder="تاريخ الرسالة" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: #f8fafc; color: #64748b;">
+            </div>
 
-            <!-- زر العودة لشاشة الخدمات الرئيسية -->
-            <button onclick="window.location.href='home.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للرئيسية</button>
+            <!-- زر الحذف -->
+            <button onclick="deleteThesis()" style="width: 100%; background: #dc2626; color: white; border: none; border-radius: 6px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px;">حذف وإشعار المستخدم</button>
+
+            <button onclick="navigateTo('admin-home.html')" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة لوحة التحكم</button>
 
         </div>
     </div>
 
-    <!-- كود الربط مع ملف firebase.js المركزي وإرسال البيانات -->
     <script type="module">
-        import { db, auth } from "./firebase.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let currentUserId = null;
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
 
-        // التحقق من حالة تسجيل الدخول للمستخدم
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let thesesMap = {};
+
+        // تعريف دالة التنقل العامة لحل مشكلة الـ ReferenceError
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
+        };
+
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserId = user.uid;
+            if (!user) {
+                window.location.href = 'login.html';
             } else {
-                currentUserId = 'student_user_123';
+                fetchTheses();
             }
         });
 
-        document.getElementById('loanId').value = 'LN-' + Math.floor(1000 + Math.random() * 9000);
-        
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('borrowDate').value = today;
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const bookTitle = urlParams.get('title');
-        if (bookTitle) {
-            document.getElementById('itemId').value = bookTitle;
-        }
-
-        window.submitLoan = async function() {
-            const loanData = {
-                loanId: document.getElementById('loanId').value,
-                itemId: document.getElementById('itemId').value,
-                borrowDate: document.getElementById('borrowDate').value,
-                quantity: document.getElementById('quantity').value,
-                loanType: document.getElementById('loanType').value,
-                returnDate: document.getElementById('returnDate').value,
-                penalty: document.getElementById('penalty').value,
-                status: 'pending',
-                uid: currentUserId,
-                createdAt: new Date()
-            };
+        async function fetchTheses() {
+            const select = document.getElementById('thesisSelect');
+            select.innerHTML = '<option value="">اختر رقم الرسالة للحذف...</option>';
 
             try {
-                await addDoc(collection(db, "loans"), loanData);
-                alert('تم إرسال طلب الإعارة بنجاح إلى النظام!');
-                window.location.href = 'orders.html';
+                const querySnapshot = await getDocs(collection(db, "theses"));
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    thesesMap[docSnap.id] = data;
+
+                    const option = document.createElement('option');
+                    option.value = docSnap.id;
+                    option.textContent = data.thesesId || docSnap.id;
+                    select.appendChild(option);
+                });
             } catch (error) {
-                console.error("خطأ في الإرسال: ", error);
-                alert('حدث خطأ أثناء إرسال الطلب: ' + error.message);
+                console.error("خطأ في جلب الرسائل:", error);
+            }
+        }
+
+        window.loadThesisData = function() {
+            const selectedId = document.getElementById('thesisSelect').value;
+            if (!selectedId) {
+                document.getElementById('thesisTitle').value = '';
+                document.getElementById('thesisDegree').value = '';
+                document.getElementById('thesisDate').value = '';
+                return;
+            }
+
+            const thesis = thesesMap[selectedId];
+            if (thesis) {
+                document.getElementById('thesisTitle').value = thesis.title || '';
+                document.getElementById('thesisDegree').value = thesis.department || thesis.degree || '';
+                document.getElementById('thesisDate').value = thesis.publicationYear || thesis.date || '';
+            }
+        }
+
+        window.deleteThesis = async function() {
+            const selectedId = document.getElementById('thesisSelect').value;
+            if (!selectedId) {
+                alert('الرجاء اختيار الرسالة المراد حذفها أولاً.');
+                return;
+            }
+
+            const thesisData = thesesMap[selectedId];
+
+            if (confirm('هل أنت متأكد من رغبتك في حذف هذه الرسالة وتنبيه الطالب؟')) {
+                try {
+                    // 1. حذف الرسالة من مجموعة theses
+                    await deleteDoc(doc(db, "theses", selectedId));
+
+                    // 2. إضافة إشعار في مجموعة الطلبات أو الإشعارات ليراها المستخدم في تطبيقه (orders.html)
+                    await addDoc(collection(db, "loans"), {
+                        itemId: thesisData.title || "رسالة جامعية",
+                        status: "مذشوفة / محذوفة",
+                        loanType: "رسالة جامعية",
+                        borrowDate: new Date().toISOString().split('T')[0],
+                        uid: thesisData.studentId || "all" // موجهة للطالب صاحب المعرف أو عامة
+                    });
+
+                    alert('تم حذف الرسالة الجامعية وإرسال التنبيه بنجاح.');
+                    fetchTheses();
+                    document.getElementById('thesisTitle').value = '';
+                    document.getElementById('thesisDegree').value = '';
+                    document.getElementById('thesisDate').value = '';
+                    document.getElementById('thesisSelect').value = '';
+                } catch (error) {
+                    console.error("خطأ في الحذف:", error);
+                    alert('حدث خطأ أثناء محاولة حذف الرسالة.');
+                }
             }
         }
     </script>
 </body>
 </html>
+اليك الكود كامل
