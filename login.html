@@ -111,11 +111,28 @@
         </div>
     </div>
 
-    <!-- استدعاء ملف firebase.js المركزي والوظائف البرمجية -->
-    <script type="module">
-        import { db, auth } from "./firebase.js";
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- استدعاء مكتبات Firebase بنظام الـ Compatibility المتوافق مع تطبيقات الموبايل -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // إعدادات Firebase الخاصة بمشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        // تهيئة الـ Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -125,17 +142,17 @@
             errorDiv.textContent = "";
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // تسجيل الدخول عبر Auth
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
-                // البحث داخل مجموعة uid واستخدام حقل type للتحقق من الصلاحية
-                const userDocRef = doc(db, "uid", user.uid);
-                const userDoc = await getDoc(userDocRef);
+                // البحث داخل مجموعة uid لاستخدام حقل type للتحقق من الصلاحية
+                const userDoc = await db.collection("uid").doc(user.uid).get();
 
-                if (userDoc.exists()) {
+                if (userDoc.exists) {
                     const userData = userDoc.data();
                     
-                    // التوجيه بناءً على قيمة حقل type (سواء كان مشرف، مدير، admin، أو طالب)
+                    // التوجيه بناءً على قيمة حقل type
                     if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
                         window.location.href = "admin-home.html";
                     } else {
