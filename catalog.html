@@ -103,8 +103,10 @@
                     const copiesCount = book.copiesCount !== undefined ? book.copiesCount : 'غير متوفر';
                     const edition = book.edition || 'غير متوفرة';
                     const isbn = book.isbn || 'غير متوفر';
-                    const fileUrl = book.fileUrl || '';
-                    const accessType = book.accessType || 'public'; // افتراضي عام إذا لم يُحدد
+                    
+                    const fileSource = book.fileData || book.fileUrl || '';
+                    const fileName = book.fileName || 'book.pdf';
+                    const accessType = book.accessType || 'public';
 
                     const card = document.createElement('div');
                     card.style.cssText = "background: white; padding: 16px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-right: 4px solid #3b82f6; display: flex; flex-direction: column; gap: 6px; cursor: pointer;";
@@ -125,27 +127,121 @@
                             { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
                         ];
 
-                        if (fileUrl) {
+                        if (fileSource) {
                             if (accessType === 'internal') {
                                 modalButtons.unshift({ 
                                     text: "تصفح داخلي أونلاين 👁️", 
                                     bg: "#f59e0b", 
                                     color: "white", 
-                                    action: () => { window.open(fileUrl, '_blank'); } 
+                                    action: () => { 
+                                        try {
+                                            let blobUrl = fileSource;
+                                            if (fileSource.startsWith('data:')) {
+                                                const arr = fileSource.split(',');
+                                                const mime = arr[0].match(/:(.*?);/)[1] || 'application/pdf';
+                                                const bstr = atob(arr[1]);
+                                                let n = bstr.length;
+                                                const u8arr = new Uint8Array(n);
+                                                while(n--) {
+                                                    u8arr[n] = bstr.charCodeAt(n);
+                                                }
+                                                const blob = new Blob([u8arr], {type: mime});
+                                                blobUrl = URL.createObjectURL(blob);
+                                            }
+                                            const win = window.open();
+                                            if (win) {
+                                                win.document.write(`<iframe src="${blobUrl}" style="width:100%; height:100%; border:none;" type="application/pdf"></iframe>`);
+                                            } else {
+                                                alert("يرجى السماح بفتح النوافذ المنبثقة من إعدادات المتصفح.");
+                                            }
+                                        } catch(err) {
+                                            console.error(err);
+                                            alert("تعذر فتح التصفح الداخلي.");
+                                        }
+                                    } 
                                 });
                             } else {
                                 modalButtons.unshift(
                                     { 
-                                        text: "تصفح أونلاين 🌐", 
+                                        text: "معاينة الملف 👁️", 
                                         bg: "#3b82f6", 
                                         color: "white", 
-                                        action: () => { window.open(fileUrl, '_blank'); } 
+                                        action: () => { 
+                                            try {
+                                                let blobUrl = fileSource;
+                                                if (fileSource.startsWith('data:')) {
+                                                    const arr = fileSource.split(',');
+                                                    const mime = arr[0].match(/:(.*?);/)[1] || 'application/pdf';
+                                                    const bstr = atob(arr[1]);
+                                                    let n = bstr.length;
+                                                    const u8arr = new Uint8Array(n);
+                                                    while(n--) {
+                                                        u8arr[n] = bstr.charCodeAt(n);
+                                                    }
+                                                    const blob = new Blob([u8arr], {type: mime});
+                                                    blobUrl = URL.createObjectURL(blob);
+                                                }
+
+                                                const win = window.open();
+                                                if (win) {
+                                                    win.document.write(`
+                                                        <html dir="rtl">
+                                                        <head><title>معاينة الملف - ${fileName}</title></head>
+                                                        <body style="margin:0; background:#333; display:flex; flex-direction:column; height:100vh;">
+                                                            <div style="background:#1e293b; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; font-family:Tahoma;">
+                                                                <span style="font-weight:bold; font-size:1rem;">${fileName}</span>
+                                                                <button onclick="window.close()" style="background:#ef4444; color:white; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">إغلاق النافذة</button>
+                                                            </div>
+                                                            <iframe src="${blobUrl}" style="width:100%; height:100%; border:none;" type="application/pdf"></iframe>
+                                                        </body>
+                                                        </html>
+                                                    `);
+                                                } else {
+                                                    alert("يرجى السماح بفتح النوافذ المنبثقة (Popups) من إعدادات المتصفح.");
+                                                }
+                                            } catch(err) {
+                                                console.error(err);
+                                                alert("تعذر فتح معاينة الملف.");
+                                            }
+                                        } 
                                     },
                                     { 
                                         text: "تحميل الملف 📥", 
                                         bg: "#059669", 
                                         color: "white", 
-                                        action: () => { const a = document.createElement('a'); a.href = fileUrl; a.download = ''; a.target = '_blank'; a.click(); } 
+                                        action: () => { 
+                                            try {
+                                                if (fileSource.startsWith('data:')) {
+                                                    const arr = fileSource.split(',');
+                                                    const mime = arr[0].match(/:(.*?);/)[1];
+                                                    const bstr = atob(arr[1]);
+                                                    let n = bstr.length;
+                                                    const u8arr = new Uint8Array(n);
+                                                    while(n--) {
+                                                        u8arr[n] = bstr.charCodeAt(n);
+                                                    }
+                                                    const blob = new Blob([u8arr], {type: mime});
+                                                    const blobUrl = URL.createObjectURL(blob);
+
+                                                    const a = document.createElement('a');
+                                                    a.href = blobUrl;
+                                                    a.download = fileName.endsWith('.pdf') ? fileName : fileName + '.pdf';
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    document.body.removeChild(a);
+                                                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                                                } else {
+                                                    const a = document.createElement('a');
+                                                    a.href = fileSource;
+                                                    a.download = fileName;
+                                                    a.target = '_blank';
+                                                    a.click();
+                                                }
+                                            } catch(e) {
+                                                console.error(e);
+                                                alert("حدث خطأ أثناء تحميل الملف.");
+                                            }
+                                        } 
                                     }
                                 );
                             }
@@ -200,8 +296,10 @@
                     const degree = thesis.degree || '';
                     const publicationYear = thesis.publicationYear || '';
                     const summary = thesis.summary || 'لا يوجد ملخص متاحة.';
-                    const fileUrl = thesis.fileUrl || '';
-                    const accessType = thesis.accessType || 'public'; // افتراضي عام
+                    
+                    const fileSource = thesis.fileData || thesis.fileUrl || '';
+                    const fileName = thesis.fileName || 'thesis.pdf';
+                    const accessType = thesis.accessType || 'public';
 
                     let authorName = thesis.fullname || thesis.authorName || thesis.author || 'باحث غير معروف';
                     let studentId = thesis.studentId || thesis.student_id || 'غير متوفر';
@@ -240,27 +338,121 @@
                             { text: "إغلاق", bg: "#e2e8f0", color: "#475569", action: closeModal }
                         ];
 
-                        if (fileUrl) {
+                        if (fileSource) {
                             if (accessType === 'internal') {
                                 modalButtons.unshift({ 
                                     text: "تصفح داخلي أونلاين 👁️", 
                                     bg: "#f59e0b", 
                                     color: "white", 
-                                    action: () => { window.open(fileUrl, '_blank'); } 
+                                    action: () => { 
+                                        try {
+                                            let blobUrl = fileSource;
+                                            if (fileSource.startsWith('data:')) {
+                                                const arr = fileSource.split(',');
+                                                const mime = arr[0].match(/:(.*?);/)[1] || 'application/pdf';
+                                                const bstr = atob(arr[1]);
+                                                let n = bstr.length;
+                                                const u8arr = new Uint8Array(n);
+                                                while(n--) {
+                                                    u8arr[n] = bstr.charCodeAt(n);
+                                                }
+                                                const blob = new Blob([u8arr], {type: mime});
+                                                blobUrl = URL.createObjectURL(blob);
+                                            }
+                                            const win = window.open();
+                                            if (win) {
+                                                win.document.write(`<iframe src="${blobUrl}" style="width:100%; height:100%; border:none;" type="application/pdf"></iframe>`);
+                                            } else {
+                                                alert("يرجى السماح بفتح النوافذ المنبثقة من إعدادات المتصفح.");
+                                            }
+                                        } catch(err) {
+                                            console.error(err);
+                                            alert("تعذر فتح التصفح الداخلي.");
+                                        }
+                                    } 
                                 });
                             } else {
                                 modalButtons.unshift(
                                     { 
-                                        text: "تصفح أونلاين 🌐", 
+                                        text: "معاينة الملف 👁️", 
                                         bg: "#3b82f6", 
                                         color: "white", 
-                                        action: () => { window.open(fileUrl, '_blank'); } 
+                                        action: () => { 
+                                            try {
+                                                let blobUrl = fileSource;
+                                                if (fileSource.startsWith('data:')) {
+                                                    const arr = fileSource.split(',');
+                                                    const mime = arr[0].match(/:(.*?);/)[1] || 'application/pdf';
+                                                    const bstr = atob(arr[1]);
+                                                    let n = bstr.length;
+                                                    const u8arr = new Uint8Array(n);
+                                                    while(n--) {
+                                                        u8arr[n] = bstr.charCodeAt(n);
+                                                    }
+                                                    const blob = new Blob([u8arr], {type: mime});
+                                                    blobUrl = URL.createObjectURL(blob);
+                                                }
+
+                                                const win = window.open();
+                                                if (win) {
+                                                    win.document.write(`
+                                                        <html dir="rtl">
+                                                        <head><title>معاينة الملف - ${fileName}</title></head>
+                                                        <body style="margin:0; background:#333; display:flex; flex-direction:column; height:100vh;">
+                                                            <div style="background:#1e293b; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; font-family:Tahoma;">
+                                                                <span style="font-weight:bold; font-size:1rem;">${fileName}</span>
+                                                                <button onclick="window.close()" style="background:#ef4444; color:white; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">إغلاق النافذة</button>
+                                                            </div>
+                                                            <iframe src="${blobUrl}" style="width:100%; height:100%; border:none;" type="application/pdf"></iframe>
+                                                        </body>
+                                                        </html>
+                                                    `);
+                                                } else {
+                                                    alert("يرجى السماح بفتح النوافذ المنبثقة (Popups) من إعدادات المتصفح.");
+                                                }
+                                            } catch(err) {
+                                                console.error(err);
+                                                alert("تعذر فتح معاينة الملف.");
+                                            }
+                                        } 
                                     },
                                     { 
                                         text: "تحميل الملف 📥", 
                                         bg: "#059669", 
                                         color: "white", 
-                                        action: () => { const a = document.createElement('a'); a.href = fileUrl; a.download = ''; a.target = '_blank'; a.click(); } 
+                                        action: () => { 
+                                            try {
+                                                if (fileSource.startsWith('data:')) {
+                                                    const arr = fileSource.split(',');
+                                                    const mime = arr[0].match(/:(.*?);/)[1];
+                                                    const bstr = atob(arr[1]);
+                                                    let n = bstr.length;
+                                                    const u8arr = new Uint8Array(n);
+                                                    while(n--) {
+                                                        u8arr[n] = bstr.charCodeAt(n);
+                                                    }
+                                                    const blob = new Blob([u8arr], {type: mime});
+                                                    const blobUrl = URL.createObjectURL(blob);
+
+                                                    const a = document.createElement('a');
+                                                    a.href = blobUrl;
+                                                    a.download = fileName.endsWith('.pdf') ? fileName : fileName + '.pdf';
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    document.body.removeChild(a);
+                                                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                                                } else {
+                                                    const a = document.createElement('a');
+                                                    a.href = fileSource;
+                                                    a.download = fileName;
+                                                    a.target = '_blank';
+                                                    a.click();
+                                                }
+                                            } catch(e) {
+                                                console.error(e);
+                                                alert("حدث خطأ أثناء تحميل الملف.");
+                                            }
+                                        } 
                                     }
                                 );
                             }
