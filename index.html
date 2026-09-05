@@ -3,64 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شاشة تسجيل مستفيد جديد</title>
+    <title>إدارة الحساب - مكتبة كلية علوم الحاسوب</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+<body style="margin: 0; padding: 20px; background-color: #f8fafc; font-family: Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box;">
 
-    <div style="background: white; width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box; margin: 20px;">
+    <div style="background: white; width: 100%; max-width: 450px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box;">
         
-        <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px; font-size: 18px;">شاشة تسجيل مستفيد جديد</h2>
-        
+        <!-- بطاقة معلومات المستخدم -->
+        <div style="text-align: center; background: #f8fafc; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+            <div style="width: 70px; height: 70px; background: #e0e7ff; color: #3730a3; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 10px auto; font-size: 28px;">👤</div>
+            <h3 id="userNameDisplay" style="margin: 0 0 5px 0; color: #1f2937; font-size: 16px;">جاري التحميل...</h3>
+            <span id="userTypeBadge" style="background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">مستفيد</span>
+        </div>
+
         <p id="errorMsg" style="color: #ef4444; font-size: 13px; text-align: center; margin-bottom: 10px; display: none;"></p>
+        <p id="successMsg" style="color: #10b981; font-size: 13px; text-align: center; margin-bottom: 10px; display: none;"></p>
 
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            
+        <!-- معلومات الحساب والتعديل -->
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            <h4 style="margin: 0; color: #374151; font-size: 14px; text-align: right; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">معلومات الحساب</h4>
+
             <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">الاسم</label>
-                <input type="text" id="nameInput" placeholder="الاسم الكامل" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+                <label style="font-size: 12px; color: #475569; font-weight: bold;">البريد الإلكتروني</label>
+                <input type="email" id="emailInput" disabled style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 13px; color: #64748b;">
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">العنوان</label>
-                <input type="text" id="addressInput" placeholder="العنوان" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
+                <label style="font-size: 12px; color: #475569; font-weight: bold;">العنوان</label>
+                <input type="text" id="addressInput" placeholder="العنوان" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 13px;">
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">الصفة</label>
-                <select id="typeInput" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
-                    <option value="طالب">طالب</option>
-                    <option value="باحث">باحث</option>
-                    <option value="أستاذ">أستاذ</option>
-                </select>
+                <label style="font-size: 12px; color: #475569; font-weight: bold;">رقم الهاتف</label>
+                <input type="text" id="phoneInput" placeholder="رقم الهاتف" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 13px;">
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">رقم الهاتف</label>
-                <input type="text" id="phoneInput" placeholder="رقم الهاتف" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
-            </div>
+            <button onclick="handleUpdateProfile()" style="background: #3b82f6; color: white; border: none; border-radius: 15px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">حفظ التعديلات</button>
 
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">البريد الإلكتروني</label>
-                <input type="email" id="emailInput" placeholder="البريد الإلكتروني" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">كلمة السر</label>
-                <input type="password" id="passwordInput" placeholder="كلمة المرور (6 أحرف على الأقل)" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-                <label style="font-size: 13px; color: #475569; font-weight: bold;">تأكيد كلمة السر</label>
-                <input type="password" id="confirmPasswordInput" placeholder="إعادة كتابة كلمة المرور" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; outline: none; font-size: 14px;">
-            </div>
-
-            <button onclick="handleRegister()" style="background: #3b82f6; color: white; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">تسجيل</button>
-
-            <a href="login.html" style="text-align: center; color: #3b82f6; font-size: 13px; text-decoration: none; margin-top: 5px;">لديك حساب بالفعل؟ تسجيل الدخول</a>
+            <!-- زر تسجيل الخروج الآمن -->
+            <button onclick="handleLogout()" style="background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: 15px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px;">تسجيل الخروج</button>
         </div>
     </div>
 
-    <!-- استدعاء مكتبات Firebase بنظام الـ Compatibility -->
+    <!-- استدعاء مكتبات Firebase بنظام الـ Compatibility المتوافق مع WebView -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -84,60 +69,74 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        window.handleRegister = async function() {
-            const name = document.getElementById('nameInput').value.trim();
-            const address = document.getElementById('addressInput').value.trim();
-            const type = document.getElementById('typeInput').value;
-            const phone = document.getElementById('phoneInput').value.trim();
-            const email = document.getElementById('emailInput').value.trim();
-            const password = document.getElementById('passwordInput').value;
-            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+        // مراقبة حالة المصادقة وجلب بيانات المستخدم تلقائياً عند فتح الصفحة
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const docRef = db.collection("uid").doc(user.uid);
+                    const docSnap = await docRef.get();
+
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        document.getElementById('userNameDisplay').innerText = data.name || user.email;
+                        document.getElementById('userTypeBadge').innerText = data.type || 'مستفيد';
+                        document.getElementById('emailInput').value = user.email || '';
+                        document.getElementById('addressInput').value = data.address || '';
+                        document.getElementById('phoneInput').value = data.phone || '';
+                    } else {
+                        document.getElementById('userNameDisplay').innerText = user.email;
+                        document.getElementById('emailInput').value = user.email;
+                    }
+                } catch (error) {
+                    console.error("خطأ في جلب البيانات:", error);
+                }
+            } else {
+                // إذا لم يكن مسجلاً للدخول، يتم توجيهه لصفحة تسجيل الدخول مباشرة
+                window.location.href = "login.html";
+            }
+        });
+
+        // دالة حفظ التعديلات
+        window.handleUpdateProfile = async function() {
+            const user = auth.currentUser;
             const errorMsg = document.getElementById('errorMsg');
-
+            const successMsg = document.getElementById('successMsg');
+            
             errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
 
-            if (!name || !email || !password || !phone) {
-                errorMsg.innerText = "الرجاء تعبئة الحقول الأساسية المطلوبة.";
-                errorMsg.style.display = 'block';
-                return;
-            }
+            if (!user) return;
 
-            if (password !== confirmPassword) {
-                errorMsg.innerText = "كلمتا المرور غير متطابقتين.";
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            if (password.length < 6) {
-                errorMsg.innerText = "كلمة المرور يجب أن تكون 6 أحرف أو أرقام على الأقل.";
-                errorMsg.style.display = 'block';
-                return;
-            }
+            const address = document.getElementById('addressInput').value.trim();
+            const phone = document.getElementById('phoneInput').value.trim();
 
             try {
-                // إنشاء المستخدم في Firebase Authentication
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
-                // حفظ بيانات المستخدم في مجموعة uid بنفس الـ UID لربط الصلاحيات تلقائياً
-                await db.collection("uid").doc(user.uid).set({
-                    name: name,
-                    email: email,
+                await db.collection("uid").doc(user.uid).update({
                     address: address,
-                    type: type,
                     phone: phone,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                alert("تم تسجيل الحساب بنجاح!");
-                window.location.href = "home.html";
-
+                successMsg.innerText = "تم حفظ التعديلات بنجاح!";
+                successMsg.style.display = 'block';
             } catch (error) {
-                console.error("خطأ في التسجيل:", error);
-                errorMsg.innerText = "خطأ في التسجيل: " + error.message;
+                console.error("خطأ التحديث:", error);
+                errorMsg.innerText = "حدث خطأ أثناء الحفظ: " + error.message;
                 errorMsg.style.display = 'block';
             }
-        }
+        };
+
+        // دالة تسجيل الخروج الفعالة
+        window.handleLogout = function() {
+            auth.signOut().then(() => {
+                // مسح البيانات المحلية والتوجيه لصفحة الدخول
+                localStorage.clear();
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("خطأ أثناء تسجيل الخروج:", error);
+                alert("تعذر تسجيل الخروج، يجدر المحاولة مرة أخرى.");
+            });
+        };
     </script>
 </body>
 </html>
