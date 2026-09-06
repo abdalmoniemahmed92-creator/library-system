@@ -34,6 +34,11 @@
                 </div>
             </div>
 
+            <!-- زر مراجعة الأبحاث المقترحة الجديد -->
+            <button onclick="navigateTo('manage-suggested-research.html')" style="width: 100%; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                📁 مراجعة الأبحاث المقترحة
+            </button>
+
             <button onclick="navigateTo('add-book.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
                 📖 إضافة كتاب
             </button>
@@ -101,7 +106,6 @@
         });
 
         async function fetchAllStats() {
-            // جلب عداد الطلاب من مجموعة uid
             try {
                 const studentsSnap = await getDocs(collection(db, "uid"));
                 document.getElementById('totalStudentsCount').innerText = studentsSnap.size;
@@ -109,7 +113,6 @@
                 document.getElementById('totalStudentsCount').innerText = "0";
             }
 
-            // جلب عداد الكتب من مجموعة books
             try {
                 const booksSnap = await getDocs(collection(db, "books"));
                 document.getElementById('totalBooksCount').innerText = booksSnap.size;
@@ -117,7 +120,6 @@
                 document.getElementById('totalBooksCount').innerText = "0";
             }
 
-            // جلب عداد الرسائل الجامعية من مجموعة theses
             try {
                 const thesesSnap = await getDocs(collection(db, "theses"));
                 document.getElementById('totalThesesCount').innerText = thesesSnap.size;
