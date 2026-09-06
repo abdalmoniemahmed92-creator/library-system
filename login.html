@@ -143,8 +143,8 @@
 
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
             const errorDiv = document.getElementById("errorMsg");
             errorDiv.textContent = "";
 
@@ -157,11 +157,15 @@
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
+                    const userType = userData.type;
                     
-                    if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
+                    // شروط التوجيه الدقيقة حسب نوع المستخدم في قاعدة البيانات
+                    if (userType === "admin" || userType === "مشرف" || userType === "مدير") {
                         window.location.href = "admin-home.html";
+                    } else if (userType === "باحث") {
+                        window.location.href = "researcher-home.html";
                     } else {
-                        window.location.href = "home.html";
+                        window.location.href = "home.html"; // للطالب أو أي نوع آخر افتراضي
                     }
                 } else {
                     errorDiv.textContent = "بيانات الحساب غير موجودة في مجموعة uid.";
