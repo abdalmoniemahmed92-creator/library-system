@@ -1,4 +1,3 @@
-اليك كود اضافة رسالة جامعية 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -15,7 +14,7 @@
             <!-- رأس الصفحة -->
             <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
                 <h2 style="color: #1f2937; margin: 0; font-size: 18px;">إضافة رسالة جامعية</h2>
-                <button onclick="window.location.href='home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 6px 10px; font-weight: bold; cursor: pointer; font-size: 11px;">الرئيسية</button>
+                <button onclick="window.location.href='admin-home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 6px 10px; font-weight: bold; cursor: pointer; font-size: 11px;">لوحة التحكم</button>
             </div>
 
             <!-- نموذج الإدخال -->
@@ -99,6 +98,9 @@
 
                 <!-- زر الحفظ -->
                 <button id="saveThesisBtn" style="background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 5px;">حفظ الرسالة</button>
+            
+                <!-- زر الرجوع لصفحة التحكم -->
+                <button onclick="window.location.href='admin-home.html'" style="background: #e2e8f0; color: #334155; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer;">الرجوع لصفحة التحكم</button>
             </div>
 
         </div>
@@ -183,7 +185,7 @@
                 });
 
                 alert('تم حفظ الرسالة الجامعية ورفع الملف بنجاح!');
-                window.location.href = 'index.html'; 
+                window.location.href = 'admin-home.html'; 
             } catch (error) {
                 console.error("خطأ في حفظ البيانات:", error);
                 alert('حدث خطأ أثناء الرفع أو الحفظ، يرجى التحقق من اتصال الإنترنت أو قواعد الصلاحيات (Storage Rules).');
