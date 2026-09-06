@@ -143,6 +143,10 @@
             color: #334155;
             border: 1px solid #cbd5e1;
         }
+        .btn-fav {
+            background: #fef08a;
+            color: #854d0e;
+        }
         .btn-close {
             background: #fee2e2;
             color: #991b1b;
@@ -173,15 +177,17 @@
             <div class="modal-actions">
                 <button class="modal-btn btn-pdf" onclick="openPdf()">عرض الملف الكامل (PDF)</button>
                 <button class="modal-btn btn-apa" onclick="copyApaCitation()">نسخ مرجع البحث (APA)</button>
+                <button class="modal-btn btn-fav" onclick="addToFavorites()">⭐ حفظ في المفضلة</button>
                 <button class="modal-btn btn-close" onclick="closeModal()">إغلاق</button>
             </div>
         </div>
     </div>
 
-    <!-- جلب الأرشيف وتفعيل النافذة المنبثقة -->
+    <!-- جلب الأرشيف وتفعيل المنبثقة والمفضلة مع الدعم العمل دون إنترنت -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -195,7 +201,17 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // تفعيل التخزين المؤقت للعمل بسلاسة في حال ضعف أو انقطاع الاتصال
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code == 'failed-precondition') {
+                console.log("فشل تفعيل التخزين المؤقت لوجود عدة نوافذ مفتوحة بنفس التطبيق.");
+            } else if (err.code == 'unimplemented') {
+                console.log("المتصفح لا يدعم ميزة الحفظ المؤقت.");
+            }
+        });
 
         let currentThesisData = null;
 
@@ -228,7 +244,7 @@
 
             } catch (error) {
                 console.error("خطأ في جلب الأرشيف:", error);
-                container.innerHTML = `<div class="no-data" style="color: #991b1b;">حدث خطأ أثناء تحميل أرشيف الرسائل.</div>`;
+                container.innerHTML = `<div class="no-data" style="color: #991b1b;">حدث خطأ أثناء تحميل أرشيف الرسائل. تأكد من اتصال الإنترنت.</div>`;
             }
         }
 
@@ -273,10 +289,36 @@
             const citation = `${author} (${year}). <i>${title}</i> (${department}). أرشيف الرسائل الجامعية.`;
             
             navigator.clipboard.writeText(citation.replace(/<[^>]*>?/gm, '')).then(() => {
-                alert("تم نسخ مرجع البحث بنسق (APA) الحافظة بنجاح!");
+                alert("تم نسخ مرجع البحث بنسق (APA) إلى الحافظة بنجاح!");
             }).catch(err => {
                 console.error("خطأ في النسخ: ", err);
             });
+        }
+
+        window.addToFavorites = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("يجب تسجيل الدخول أولاً لحفظ الأبحاث في المفضلة.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!currentThesisData) return;
+
+            try {
+                await addDoc(collection(db, "favorites"), {
+                    userId: user.uid,
+                    thesisTitle: currentThesisData.title || "بدون عنوان",
+                    authorName: currentThesisData.authorName || "غير محدد",
+                    department: currentThesisData.department || "علوم الحاسوب",
+                    savedAt: serverTimestamp()
+                });
+
+                alert("تم حفظ البحث في قائمتك المفضلة بنجاح!");
+            } catch (error) {
+                console.error("خطأ في حفظ المفضلة:", error);
+                alert("حدث خطأ أثناء حفظ البحث في المفضلة.");
+            }
         }
 
         loadTheses();
