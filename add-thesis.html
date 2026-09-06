@@ -90,10 +90,10 @@
                     <textarea id="summaryInput" rows="3" placeholder="أدخل ملخص الرسالة..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none; resize: none;"></textarea>
                 </div>
 
-                <!-- حقل اختيار ملف الـ PDF -->
+                <!-- حقل رابط ملف الـ PDF من GitHub -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #374155;">ملف الرسالة (PDF)</label>
-                    <input type="file" id="thesisFile" accept=".pdf" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #f8fafc; text-align: right; outline: none;">
+                    <label style="font-size: 12px; font-weight: bold; color: #374155;">رابط ملف الـ PDF المباشر (GitHub Raw URL)</label>
+                    <input type="url" id="fileUrlInput" placeholder="https://raw.githubusercontent.com/..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #f8fafc; text-align: left; direction: ltr; outline: none;">
                 </div>
 
                 <!-- زر الحفظ -->
@@ -106,11 +106,10 @@
         </div>
     </div>
 
-    <!-- استدعاء الاتصال من ملف firebase.js الموحد لمنع تكرار الإعدادات وتقليل الضغط على التطبيق -->
+    <!-- استدعاء الاتصال من ملف firebase.js الموحد -->
     <script type="module">
-        import { db, storage } from './firebase.js';
+        import { db } from './firebase.js';
         import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         // تعبئة سنوات النشر تلقائياً
         const yearSelect = document.getElementById('publicationYearInput');
@@ -131,7 +130,7 @@
             const degree = document.getElementById('degreeInput').value;
             const publicationYear = document.getElementById('publicationYearInput').value;
             const summary = document.getElementById('summaryInput').value.trim();
-            const fileInput = document.getElementById('thesisFile');
+            const fileUrl = document.getElementById('fileUrlInput').value.trim();
 
             if (!title || !authorName) {
                 alert('يرجى إدخال عنوان الرسالة واسم الباحث على الأقل.');
@@ -139,21 +138,11 @@
             }
 
             const btn = document.getElementById('saveThesisBtn');
-            btn.innerText = 'جاري الرفع والحفظ...';
+            btn.innerText = 'جاري الحفظ...';
             btn.disabled = true;
 
             try {
-                let fileUrl = "";
-
-                // رفع ملف الـ PDF إلى Storage إذا تم اختياره
-                if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    const storageRef = ref(storage, 'theses_files/' + Date.now() + '_' + file.name);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    fileUrl = await getDownloadURL(snapshot.ref);
-                }
-
-                // حفظ البيانات ورابط الملف في مجموعة theses
+                // حفظ البيانات ورابط GitHub مباشرة في مجموعة theses
                 await addDoc(collection(db, "theses"), {
                     thesesId: thesesId || '',
                     title: title,
@@ -168,11 +157,11 @@
                     createdAt: new Date().toISOString()
                 });
 
-                alert('تم حفظ الرسالة الجامعية ورفع الملف بنجاح!');
+                alert('تم حفظ الرسالة الجامعية بنجاح!');
                 window.location.href = 'admin-home.html'; 
             } catch (error) {
                 console.error("خطأ في حفظ البيانات:", error);
-                alert('حدث خطأ أثناء الرفع أو الحفظ، يرجى التحقق من اتصال الإنترنت أو قواعد الصلاحيات.');
+                alert('حدث خطأ أثناء الحفظ، يرجى التحقق من اتصال الإنترنت أو قواعد الصلاحيات.');
                 btn.innerText = 'حفظ الرسالة';
                 btn.disabled = false;
             }
