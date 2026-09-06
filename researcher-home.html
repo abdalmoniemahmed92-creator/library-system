@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الباحث - الفهرس الإلكتروني لكلية علوم الحاسوب</title>
+    <title>لوحة الباحث الأكاديمي - الفهرس الإلكتروني</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -13,149 +13,128 @@
             font-family: 'Cairo', sans-serif;
         }
         body {
-            background-color: #f4f6f9;
-            direction: rtl;
-            color: #333;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding: 20px;
         }
-        header {
-            background-color: #2c3e50;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .top-bar {
+            background: #1e293b;
             color: white;
-            padding: 15px 30px;
+            padding: 15px 20px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        header h1 {
-            font-size: 18px;
+        .top-bar h1 {
+            font-size: 16px;
+            line-height: 1.4;
         }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .logout-btn {
-            background-color: #e74c3c;
+        .btn-logout {
+            background: #ef4444;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 8px 14px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-        .welcome-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-            border-right: 5px solid #3498db;
-        }
-        .welcome-card h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            font-weight: bold;
+            font-size: 13px;
         }
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            padding: 25px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-right: 5px solid #0284c7;
         }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card h3 {
-            color: #3498db;
-            margin-bottom: 10px;
-            font-size: 18px;
+        .card h2 {
+            font-size: 20px;
+            color: #0f172a;
+            margin-bottom: 12px;
         }
         .card p {
-            color: #666;
+            color: #475569;
             font-size: 14px;
-            margin-bottom: 15px;
             line-height: 1.6;
+            margin-bottom: 20px;
         }
-        .card-btn {
-            background-color: #3498db;
+        .btn-action {
+            background: #0284c7;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: bold;
             cursor: pointer;
-            font-weight: 600;
-            width: 100%;
+            font-size: 15px;
             text-align: center;
-            display: block;
             text-decoration: none;
-            transition: background 0.3s;
+            display: block;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(2,132,199,0.2);
         }
-        .card-btn:hover {
-            background-color: #2980b9;
+        .btn-action:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>الفهرس الإلكتروني - لوحة الباحث الأكاديمي</h1>
-        <div class="user-info">
-            <span id="userName">جاري تحميل البيانات...</span>
-            <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
-        </div>
-    </header>
-
     <div class="container">
-        <div class="welcome-card">
-            <h2 id="welcomeTitle">مرحباً بك، يا باحث</h2>
+        <!-- شريط الترويسة العلوي مع اسم الباحث -->
+        <div class="top-bar">
+            <h1>الفهرس الإلكتروني<br><span style="font-size: 14px; font-weight: normal; color: #cbd5e1;">لوحة الباحث: <b id="researcherName">جاري التحميل...</b></span></h1>
+            <button class="btn-logout" onclick="logout()">تسجيل الخروج</button>
+        </div>
+
+        <!-- بطاقة الترحيب -->
+        <div class="card">
+            <h2 id="welcomeTitle">مرحباً بك!</h2>
             <p>هذه المنصة مخصصة لدعم أبحاثك الأكاديمية، تصفح الرسائل الجامعية، استعراض المراجع، وإدارة مشاريعك بكل سهولة.</p>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="card">
-                <h3>📚 أرشيف الرسائل الجامعية</h3>
-                <p>تصفح رسائل الماجستير والدكتوراه السابقة في تخصصات علوم الحاسوب المختلفة مع إمكانية قراءة الملخصات.</p>
-                <a href="#" class="card-btn">تصفح الأرشيف</a>
-            </div>
+        <!-- بطاقة أرشيف الرسائل الجامعية -->
+        <div class="card" style="border-right-color: #10b981;">
+            <h2>📚 أرشيف الرسائل الجامعية</h2>
+            <p>تصفح رسائل الماجستير والدكتوراه السابقة في تخصصات علوم الحاسوب المختلفة مع إمكانية قراءة الملخصات واستعراض المراجع.</p>
+            <a href="theses.html" class="btn-action" style="background: #10b981;">تصفح الأرشيف</a>
+        </div>
 
-            <div class="card">
-                <h3>🔍 محرك البحث المتقدم</h3>
-                <p>ابحث بدقة عن الكتب والأوراق البحثية باستخدام اسم المؤلف، سنة النشر، أو الكلمات المفتاحية الدقيقة.</p>
-                <a href="#" class="card-btn">بحث متقدم</a>
-            </div>
+        <!-- بطاقة محرك البحث المتقدم -->
+        <div class="card" style="border-right-color: #0284c7;">
+            <h2>🔍 محرك البحث المتقدم</h2>
+            <p>ابحث بدقة متناهية داخل قاعدة البيانات عبر تصفية النتائج بحسب العنوان، اسم المؤلف، أو التخصص الأكاديمي.</p>
+            <a href="advanced-search.html" class="btn-action" style="background: #0284c7;">الانتقال للبحث المتقدم</a>
+        </div>
 
-            <div class="card">
-                <h3>📌 المراجع والمحفوظات</h3>
-                <p>الوصول السريع إلى الأبحاث والكتب التي قمت بحفظها ومراجعتها مسبقاً للرجوع إليها وقت الحاجة.</p>
-                <a href="#" class="card-btn">عرض المحفوظات</a>
-            </div>
+        <!-- بطاقة قائمة المفضلة الشخصية -->
+        <div class="card" style="border-right-color: #f59e0b;">
+            <h2>⭐ قائمة الأبحاث المفضلة</h2>
+            <p>استعراض سريع للأبحاث والمشاريع العلمية التي قمت بحفظها للرجوع إليها لاثراء دراساتك ومراجعك.</p>
+            <a href="favorites.html" class="btn-action" style="background: #f59e0b;">عرض المفضلة الشخصية</a>
+        </div>
 
-            <div class="card">
-                <h3>📤 اقتراح بحث أو مرجع</h3>
-                <p>هل تمتلك بحثاً أو مشروع تخرج وترغب في إضافته لفهرس الكلية؟ أرسل تفاصيله للمراجعة والإضافة.</p>
-                <a href="#" class="card-btn">إرسال اقتراح بحث</a>
-            </div>
+        <!-- بطاقة اقتراح بحث أو مشروع جديد -->
+        <div class="card" style="border-right-color: #8b5cf6;">
+            <h2>💡 مقترحات الأبحاث ومشاريع التخرج</h2>
+            <p>قم بتقديم مقترح مشروع تخرج أو بحث علمي جديد لتقديمه إلى إدارة المكتبة ومراجعته لنشره في الأرشيف.</p>
+            <a href="suggest-research.html" class="btn-action" style="background: #8b5cf6;">اقتراح بحث جديد</a>
         </div>
     </div>
 
+    <!-- كود جلب بيانات الباحث والتحقق من الجلسة -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -172,30 +151,35 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        enableIndexedDbPersistence(db).catch((err) => {
+            console.log("Persistence info:", err.code);
+        });
+
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
                 try {
                     const userDocRef = doc(db, "uid", user.uid);
                     const userDoc = await getDoc(userDocRef);
-
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        document.getElementById("userName").textContent = `الباحث: ${userData.name}`;
-                        document.getElementById("welcomeTitle").textContent = `مرحباً بك، ${userData.name}!`;
-                    } else {
-                        document.getElementById("userName").textContent = user.email;
+                    
+                    let displayName = user.email.split('@')[0];
+                    if (userDoc.exists() && userDoc.data().name) {
+                        displayName = userDoc.data().name;
                     }
+
+                    document.getElementById("researcherName").innerText = displayName;
+                    document.getElementById("welcomeTitle").innerText = `مرحباً بك، ${displayName}!`;
                 } catch (error) {
-                    console.error("خطأ في جلب بيانات الباحث:", error);
+                    console.error("خطأ في جلب بيانات المستخدم:", error);
+                    document.getElementById("researcherName").innerText = user.email;
                 }
-            } else {
-                window.location.href = "login.html";
             }
         });
 
         window.logout = function() {
             signOut(auth).then(() => {
-                window.location.href = "login.html";
+                window.location.href = 'login.html';
             }).catch((error) => {
                 console.error("خطأ أثناء تسجيل الخروج:", error);
             });
