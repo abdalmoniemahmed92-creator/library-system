@@ -51,12 +51,12 @@
 
     <!-- النافذة المنبثقة الثانية (خاصة بالتفاصيل والطباعة الفردية للعنصر) -->
     <div id="detailModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1100; padding: 15px; box-sizing: border-box;">
-        <div style="background: white; width: 100%; max-width: 450px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <div style="background: white; width: 100%; max-width: 480px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; max-height: 90vh; box-sizing: border-box; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
             
             <h3 id="detailTitle" style="margin-top: 0; color: #0f172a; font-size: 17px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">تفاصيل التقرير</h3>
             
             <!-- نطاق الطباعة المخصص للعنصر المحدد -->
-            <div id="printableArea" style="margin: 15px 0; font-size: 14px; color: #334155; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div id="printableArea" style="overflow-y: auto; margin: 15px 0; font-size: 13px; color: #334155; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; max-height: 60vh;">
                 <div id="detailBody"></div>
             </div>
 
@@ -108,10 +108,21 @@
             document.getElementById('detailModal').style.display = 'none';
         }
 
-        window.openDetailPopup = function(title, contentHtml) {
+        window.openDetailPopup = function(title, encodedContent) {
             document.getElementById('detailTitle').textContent = title;
-            document.getElementById('detailBody').innerHTML = contentHtml;
+            document.getElementById('detailBody').innerHTML = decodeURIComponent(encodedContent);
             document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function cleanText(str) {
+            if (!str) return "";
+            return String(str)
+                .trim()
+                .toLowerCase()
+                .replace(/[إأآا]/g, "ا")
+                .replace(/ة/g, "ه")
+                .replace(/ى/g, "ي")
+                .replace(/\s+/g, " ");
         }
 
         window.generateReport = async function(type) {
@@ -125,26 +136,89 @@
             try {
                 if (type === 'books') {
                     titleEl.textContent = 'قائمة تقارير الكتب المُعارة';
-                    const snapshot = await getDocs(collection(db, "loans"));
-                    if (snapshot.empty) {
+                    
+                    const [loansSnap, uidSnap, studentSnap] = await Promise.all([
+                        getDocs(collection(db, "loans")),
+                        getDocs(collection(db, "uid")).catch(() => ({ empty: true })),
+                        getDocs(collection(db, "student")).catch(() => ({ empty: true }))
+                    ]);
+
+                    if (loansSnap.empty) {
                         bodyEl.innerHTML = '<p>لا توجد سجلات إعارة حالياً.</p>';
                         return;
                     }
-                    let html = '';
-                    snapshot.forEach(docSnap => {
+
+                    const namesMap = {};
+                    const processDocs = (snap) => {
+                        if (!snap.empty) {
+                            snap.forEach(doc => {
+                                const data = doc.data();
+                                const name = data.fullname || data.name || data.username || data.studentName || data.studentId || '';
+                                if (name) {
+                                    namesMap[doc.id] = name;
+                                    if (data.uid) namesMap[data.uid] = name;
+                                    if (data.studentId) namesMap[data.studentId] = name;
+                                }
+                            });
+                        }
+                    };
+
+                    processDocs(uidSnap);
+                    processDocs(studentSnap);
+
+                    // تجميع الإعارات حسب المستخدم لمعرفة عدد الكتب التي استعارها
+                    const borrowerMap = {};
+
+                    loansSnap.forEach(docSnap => {
                         const data = docSnap.data();
-                        const itemTitle = data.itemId || data.bookTitle || 'عنصر بدون عنوان';
-                        const uid = data.uid || 'غير محدد';
-                        const loanType = data.loanType || 'عادية';
-                        const status = data.status || 'نشط';
+                        const uid = data.uid || data.studentId || data.userId || 'unknown';
+                        const borrowerName = namesMap[uid] || data.userName || data.borrowerName || data.studentName || data.fullname || `مستخدم (${uid.substring(0, 8)}...)`;
 
-                        const details = `<b>العنصر/الكتاب:</b> ${itemTitle}<br><br><b>معرف المستخدم (UID):</b> ${uid}<br><br><b>نوع الإعارة:</b> ${loanType}<br><br><b>الحالة:</b> ${status}`;
+                        if (!borrowerMap[uid]) {
+                            borrowerMap[uid] = {
+                                name: borrowerName,
+                                uid: uid,
+                                books: []
+                            };
+                        }
 
-                        html += `<div onclick="openDetailPopup('تفاصيل تقرير الإعارة', '${details.replace(/'/g, "\\'")}')" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
-                            <b>الكتاب:</b> ${itemTitle}<br>
-                            <span style="color: #64748b; font-size: 11px;">الحالة: ${status} (اضغط للعرض والطباعة)</span>
+                        borrowerMap[uid].books.push({
+                            itemTitle: data.itemId || data.bookTitle || data.title || 'عنصر بدون عنوان',
+                            status: data.status || 'نشط',
+                            loanDate: data.loanDate || data.borrowDate || data.startDate || 'غير متوفر',
+                            returnDate: data.returnDate || data.dueDate || data.expiryDate || 'غير محدد',
+                            loanType: data.loanType || 'عادية'
+                        });
+                    });
+
+                    let html = '';
+                    Object.values(borrowerMap).forEach(borrower => {
+                        const booksCount = borrower.books.length;
+                        
+                        // بناء تفاصيل الكتب الخاصة بهذا المستعير لعرضها في نافذة التفاصيل
+                        let booksDetailsHtml = '';
+                        borrower.books.forEach((b, idx) => {
+                            booksDetailsHtml += `
+                                <div style="background: white; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 6px;">
+                                    <b>الكتاب (${idx + 1}):</b> ${b.itemTitle}<br>
+                                    <b>تاريخ الإعارة:</b> ${b.loanDate}<br>
+                                    <b>تاريخ الإرجاع:</b> ${b.returnDate}<br>
+                                    <b>الحالة:</b> ${b.status}
+                                </div>
+                            `;
+                        });
+
+                        const details = `<b>اسم المستعير:</b> ${borrower.name}<br><b>إجمالي الكتب المُعارة:</b> ${booksCount}<br><br><b>قائمة الكتب:</b><div style="margin-top: 6px;">${booksDetailsHtml}</div>`;
+                        const encodedDetails = encodeURIComponent(details);
+
+                        // عرض ملخص البطاقة مع عدد الكتب المُعارة للمستعير
+                        html += `<div onclick="openDetailPopup('تفاصيل إعارات المستعير', '${encodedDetails}')" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
+                            <span style="color: #1e3a8a; font-size: 13px; display: block; margin-bottom: 4px;">المستعير: <b>${borrower.name}</b></span>
+                            <span style="color: #0f172a; font-size: 12px; font-weight: bold; display: block; margin-bottom: 3px;">عدد الكتب المُعارة: ${booksCount} كتاب</span>
+                            <span style="color: #64748b; font-size: 11px;">اضغط لعرض كافة التفاصيل والكتب (طباعة)</span>
                         </div>`;
                     });
+
                     bodyEl.innerHTML = html;
 
                 } else if (type === 'authors') {
@@ -162,26 +236,65 @@
 
                     const booksList = [];
                     booksSnap.forEach(doc => {
-                        booksList.push({ id: doc.id, ...doc.data() });
+                        const bData = doc.data();
+                        const bookAuthorName = bData.fullname || bData.author || '';
+                        booksList.push({ 
+                            id: doc.id, 
+                            title: String(bData.title || 'بدون عنوان').trim(),
+                            fullname: String(bookAuthorName).trim(),
+                            cleanAuthor: cleanText(bookAuthorName),
+                            authorId: String(bData.authorId || '').trim(),
+                            edition: String(bData.edition || 'غير متوفر').trim(),
+                            publisher: String(bData.publisher || 'غير متوفر').trim(),
+                            pupilishDate: String(bData.pupilishDate || bData.publishDate || 'غير متوفر').trim(),
+                            isbn: String(bData.isbn || 'غير متوفر').trim(),
+                            copiesCount: String(bData.copiesCount || 'غير متوفر').trim()
+                        });
                     });
 
                     let html = '';
                     authorsSnap.forEach(docSnap => {
                         const authorData = docSnap.data();
-                        const authorId = docSnap.id;
-                        const authorName = authorData.authorName || authorData.name || 'مؤلف غير معروف';
+                        const authorId = String(docSnap.id).trim();
+                        const authorName = String(authorData.fullname || authorData.name || '').trim();
+                        const cleanAuthorName = cleanText(authorName);
+                        const authorWords = cleanAuthorName.split(" ").filter(w => w.length > 2);
 
-                        const authorBooks = booksList.filter(b => 
-                            b.authorId === authorId || 
-                            b.author === authorName || 
-                            b.authorId === authorName
-                        );
+                        const authorBooks = booksList.filter(b => {
+                            if (b.authorId && b.authorId === authorId) return true;
+                            if (b.cleanAuthor && cleanAuthorName && (b.cleanAuthor === cleanAuthorName || b.cleanAuthor.includes(cleanAuthorName) || cleanAuthorName.includes(b.cleanAuthor))) return true;
+                            
+                            if (authorWords.length > 0 && b.cleanAuthor) {
+                                let matchCount = authorWords.filter(word => b.cleanAuthor.includes(word)).length;
+                                if (matchCount >= Math.min(2, authorWords.length)) return true;
+                            }
+                            return false;
+                        });
 
-                        let booksHtml = authorBooks.length > 0 ? authorBooks.map(b => `<li>${b.title || b.bookTitle || 'كتاب بدون عنوان'}</li>`).join('') : '<li>لا توجد كتب مسجلة</li>';
-                        const details = `<b>اسم المؤلف:</b> ${authorName}<br><br><b>معرف المؤلف (ID):</b> ${authorId}<br><br><b>الكتب الخاصة به:</b><ul>${booksHtml}</ul>`;
+                        let booksDetailsListHtml = '';
 
-                        html += `<div onclick="openDetailPopup('تقرير المؤلف: ${authorName}', '${details.replace(/'/g, "\\'").replace(/\n/g, "")}')" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
-                            <b style="color: #1e3a8a;">${authorName}</b><br>
+                        if (authorBooks.length > 0) {
+                            authorBooks.forEach((b, index) => {
+                                booksDetailsListHtml += `
+                                    <div style="background: #ffffff; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 8px;">
+                                        <b>الكتاب (${index + 1}):</b> ${b.title}<br>
+                                        <b>الطبعة:</b> ${b.edition}<br>
+                                        <b>دار النشر:</b> ${b.publisher}<br>
+                                        <b>تاريخ النشر:</b> ${b.pupilishDate}<br>
+                                        <b>الرقم المعياري (ISBN):</b> ${b.isbn}<br>
+                                        <b>عدد النسخ:</b> ${b.copiesCount}
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            booksDetailsListHtml = '<p>لا توجد كتب مسجلة لهذا المؤلف.</p>';
+                        }
+
+                        const details = `<b>اسم المؤلف:</b> ${authorName || 'مؤلف بدون اسم'}<br><br><b>معرف المؤلف (ID):</b> ${authorId}<br><br><b>الكتب الخاصة به وتفاصيلها:</b><div style="margin-top: 8px;">${booksDetailsListHtml}</div>`;
+                        const encodedDetails = encodeURIComponent(details);
+
+                        html += `<div onclick="openDetailPopup('تقرير المؤلف: ${authorName || authorId}', '${encodedDetails}')" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
+                            <b style="color: #1e3a8a;">${authorName || 'مؤلف بدون اسم'}</b><br>
                             <span style="color: #64748b; font-size: 11px;">عدد الكتب: ${authorBooks.length} (اضغط للعرض والطباعة)</span>
                         </div>`;
                     });
@@ -204,8 +317,9 @@
                         const studentId = data.studentId || 'غير متوفر';
 
                         const details = `<b>عنوان الرسالة:</b> ${title}<br><br><b>الدرجة العلمية:</b> ${degree}<br><br><b>القسم:</b> ${department}<br><br><b>معرف الطالب:</b> ${studentId}`;
+                        const encodedDetails = encodeURIComponent(details);
 
-                        html += `<div onclick="openDetailPopup('تقرير رسالة جامعية', '${details.replace(/'/g, "\\'")}')" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
+                        html += `<div onclick="openDetailPopup('تقرير رسالة جامعية', '${encodedDetails}')" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">
                             <b>عنوان الرسالة:</b> ${title}<br>
                             <span style="color: #64748b; font-size: 11px;">القسم: ${department} (اضغط للعرض والطباعة)</span>
                         </div>`;
