@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الباحث - الفهرس الإلكتروني لكلية علوم الحاسوب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            direction: rtl;
+            color: #333;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            font-size: 18px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .welcome-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            border-right: 5px solid #3498db;
+        }
+        .welcome-card h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .card-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .card-btn:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>الفهرس الإلكتروني - لوحة الباحث الأكاديمي</h1>
+        <div class="user-info">
+            <span id="userName">جاري تحميل البيانات...</span>
+            <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h2 id="welcomeTitle">مرحباً بك، يا باحث</h2>
+            <p>هذه المنصة مخصصة لدعم أبحاثك الأكاديمية، تصفح الرسائل الجامعية، استعراض المراجع، وإدارة مشاريعك بكل سهولة.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>📚 أرشيف الرسائل الجامعية</h3>
+                <p>تصفح رسائل الماجستير والدكتوراه السابقة في تخصصات علوم الحاسوب المختلفة مع إمكانية قراءة الملخصات.</p>
+                <a href="#" class="card-btn">تصفح الأرشيف</a>
+            </div>
+
+            <div class="card">
+                <h3>🔍 محرك البحث المتقدم</h3>
+                <p>ابحث بدقة عن الكتب والأوراق البحثية باستخدام اسم المؤلف، سنة النشر، أو الكلمات المفتاحية الدقيقة.</p>
+                <a href="#" class="card-btn">بحث متقدم</a>
+            </div>
+
+            <div class="card">
+                <h3>📌 المراجع والمحفوظات</h3>
+                <p>الوصول السريع إلى الأبحاث والكتب التي قمت بحفظها ومراجعتها مسبقاً للرجوع إليها وقت الحاجة.</p>
+                <a href="#" class="card-btn">عرض المحفوظات</a>
+            </div>
+
+            <div class="card">
+                <h3>📤 اقتراح بحث أو مرجع</h3>
+                <p>هل تمتلك بحثاً أو مشروع تخرج وترغب في إضافته لفهرس الكلية؟ أرسل تفاصيله للمراجعة والإضافة.</p>
+                <a href="#" class="card-btn">إرسال اقتراح بحث</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDocRef = doc(db, "uid", user.uid);
+                    const userDoc = await getDoc(userDocRef);
+
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        document.getElementById("userName").textContent = `الباحث: ${userData.name}`;
+                        document.getElementById("welcomeTitle").textContent = `مرحباً بك، ${userData.name}!`;
+                    } else {
+                        document.getElementById("userName").textContent = user.email;
+                    }
+                } catch (error) {
+                    console.error("خطأ في جلب بيانات الباحث:", error);
+                }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        window.logout = function() {
+            signOut(auth).then(() => {
+                window.location.href = "login.html";
+            }).catch((error) => {
+                console.error("خطأ أثناء تسجيل الخروج:", error);
+            });
+        }
+    </script>
+</body>
+</html>
