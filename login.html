@@ -50,33 +50,44 @@
             border-radius: 5px;
             font-size: 15px;
         }
+        .actions-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
         .login-btn {
             background: #3498db;
             color: white;
             border: none;
-            width: 100%;
+            flex: 1;
             padding: 12px;
             border-radius: 5px;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: background 0.3s;
-            margin-top: 10px;
         }
         .login-btn:hover {
             background: #2980b9;
         }
-        .register-link {
-            text-align: center;
-            margin-top: 15px;
-        }
-        .register-link a {
-            color: #3498db;
+        .register-btn {
+            background: #e2e8f0;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            flex: 1;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: 700;
             text-decoration: none;
-            font-weight: 600;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
         }
-        .register-link a:hover {
-            text-decoration: underline;
+        .register-btn:hover {
+            background: #cbd5e1;
         }
         .error-msg {
             color: #e74c3c;
@@ -103,18 +114,17 @@
                 <input type="password" id="password" required placeholder="********">
             </div>
             
-            <button type="submit" class="login-btn" id="submitBtn">دخول</button>
+            <div class="actions-container">
+                <button type="submit" class="login-btn" id="submitBtn">دخول</button>
+                <a href="register.html" class="register-btn">تسجيل جديد</a>
+            </div>
         </form>
-
-        <div class="register-link">
-            ليس لديك حساب؟ <a href="register.html">تسجيل جديد</a>
-        </div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -142,14 +152,12 @@
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // البحث داخل مجموعة uid واستخدام حقل type للتحقق من الصلاحية
                 const userDocRef = doc(db, "uid", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     
-                    // التوجيه بناءً على قيمة حقل type (سواء كان مشرف، مدير، admin، أو طالب)
                     if (userData.type === "admin" || userData.type === "مشرف" || userData.type === "مدير") {
                         window.location.href = "admin-home.html";
                     } else {
