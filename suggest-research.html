@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اقتراح بحث أو مرجع - الفهرس الإلكتروني</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            direction: rtl;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 22px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .submit-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            flex: 1;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover {
+            background: #2980b9;
+        }
+        .back-btn {
+            background: #e2e8f0;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            flex: 1;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        .back-btn:hover {
+            background: #cbd5e1;
+        }
+        .msg {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <div class="form-card">
+        <h2>اقتراح بحث أو مشروع تخرج جديد</h2>
+        <div id="statusMsg" class="msg"></div>
+
+        <form id="researchForm">
+            <div class="form-group">
+                <label for="title">عنوان البحث أو الرسالة</label>
+                <input type="text" id="title" required placeholder="مثال: نظام إدارة المكتبات الذكي">
+            </div>
+
+            <div class="form-group">
+                <label for="author">اسم الباحث / المؤلف</label>
+                <input type="text" id="author" required placeholder="الاسم الثلاثي">
+            </div>
+
+            <div class="form-group">
+                <label for="category">التخصص الأكاديمي</label>
+                <select id="category" required>
+                    <option value="">اختر التخصص</option>
+                    <option value="الذكاء الاصطناعي">الذكاء الاصطناعي (AI)</option>
+                    <option value="هندسة البرمجيات">هندسة البرمجيات (Software Engineering)</option>
+                    <option value="أمن المعلومات">أمن المعلومات (Cybersecurity)</option>
+                    <option value="شبكات الحاسوب">شبكات الحاسوب (Networks)</option>
+                    <option value="نظم المعلومات">نظم المعلومات (Information Systems)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="year">سنة النشر / التخرج</label>
+                <input type="number" id="year" required placeholder="2026" min="2000" max="2030">
+            </div>
+
+            <div class="form-group">
+                <label for="abstract">ملخص البحث (Abstract)</label>
+                <textarea id="abstract" required placeholder="اكتب نبذة مختصرة عن محتوى البحث والهدف منه..."></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="submit-btn" id="submitBtn">إرسال الاقتراح</button>
+                <a href="researcher-home.html" class="back-btn">العودة للوحة الباحث</a>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+
+        // التحقق من أن المستخدم مسجل دخول
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // معالجة إرسال النموذج وحفظه في Firestore
+        document.getElementById("researchForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const statusMsg = document.getElementById("statusMsg");
+            
+            const title = document.getElementById("title").value.trim();
+            const author = document.getElementById("author").value.trim();
+            const category = document.getElementById("category").value;
+            const year = document.getElementById("year").value.trim();
+            const abstract = document.getElementById("abstract").value.trim();
+
+            if (!currentUser) {
+                statusMsg.className = "msg error";
+                statusMsg.textContent = "يجب تسجيل الدخول أولاً لإرسال المقترح.";
+                return;
+            }
+
+            try {
+                // حفظ البيانات في مجموعة suggested_research
+                await addDoc(collection(db, "suggested_research"), {
+                    title: title,
+                    author: author,
+                    category: category,
+                    year: year,
+                    abstract: abstract,
+                    suggestedBy: currentUser.uid,
+                    status: "pending", // معلق لحين موافقة المشرف
+                    createdAt: serverTimestamp()
+                });
+
+                statusMsg.className = "msg success";
+                statusMsg.textContent = "تم إرسال اقتراح البحث بنجاح، بانتظار مراجعة الإدارة.";
+                
+                // تفريغ الحقول بعد الإرسال الناجح
+                document.getElementById("researchForm").reset();
+
+            } catch (error) {
+                console.error("خطأ أثناء حفظ الاقتراح:", error);
+                statusMsg.className = "msg error";
+                statusMsg.textContent = "حدث خطأ أثناء الإرسال، حاول مرة أخرى.";
+            }
+        });
+    </script>
+</body>
+</html>
