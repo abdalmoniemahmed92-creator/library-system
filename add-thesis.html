@@ -23,42 +23,41 @@
                 <!-- thesesId -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">رقم الرسالة (thesesId)</label>
-                    <input type="text" id="thesesIdInput" placeholder="مثل: TH-2024-01..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
+                    <input type="text" id="thesesIdInput" value="TH-2026-01" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
                 </div>
 
                 <!-- title -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">عنوان الرسالة (title)</label>
-                    <input type="text" id="titleInput" placeholder="أدخل عنوان الرسالة الجامعية..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
+                    <input type="text" id="titleInput" value="تصميم وتطوير نظام إدارة المستودعات الرقمية للرسائل الجامعية باستخدام تقنيات الحوسبة السحابية" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
                 </div>
 
                 <!-- authorName -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">اسم الباحث (authorName)</label>
-                    <input type="text" id="authorNameInput" placeholder="أدخل اسم الباحث الثلاثي..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
+                    <input type="text" id="authorNameInput" value="أحمد محمد علي الحسن" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
                 </div>
 
                 <!-- studentId -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">الرقم الجامعي (studentId)</label>
-                    <input type="text" id="studentIdInput" placeholder="مثل: 1-14-124160..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
+                    <input type="text" id="studentIdInput" value="1-20-241050" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
                 </div>
 
                 <!-- categoryId -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">معرف التصنيف (categoryId)</label>
-                    <input type="text" id="categoryIdInput" placeholder="أدخل معرف التصنيف..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
+                    <input type="text" id="categoryIdInput" value="CAT-IS" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none;">
                 </div>
 
                 <!-- department -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">القسم الأكاديمي (department)</label>
                     <select id="departmentInput" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: white; text-align: right; outline: none; cursor: pointer;">
-                        <option value="">اختر القسم الأكاديمي...</option>
                         <option value="علوم الحاسوب">علوم الحاسوب</option>
                         <option value="تقنية المعلومات">تقنية المعلومات</option>
                         <option value="هندسة البرمجيات">هندسة البرمجيات</option>
-                        <option value="نظم المعلومات الإدارية">نظم المعلومات الإدارية</option>
+                        <option value="نظم المعلومات الإدارية" selected>نظم المعلومات الإدارية</option>
                         <option value="نظم المعلومات المحاسبية">نظم المعلومات المحاسبية</option>
                         <option value="نظم معلومات المكتبات">نظم معلومات المكتبات</option>
                     </select>
@@ -68,10 +67,7 @@
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">الدرجة العلمية (degree)</label>
                     <select id="degreeInput" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: white; text-align: right; outline: none; cursor: pointer;">
-                        <option value="">اختر الدرجة العلمية...</option>
-                        <option value="دبلوم">دبلوم</option>
-                        <option value="بكالاريوس">بكالاريوس</option>
-                        <option value="ماجستير">ماجستير</option>
+                        <option value="ماجستير" selected>ماجستير</option>
                         <option value="دكتوراه">دكتوراه</option>
                     </select>
                 </div>
@@ -80,20 +76,20 @@
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">سنة النشر (publicationYear)</label>
                     <select id="publicationYearInput" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; background: white; text-align: right; outline: none; cursor: pointer;">
-                        <option value="">اختر سنة النشر...</option>
+                        <option value="2026" selected>2026</option>
                     </select>
                 </div>
 
                 <!-- summary -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">الملخص (summary)</label>
-                    <textarea id="summaryInput" rows="3" placeholder="أدخل ملخص الرسالة..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none; resize: none;"></textarea>
+                    <textarea id="summaryInput" rows="3" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-align: right; outline: none; resize: none;">يهدف البحث إلى بناء نظام رقمي متكامل لإدارة وأرشفة الرسائل العلمية والمشاريع الأكاديمية باستخدام قواعد بيانات سحابية.</textarea>
                 </div>
 
                 <!-- حقل رابط ملف الـ PDF من GitHub -->
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <label style="font-size: 12px; font-weight: bold; color: #374155;">رابط ملف الـ PDF المباشر (GitHub Raw URL)</label>
-                    <input type="url" id="fileUrlInput" placeholder="https://raw.githubusercontent.com/..." style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #f8fafc; text-align: left; direction: ltr; outline: none;">
+                    <input type="url" id="fileUrlInput" value="https://raw.githubusercontent.com/abdalmoniemahmed92-creator/library-system/main/sample_thesis.pdf" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; background: #f8fafc; text-align: left; direction: ltr; outline: none;">
                 </div>
 
                 <!-- زر الحفظ -->
@@ -106,32 +102,10 @@
         </div>
     </div>
 
-    <!-- استدعاء الاتصال والتحقق من المصادقة -->
+    <!-- استدعاء الاتصال الصحيح -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDb, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { db } from './firebase.js';
-
-        const auth = getAuth();
-
-        // التأكد من وجود جلسة مصادقة نشطة لتفادي مشكلة الصلاحيات
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                signInAnonymously(auth).catch((error) => {
-                    console.error("خطأ في المصادقة التلقائية:", error);
-                });
-            }
-        });
-
-        // تعبئة سنوات النشر تلقائياً
-        const yearSelect = document.getElementById('publicationYearInput');
-        for (let year = 2030; year >= 1980; year--) {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = year;
-            yearSelect.appendChild(option);
-        }
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         document.getElementById('saveThesisBtn').onclick = async function() {
             const thesesId = document.getElementById('thesesIdInput').value.trim();
@@ -146,7 +120,7 @@
             const fileUrl = document.getElementById('fileUrlInput').value.trim();
 
             if (!title || !authorName || !thesesId) {
-                alert('يرجى إدخال رقم الرسالة، عنوان الرسالة واسم الباحث على الأقل.');
+                alert('يرجى إدخال الحقول الأساسية.');
                 return;
             }
 
@@ -155,7 +129,6 @@
             btn.disabled = true;
 
             try {
-                // استخدام setDoc مع معرف مستند مخصص (thesesId) لضمان الربط السليم
                 await setDoc(doc(db, "theses", thesesId), {
                     thesesId: thesesId,
                     title: title,
@@ -174,7 +147,7 @@
                 window.location.href = 'admin-home.html'; 
             } catch (error) {
                 console.error("خطأ في حفظ البيانات:", error);
-                alert('حدث خطأ أثناء الحفظ، يرجى التحقق من الاتصال أو صلاحيات الحساب.');
+                alert('حدث خطأ أثناء الحفظ، يرجى التحقق من اتصال الإنترنت.');
                 btn.innerText = 'حفظ الرسالة';
                 btn.disabled = false;
             }
