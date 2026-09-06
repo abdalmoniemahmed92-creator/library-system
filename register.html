@@ -28,13 +28,12 @@
                 <input type="text" id="addressInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; text-align: right;">
             </div>
 
-            <!-- حقل الصفة -->
+            <!-- حقل الصفة (مقتصراً على طالب أو باحث فقط) -->
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <label style="font-size: 14px; color: #1e293b; font-weight: bold; width: 30%; text-align: right;">الصفة</label>
                 <select id="typeInput" style="width: 65%; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; font-size: 14px; outline: none; box-sizing: border-box; direction: rtl;">
                     <option value="طالب">طالب</option>
                     <option value="باحث">باحث</option>
-                    <option value="أستاذ">أستاذ</option>
                 </select>
             </div>
 
@@ -121,7 +120,7 @@
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. حفظ كافة بيانات المستخدم ضمن جدول uid مع الـ uid الخاص به
+                // 2. حفظ كافة بيانات المستخدم ضمن مجموعة uid مع الـ uid الخاص به
                 await setDoc(doc(db, "uid", user.uid), {
                     name: name,
                     address: address,
