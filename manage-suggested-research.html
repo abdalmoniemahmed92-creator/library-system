@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مراجعة الأبحاث المقترحة - لوحة المدير</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
+        
+        <div style="width: 100%; max-width: 600px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;">
+            
+            <!-- زر العودة للوحة المدير -->
+            <button onclick="window.location.href='admin-home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; text-align: center;">
+                ← العودة لوحة التحكم الرئيسية
+            </button>
+
+            <h2 style="color: #1f2937; margin: 0; font-size: 20px; text-align: center;">الأبحاث ومشاريع التخرج المقترحة</h2>
+            <p style="color: #64748b; margin: 0; font-size: 13px; text-align: center;">مراجعة وقبول أو رفض طلبات الباحثين</p>
+
+            <div id="requestsContainer" style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                <p style="text-align: center; color: #64748b;">جاري تحميل الطلبات...</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loadSuggestedResearch();
+            }
+        });
+
+        async function loadSuggestedResearch() {
+            const container = document.getElementById("requestsContainer");
+            container.innerHTML = "";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "suggested_research"));
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = `<p style="text-align: center; color: #64748b;">لا توجد أبحاث مقترحة حالياً.</p>`;
+                    return;
+                }
+
+                querySnapshot.forEach((documentSnapshot) => {
+                    const data = documentSnapshot.data();
+                    const docId = documentSnapshot.id;
+
+                    const card = document.createElement("div");
+                    card.style.cssText = "background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px;";
+
+                    card.innerHTML = `
+                        <div style="font-weight: bold; color: #1e293b; font-size: 16px;">${data.title || 'بدون عنوان'}</div>
+                        <div style="font-size: 13px; color: #475569;"><b>الباحث:</b> ${data.author || 'غير معروف'} | <b>التخصص:</b> ${data.category || '-'} | <b>السنة:</b> ${data.year || '-'}</div>
+                        <div style="font-size: 13px; color: #64748b; background: #fff; padding: 8px; border-radius: 4px; border: 1px solid #f1f5f9;"><b>الملخص:</b> ${data.abstract || 'لا يوجد ملخص'}</div>
+                        <div style="display: flex; gap: 10px; margin-top: 5px;">
+                            <button onclick="approveResearch('${docId}', '${encodeURIComponent(JSON.stringify(data))}')" style="flex: 1; background: #22c55e; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer;">قبول وإضافة للأرشيف</button>
+                            <button onclick="deleteResearch('${docId}')" style="flex: 1; background: #ef4444; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer;">رفض وحذف</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("خطأ في جلب المقترحات:", error);
+                container.innerHTML = `<p style="text-align: center; color: #ef4444;">حدث خطأ أثناء تحميل البيانات.</p>`;
+            }
+        }
+
+        // دالة الموافقة ونقل البحث لمجموعة الأرشيف أو الرسائل (theses)
+        window.approveResearch = async function(docId, encodedData) {
+            if (!confirm("هل أنت متأكد من الموافقة على هذا البحث وإضافته رسمياً؟")) return;
+
+            try {
+                const data = JSON.parse(decodeURIComponent(encodedData));
+                
+                // إضافته إلى مجموعة الأرشيف/الرسائل الرسمية (theses)
+                await addDoc(collection(db, "theses"), {
+                    title: data.title,
+                    author: data.author,
+                    category: data.category,
+                    year: data.year,
+                    abstract: data.abstract,
+                    createdAt: new Date()
+                });
+
+                // حذفه من قائمة المقترحات المعلقة
+                await deleteDoc(doc(db, "suggested_research", docId));
+
+                alert("تم قبول البحث وإضافته للأرشيف بنجاح!");
+                loadSuggestedResearch();
+            } catch (error) {
+                console.error("خطأ أثناء الموافقة:", error);
+                alert("حدث خطأ، حاول مرة أخرى.");
+            }
+        };
+
+        // دالة حذف/رفض الطلب
+        window.deleteResearch = async function(docId) {
+            if (!confirm("هل أنت متأكد من رفض وحذف هذا المقترح؟")) return;
+
+            try {
+                await deleteDoc(doc(db, "suggested_research", docId));
+                alert("تم حذف المقترح.");
+                loadSuggestedResearch();
+            } catch (error) {
+                console.error("خطأ أثناء الحذف:", error);
+                alert("حدث خطأ أثناء الحذف.");
+            }
+        };
+    </script>
+</body>
+</html>
