@@ -38,6 +38,11 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             margin-bottom: 15px;
             border-right: 5px solid #0284c7;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .thesis-card:hover {
+            transform: translateY(-2px);
         }
         .thesis-title {
             color: #0f172a;
@@ -75,6 +80,74 @@
             background: white;
             border-radius: 12px;
         }
+        
+        /* تصميم النافذة المنبثقة Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .modal-body p {
+            margin-bottom: 10px;
+            color: #334155;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .modal-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-pdf {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .btn-apa {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-close {
+            background: #fee2e2;
+            color: #991b1b;
+            margin-right: auto;
+        }
     </style>
 </head>
 <body>
@@ -90,7 +163,22 @@
         </div>
     </div>
 
-    <!-- جلب الأرشيف من فايربيس مطابقاً لحقول قاعدة البيانات -->
+    <!-- النافذة المنبثقة لتفاصيل البحث -->
+    <div id="thesisModal" class="modal-overlay" onclick="closeModalOnOutside(event)">
+        <div class="modal-content">
+            <div id="modalTitle" class="modal-header">عنوان الرسالة</div>
+            <div class="modal-body" id="modalBody">
+                <!-- تفاصيل الرسالة تظهر هنا ديناميكياً -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-pdf" onclick="openPdf()">عرض الملف الكامل (PDF)</button>
+                <button class="modal-btn btn-apa" onclick="copyApaCitation()">نسخ مرجع البحث (APA)</button>
+                <button class="modal-btn btn-close" onclick="closeModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- جلب الأرشيف وتفعيل النافذة المنبثقة -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -109,6 +197,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        let currentThesisData = null;
+
         async function loadTheses() {
             const container = document.getElementById("thesesList");
             try {
@@ -125,6 +215,8 @@
 
                     const card = document.createElement("div");
                     card.className = "thesis-card";
+                    card.onclick = () => openModal(data);
+
                     card.innerHTML = `
                         <div class="thesis-title">${data.title || "بدون عنوان"}</div>
                         <div class="thesis-info"><b>المؤلف:</b> ${data.authorName || "غير محدد"} | <b>الدرجة:</b> ${data.degree || "غير محددة"}</div>
@@ -138,6 +230,53 @@
                 console.error("خطأ في جلب الأرشيف:", error);
                 container.innerHTML = `<div class="no-data" style="color: #991b1b;">حدث خطأ أثناء تحميل أرشيف الرسائل.</div>`;
             }
+        }
+
+        window.openModal = function(data) {
+            currentThesisData = data;
+            document.getElementById("modalTitle").innerText = data.title || "بدون عنوان";
+            document.getElementById("modalBody").innerHTML = `
+                <p><b>المؤلف:</b> ${data.authorName || "غير محدد"}</p>
+                <p><b>الدرجة العلمية:</b> ${data.degree || "غير محددة"}</p>
+                <p><b>القسم الأكاديمي:</b> ${data.department || "غير محدد"}</p>
+                <p><b>سنة النشر:</b> ${data.publicationYear || "غير محددة"}</p>
+                <p><b>الملخص:</b> ${data.summary || "لا يوجد ملخص متاح."}</p>
+            `;
+            document.getElementById("thesisModal").style.display = "flex";
+        }
+
+        window.closeModal = function() {
+            document.getElementById("thesisModal").style.display = "none";
+        }
+
+        window.closeModalOnOutside = function(event) {
+            if (event.target.id === "thesisModal") {
+                closeModal();
+            }
+        }
+
+        window.openPdf = function() {
+            if (currentThesisData && currentThesisData.fileUrl) {
+                window.open(currentThesisData.fileUrl, '_blank');
+            } else {
+                alert("عذراً، ملف الـ PDF غير مرفق لهذه الرسالة حالياً.");
+            }
+        }
+
+        window.copyApaCitation = function() {
+            if (!currentThesisData) return;
+            const author = currentThesisData.authorName || "اسم المؤلف";
+            const year = currentThesisData.publicationYear || "2026";
+            const title = currentThesisData.title || "عنوان الرسالة";
+            const department = currentThesisData.department || "كلية علوم الحاسوب";
+            
+            const citation = `${author} (${year}). <i>${title}</i> (${department}). أرشيف الرسائل الجامعية.`;
+            
+            navigator.clipboard.writeText(citation.replace(/<[^>]*>?/gm, '')).then(() => {
+                alert("تم نسخ مرجع البحث بنسق (APA) الحافظة بنجاح!");
+            }).catch(err => {
+                console.error("خطأ في النسخ: ", err);
+            });
         }
 
         loadTheses();
