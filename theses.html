@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أرشيف الرسائل الجامعية ومشاريع التخرج</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .thesis-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            border-right: 5px solid #0284c7;
+        }
+        .thesis-title {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .thesis-info {
+            color: #475569;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .thesis-desc {
+            color: #334155;
+            font-size: 14px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        .back-btn {
+            background: #e2e8f0;
+            color: #334155;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .no-data {
+            text-align: center;
+            color: #64748b;
+            padding: 40px;
+            background: white;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>أرشيف الرسائل الجامعية</h2>
+            <button class="back-btn" onclick="window.location.href='researcher-home.html'">العودة للوحة الباحث</button>
+        </div>
+
+        <div id="thesesList">
+            <p style="text-align: center; color: #64748b;">جاري تحميل الأرشيف...</p>
+        </div>
+    </div>
+
+    <!-- جلب الأرشيف من فايربيس مطابقاً لحقول قاعدة البيانات -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadTheses() {
+            const container = document.getElementById("thesesList");
+            try {
+                const querySnapshot = await getDocs(collection(db, "theses"));
+                container.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = `<div class="no-data">لا توجد رسائل أو مشاريع مؤرشفة حالياً في الأرشيف.</div>`;
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+
+                    const card = document.createElement("div");
+                    card.className = "thesis-card";
+                    card.innerHTML = `
+                        <div class="thesis-title">${data.title || "بدون عنوان"}</div>
+                        <div class="thesis-info"><b>المؤلف:</b> ${data.authorName || "غير محدد"} | <b>الدرجة:</b> ${data.degree || "غير محددة"}</div>
+                        <div class="thesis-info"><b>القسم:</b> ${data.department || "غير محدد"} | <b>سنة النشر:</b> ${data.publicationYear || "غير محددة"}</div>
+                        <div class="thesis-desc"><b>الملخص:</b> ${data.summary || "لا يوجد ملخص متاح."}</div>
+                    `;
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("خطأ في جلب الأرشيف:", error);
+                container.innerHTML = `<div class="no-data" style="color: #991b1b;">حدث خطأ أثناء تحميل أرشيف الرسائل.</div>`;
+            }
+        }
+
+        loadTheses();
+    </script>
+</body>
+</html>
