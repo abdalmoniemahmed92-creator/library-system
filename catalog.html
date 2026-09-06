@@ -14,13 +14,13 @@
             <!-- شريط العنوان وزر الرجوع للصفحة الرئيسية -->
             <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                 <span style="font-size: 16px; font-weight: bold; color: #1f2937;">تصفح المكتبة</span>
-                <button onclick="window.location.href='home.html'" style="background: #e2e8f0; color: #475569; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-weight: bold;">الرئيسية 🏠</button>
+                <button id="btnHome" style="background: #e2e8f0; color: #475569; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; font-weight: bold;">الرئيسية 🏠</button>
             </div>
 
             <!-- أزرار التبديل بين الكتب والرسائل الجامعية -->
             <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 10px;">
-                <button id="btnBooks" onclick="switchTab('books')" style="flex: 1; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">📚 الكتب</button>
-                <button id="btnTheses" onclick="switchTab('theses')" style="flex: 1; background: #e2e8f0; color: #475569; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">🎓 الرسائل الجامعية</button>
+                <button id="btnBooks" style="flex: 1; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">📚 الكتب</button>
+                <button id="btnTheses" style="flex: 1; background: #e2e8f0; color: #475569; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;">🎓 الرسائل الجامعية</button>
             </div>
 
             <!-- حاوية عرض النتائج -->
@@ -40,14 +40,14 @@
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت المحدث للربط بملف firebase.js المركزي -->
+    <!-- كود الجافاسكريبت البرمجي الآمن والمعزز بالترتيب التنازلي -->
     <script type="module">
         import { db } from "./firebase.js";
-        import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         let currentTab = 'books';
 
-        window.switchTab = function(tab) {
+        function switchTab(tab) {
             currentTab = tab;
             const btnBooks = document.getElementById('btnBooks');
             const btnTheses = document.getElementById('btnTheses');
@@ -67,6 +67,10 @@
             }
         }
 
+        document.getElementById('btnBooks').addEventListener('click', () => switchTab('books'));
+        document.getElementById('btnTheses').addEventListener('click', () => switchTab('theses'));
+        document.getElementById('btnHome').addEventListener('click', () => { window.location.href = 'home.html'; });
+
         function checkIfNew(item) {
             if (item.isNew === true) return true;
             const timestamp = item.createdAt || item.timestamp || item.dateAdded;
@@ -83,7 +87,9 @@
             container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">جاري تحميل الكتب...</div>';
 
             try {
-                const querySnapshot = await getDocs(collection(db, "books"));
+                // جلب الكتب مرتبة تنازلياً من الأحدث إلى الأقدم
+                const q = query(collection(db, "books"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
                     container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; background: white; border-radius: 10px;">لا توجد كتب مسجلة حالياً.</div>';
@@ -196,7 +202,9 @@
             container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">جاري تحميل الرسائل...</div>';
 
             try {
-                const querySnapshot = await getDocs(collection(db, "theses"));
+                // جلب الرسائل مرتبة تنازلياً من الأحدث إلى الأقدم
+                const q = query(collection(db, "theses"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
                 
                 if (querySnapshot.empty) {
                     container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; background: white; border-radius: 10px;">لا توجد رسائل جامعية مسجلة حالياً.</div>';
@@ -321,27 +329,19 @@
             }
         }
 
-        // دالة مركزية موحدة لمعالجة المعاينة والتحميل سواء كانت الملفات Base64 محلية أو روابط خارجية (مثل GitHub)
         function handleFilePreviewOrDownload(fileSource, fileName, mode) {
             try {
-                // إذا كان الرابط خارجياً (مثل GitHub)
                 if (fileSource.startsWith('http://') || fileSource.startsWith('https://')) {
-                    if (mode === 'preview') {
-                        window.open(fileSource, '_blank');
-                    } else {
-                        // للتحميل أو العرض المباشر عبر نافذة جديدة للروابط الخارجية
-                        const a = document.createElement('a');
-                        a.href = fileSource;
-                        a.download = fileName;
-                        a.target = '_blank';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    }
+                    const a = document.createElement('a');
+                    a.href = fileSource;
+                    a.download = fileName;
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                     return;
                 }
 
-                // إذا كان الملف مخزناً كـ Base64 محلي
                 if (fileSource.startsWith('data:')) {
                     const arr = fileSource.split(',');
                     const mime = arr[0].match(/:(.*?);/)[1] || 'application/pdf';
@@ -355,23 +355,12 @@
                     const blobUrl = URL.createObjectURL(blob);
 
                     if (mode === 'preview') {
-                        const win = window.open();
-                        if (win) {
-                            win.document.write(`
-                                <html dir="rtl">
-                                <head><title>معاينة الملف - ${fileName}</title></head>
-                                <body style="margin:0; background:#333; display:flex; flex-direction:column; height:100vh;">
-                                    <div style="background:#1e293b; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; font-family:Tahoma;">
-                                        <span style="font-weight:bold; font-size:1rem;">${fileName}</span>
-                                        <button onclick="window.close()" style="background:#ef4444; color:white; border:none; padding:6px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">إغلاق النافذة</button>
-                                    </div>
-                                    <iframe src="${blobUrl}" style="width:100%; height:100%; border:none;" type="application/pdf"></iframe>
-                                </body>
-                                </html>
-                            `);
-                        } else {
-                            alert("يرجى السماح بفتح النوافذ المنبثقة (Popups) من إعدادات المتصفح.");
-                        }
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.target = '_blank';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
                     } else {
                         const a = document.createElement('a');
                         a.href = blobUrl;
@@ -388,7 +377,7 @@
             }
         }
 
-        window.openModal = function(title, htmlBody, buttons) {
+        function openModal(title, htmlBody, buttons) {
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalBody').innerHTML = htmlBody;
             
@@ -406,7 +395,7 @@
             document.getElementById('customModal').style.display = 'flex';
         }
 
-        window.closeModal = function() {
+        function closeModal() {
             document.getElementById('customModal').style.display = 'none';
         }
 
