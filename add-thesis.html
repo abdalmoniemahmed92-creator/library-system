@@ -106,10 +106,23 @@
         </div>
     </div>
 
-    <!-- استدعاء الاتصال من ملف firebase.js الموحد -->
+    <!-- استدعاء الاتصال والتحقق من المصادقة -->
     <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDb, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { db } from './firebase.js';
-        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const auth = getAuth();
+
+        // التأكد من وجود جلسة مصادقة نشطة لتفادي مشكلة الصلاحيات
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                signInAnonymously(auth).catch((error) => {
+                    console.error("خطأ في المصادقة التلقائية:", error);
+                });
+            }
+        });
 
         // تعبئة سنوات النشر تلقائياً
         const yearSelect = document.getElementById('publicationYearInput');
@@ -132,8 +145,8 @@
             const summary = document.getElementById('summaryInput').value.trim();
             const fileUrl = document.getElementById('fileUrlInput').value.trim();
 
-            if (!title || !authorName) {
-                alert('يرجى إدخال عنوان الرسالة واسم الباحث على الأقل.');
+            if (!title || !authorName || !thesesId) {
+                alert('يرجى إدخال رقم الرسالة، عنوان الرسالة واسم الباحث على الأقل.');
                 return;
             }
 
@@ -142,17 +155,17 @@
             btn.disabled = true;
 
             try {
-                // حفظ البيانات ورابط GitHub مباشرة في مجموعة theses
-                await addDoc(collection(db, "theses"), {
-                    thesesId: thesesId || '',
+                // استخدام setDoc مع معرف مستند مخصص (thesesId) لضمان الربط السليم
+                await setDoc(doc(db, "theses", thesesId), {
+                    thesesId: thesesId,
                     title: title,
                     authorName: authorName,
-                    studentId: studentId || '',
-                    categoryId: categoryId || '',
-                    department: department || '',
-                    degree: degree || '',
-                    publicationYear: publicationYear || '',
-                    summary: summary || '',
+                    studentId: studentId,
+                    categoryId: categoryId,
+                    department: department,
+                    degree: degree,
+                    publicationYear: publicationYear,
+                    summary: summary,
                     fileUrl: fileUrl,
                     createdAt: new Date().toISOString()
                 });
@@ -161,7 +174,7 @@
                 window.location.href = 'admin-home.html'; 
             } catch (error) {
                 console.error("خطأ في حفظ البيانات:", error);
-                alert('حدث خطأ أثناء الحفظ، يرجى التحقق من اتصال الإنترنت أو قواعد الصلاحيات.');
+                alert('حدث خطأ أثناء الحفظ، يرجى التحقق من الاتصال أو صلاحيات الحساب.');
                 btn.innerText = 'حفظ الرسالة';
                 btn.disabled = false;
             }
