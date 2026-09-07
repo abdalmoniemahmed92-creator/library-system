@@ -1,10 +1,10 @@
 {
   "name": "الفهرس الإلكتروني",
-  "short_name": "الفهرس الإلكتروني",
+  "short_name": "الفهرس",
   "description": "تطبيق ذكي لفهرسة وإدارة مصادر المعلومات والرسائل الجامعية",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#2e1818",
+  "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
   "icons": [
     {
