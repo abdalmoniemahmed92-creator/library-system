@@ -1,8 +1,17 @@
-"icons": [
-  {
-    "src": "https://اسم-موقعك.vercel.app/icon.png",
-    "sizes": "512x512",
-    "type": "image/png",
-    "purpose": "any maskable"
-  }
-]
+{
+  "name": "الفهرس الإلكتروني",
+  "short_name": "الفهرس",
+  "description": "تطبيق ذكي لفهرسة وإدارة مصادر المعلومات والرسائل الجامعية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "https://library-system-tau.vercel.app/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
