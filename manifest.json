@@ -1,0 +1,17 @@
+{
+  "name": "الفهرس الإلكتروني",
+  "short_name": "الفهرس الإلكتروني",
+  "description": "تطبيق ذكي لفهرسة وإدارة مصادر المعلومات والرسائل الجامعية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2e1818",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "https://[رابط-موقعك-على-vercel].vercel.app/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
