@@ -1,6 +1,6 @@
 {
   "name": "الفهرس الإلكتروني",
-  "short_name": "الفهرس",
+  "short_name":"الفهرس الإلكتروني",
   "description": "تطبيق ذكي لفهرسة وإدارة مصادر المعلومات والرسائل الجامعية",
   "start_url": "/",
   "display": "standalone",
@@ -8,7 +8,7 @@
   "theme_color": "#4f46e5",
   "icons": [
     {
-      "src": "https://library-system-tau.vercel.app/icon.png",
+      "src": "https://library-system-ten-nu.vercel.app/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
