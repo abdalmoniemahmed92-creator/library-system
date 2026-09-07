@@ -1,20 +1,7 @@
-{
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
-  "name": "الفهرس الإلكتروني لكلية علوم الحاسوب",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "الفهرس",
-  "start_url": "/",
-  "theme_color": "#3b82f6",
-  "id": "library.app",
-  "description": "الفهرس الإلكتروني لإدارة الكتب والرسائل الأكاديمية لكلية علوم الحاسوب، يتيح للطلاب والباحثين تصفح الكتب والرسائل وإدارتها بكل سهولة.",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+"icons": [
+  {
+    "src": "/images/icon.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }
+]
