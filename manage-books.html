@@ -46,8 +46,8 @@
                 <input type="text" id="editAuthor" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
             </div>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="window.saveBookEdit()" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">حفظ</button>
-                <button onclick="window.closeEditModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">إلغاء</button>
+                <button id="saveEditBtn" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">حفظ</button>
+                <button id="cancelEditBtn" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">إلغاء</button>
             </div>
         </div>
     </div>
@@ -115,30 +115,49 @@
 
                         <!-- الأزرار في الأسفل بشكل هادئ -->
                         <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px;">
-                            <button onclick="window.openEditModal('${docSnap.id}', '${title}', '${author}')" style="background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">تعديل</button>
-                            <button onclick="window.deleteBook('${docSnap.id}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">حذف</button>
+                            <button class="edit-btn" data-id="${docSnap.id}" data-title="${title}" data-author="${author}" style="background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">تعديل</button>
+                            <button class="delete-btn" data-id="${docSnap.id}" style="background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">حذف</button>
                         </div>
                     `;
                     container.appendChild(card);
                 });
+
+                // ربط أحداث التعديل لكل الأزرار المولدة ديناميكياً
+                document.querySelectorAll('.edit-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const docId = e.target.getAttribute('data-id');
+                        const title = e.target.getAttribute('data-title');
+                        const author = e.target.getAttribute('data-author');
+                        openEditModal(docId, title, author);
+                    });
+                });
+
+                // ربط أحداث الحذف لكل الأزرار المولدة ديناميكياً
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const docId = e.target.getAttribute('data-id');
+                        deleteBook(docId);
+                    });
+                });
+
             } catch (error) {
                 console.error("خطأ في جلب الكتب:", error);
                 container.innerHTML = '<p style="text-align: center; color: #dc2626; font-size: 13px;">فشل تحميل الكتب.</p>';
             }
         }
 
-        window.openEditModal = function(docId, title, author) {
+        function openEditModal(docId, title, author) {
             document.getElementById('editDocId').value = docId;
             document.getElementById('editTitle').value = title;
             document.getElementById('editAuthor').value = author;
             document.getElementById('editModal').style.display = 'flex';
         }
 
-        window.closeEditModal = function() {
+        function closeEditModal() {
             document.getElementById('editModal').style.display = 'none';
         }
 
-        window.saveBookEdit = async function() {
+        async function saveBookEdit() {
             const docId = document.getElementById('editDocId').value;
             const newTitle = document.getElementById('editTitle').value;
             const newAuthor = document.getElementById('editAuthor').value;
@@ -149,7 +168,7 @@
                     author: newAuthor
                 });
                 alert('تم تعديل بيانات الكتاب بنجاح.');
-                window.closeEditModal();
+                closeEditModal();
                 fetchBooks();
             } catch (error) {
                 console.error("خطأ أثناء التعديل:", error);
@@ -157,7 +176,7 @@
             }
         }
 
-        window.deleteBook = async function(docId) {
+        async function deleteBook(docId) {
             if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
                 try {
                     await deleteDoc(doc(db, "books", docId));
@@ -169,6 +188,10 @@
                 }
             }
         }
+
+        // ربط أزرار النافذة المنبثقة
+        document.getElementById('saveEditBtn').addEventListener('click', saveBookEdit);
+        document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
     </script>
 </body>
 </html>
