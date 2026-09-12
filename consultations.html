@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خدمة الاستشارات المرجعية</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh; justify-content: center;">
+        
+        <div style="width: 100%; max-width: 380px; background: white; padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            
+            <!-- عنوان الصفحة -->
+            <h2 style="color: #1f2937; margin: 0 0 5px 0; font-size: 20px; text-align: center; width: 100%; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">الاستشارات المرجعية</h2>
+
+            <!-- نموذج الطلب -->
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
+                
+                <!-- حقل عنوان الاستشارة -->
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 13px; color: #475569; font-weight: bold;">عنوان الاستشارة أو السؤال:</label>
+                    <input type="text" id="consultationTitle" placeholder="مثال: مساعدة في إيجاد مراجع لبرمجة القواعد" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
+                </div>
+
+                <!-- حقل القسم أو التخصص (إدخال نصي حر) -->
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 13px; color: #475569; font-weight: bold;">القسم أو التخصص:</label>
+                    <input type="text" id="consultationDept" placeholder="اكتب اسم القسم أو التخصص بدقة..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px;">
+                </div>
+
+                <!-- حقل تفاصيل السؤال -->
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 13px; color: #475569; font-weight: bold;">تفاصيل الاستشارة:</label>
+                    <textarea id="consultationDetails" rows="4" placeholder="اكتب تفاصيل طلبك أو سؤالك بدقة..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; resize: none;"></textarea>
+                </div>
+
+                <!-- زر الإرسال -->
+                <button onclick="submitConsultation()" style="width: 100%; background: #10b981; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 15px; margin-top: 5px; transition: background 0.2s;">
+                    إرسال الطلب
+                </button>
+            </div>
+
+            <!-- زر العودة لصفحة الخدمات (معدل ليكون service.html) -->
+            <button onclick="window.location.href='service.html'" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 14px;">
+                العودة للخدمات
+            </button>
+
+        </div>
+    </div>
+
+    <script>
+        function submitConsultation() {
+            const title = document.getElementById('consultationTitle').value;
+            const dept = document.getElementById('consultationDept').value;
+            const details = document.getElementById('consultationDetails').value;
+
+            if(!title || !dept || !details) {
+                alert('الرجاء إكمال جميع الحقول المطلوبة قبل الإرسال.');
+                return;
+            }
+
+            alert('تم إرسال استشارتك بنجاح وسيقوم أمين المكتبة بالرد عليك قريباً!');
+            
+            // تفريغ الحقول بعد الإرسال
+            document.getElementById('consultationTitle').value = '';
+            document.getElementById('consultationDept').value = '';
+            document.getElementById('consultationDetails').value = '';
+        }
+    </script>
+
+</body>
+</html>
