@@ -38,8 +38,13 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #334155;">التصنيف أو القسم</label>
-                    <input type="text" id="bookCategory" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                    <label style="font-size: 12px; font-weight: bold; color: #334155;">القسم / التصنيف</label>
+                    <input type="text" id="bookDepartment" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <label style="font-size: 12px; font-weight: bold; color: #334155;">عدد النسخ</label>
+                    <input type="number" id="copiesCount" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 5px;">
@@ -51,7 +56,7 @@
                 <button onclick="updateBook()" style="width: 100%; background: #22c55e; color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">حفظ التعديلات</button>
             </div>
 
-            <!-- زر العودة لوحة التحكم -->
+            <!-- زر العودة لوحة التحكم المحدث -->
             <button onclick="window.location.href='admin-home.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">العودة إلى لوحة التحكم</button>
 
         </div>
@@ -61,7 +66,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -101,11 +106,11 @@
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    booksMap[docSnap.id] = data; // تخزين البيانات محلياً
+                    booksMap[docSnap.id] = data; 
                     
                     const option = document.createElement('option');
                     option.value = docSnap.id;
-                    option.textContent = data.title || data.bookTitle || 'كتاب بدون عنوان';
+                    option.textContent = data.title || 'كتاب بدون عنوان';
                     select.appendChild(option);
                 });
             } catch (error) {
@@ -126,9 +131,10 @@
             const book = booksMap[selectedId];
             if (book) {
                 document.getElementById('bookDocId').value = selectedId;
-                document.getElementById('bookTitle').value = book.title || book.bookTitle || '';
+                document.getElementById('bookTitle').value = book.title || '';
                 document.getElementById('bookAuthor').value = book.author || '';
-                document.getElementById('bookCategory').value = book.category || '';
+                document.getElementById('bookDepartment').value = book.department || book.category || '';
+                document.getElementById('copiesCount').value = book.copiesCount || 1;
                 document.getElementById('bookUrl').value = book.url || book.link || '';
                 
                 formContainer.style.display = 'flex';
@@ -142,7 +148,8 @@
             const updatedData = {
                 title: document.getElementById('bookTitle').value,
                 author: document.getElementById('bookAuthor').value,
-                category: document.getElementById('bookCategory').value,
+                department: document.getElementById('bookDepartment').value,
+                copiesCount: Number(document.getElementById('copiesCount').value),
                 url: document.getElementById('bookUrl').value
             };
 
@@ -150,7 +157,7 @@
                 const bookRef = doc(db, "books", docId);
                 await updateDoc(bookRef, updatedData);
                 alert('تم تحديث بيانات الكتاب بنجاح!');
-                fetchAllBooks(); // تحديث القائمة
+                fetchAllBooks(); 
                 document.getElementById('editFormContainer').style.display = 'none';
                 document.getElementById('bookSelect').value = "";
             } catch (error) {
