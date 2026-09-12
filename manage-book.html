@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الكتب</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif; color: #334155;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 25px 15px; box-sizing: border-box; min-height: 100vh;">
+        
+        <!-- الحاوية الرئيسية -->
+        <div style="width: 100%; max-width: 600px; background: #ffffff; padding: 22px 18px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; border: 1px solid #f1f5f9;">
+            
+            <!-- رأس الصفحة -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 22px;">📚</span>
+                    <h2 style="color: #1e293b; margin: 0; font-size: 18px; font-weight: bold;">إدارة الكتب المقترحة</h2>
+                </div>
+                <button onclick="window.location.href='admin-home.html'" style="background: #f1f5f9; color: #475569; border: none; border-radius: 8px; padding: 7px 12px; font-weight: 500; cursor: pointer; font-size: 12px; transition: 0.2s;">العودة للوحة التحكم</button>
+            </div>
+
+            <!-- قسم الكتب (books) -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <h3 style="color: #64748b; margin: 0; font-size: 14px; font-weight: 600;">قائمة الكتب المتاحة</h3>
+                <div id="booksListContainer" style="display: flex; flex-direction: column; gap: 12px; max-height: 520px; overflow-y: auto;">
+                    <p style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">جاري تحميل الكتب...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- نافذة منبثقة لتعديل بيانات الكتاب -->
+    <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.4); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box;">
+        <div style="background: white; padding: 22px; border-radius: 14px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <h3 style="margin: 0; color: #1e293b; font-size: 16px;">تعديل بيانات الكتاب</h3>
+            <input type="hidden" id="editDocId">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 11px; color: #64748b; font-weight: bold;">عنوان الكتاب:</label>
+                <input type="text" id="editTitle" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 11px; color: #64748b; font-weight: bold;">اسم المؤلف:</label>
+                <input type="text" id="editAuthor" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button onclick="window.saveBookEdit()" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">حفظ</button>
+                <button onclick="window.closeEditModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- كود جلب البيانات وربطها من Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                fetchBooks();
+            }
+        });
+
+        async function fetchBooks() {
+            const container = document.getElementById('booksListContainer');
+            try {
+                const querySnapshot = await getDocs(collection(db, "books"));
+                container.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">لا توجد كتب مسجلة حالياً.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const title = data.title || data.bookName || data.name || 'كتاب بدون عنوان';
+                    const author = data.author || data.authorName || 'مؤلف غير محدد';
+                    const category = data.category || data.department || 'عام';
+                    const bookId = data.bookId || docSnap.id;
+
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: #ffffff; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);";
+
+                    card.innerHTML = `
+                        <!-- عنوان الكتاب -->
+                        <div style="font-weight: bold; color: #1e293b; font-size: 15px; line-height: 1.4;">${title}</div>
+
+                        <!-- تفاصيل الكتاب -->
+                        <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #64748b; border-top: 1px dashed #f1f5f9; padding-top: 8px;">
+                            <div>معرف الكتاب: <span style="font-family: monospace; color: #0284c7; font-weight: bold; direction: ltr; display: inline-block;">${bookId}</span></div>
+                            <div>المؤلف: <span style="color: #334155; font-weight: 500;">${author}</span></div>
+                            <div>التصنيف / القسم: <span style="color: #0f172a; font-weight: 500;">${category}</span></div>
+                        </div>
+
+                        <!-- الأزرار في الأسفل بشكل هادئ -->
+                        <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px;">
+                            <button onclick="window.openEditModal('${docSnap.id}', '${title}', '${author}')" style="background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">تعديل</button>
+                            <button onclick="window.deleteBook('${docSnap.id}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">حذف</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error("خطأ في جلب الكتب:", error);
+                container.innerHTML = '<p style="text-align: center; color: #dc2626; font-size: 13px;">فشل تحميل الكتب.</p>';
+            }
+        }
+
+        window.openEditModal = function(docId, title, author) {
+            document.getElementById('editDocId').value = docId;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editAuthor').value = author;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        window.saveBookEdit = async function() {
+            const docId = document.getElementById('editDocId').value;
+            const newTitle = document.getElementById('editTitle').value;
+            const newAuthor = document.getElementById('editAuthor').value;
+
+            try {
+                await updateDoc(doc(db, "books", docId), {
+                    title: newTitle,
+                    author: newAuthor
+                });
+                alert('تم تعديل بيانات الكتاب بنجاح.');
+                window.closeEditModal();
+                fetchBooks();
+            } catch (error) {
+                console.error("خطأ أثناء التعديل:", error);
+                alert('فشل حفظ التعديلات.');
+            }
+        }
+
+        window.deleteBook = async function(docId) {
+            if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
+                try {
+                    await deleteDoc(doc(db, "books", docId));
+                    alert('تم حذف الكتاب بنجاح.');
+                    fetchBooks();
+                } catch (error) {
+                    console.error("خطأ أثناء الحذف:", error);
+                    alert('فشل عملية الحذف.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
