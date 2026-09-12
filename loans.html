@@ -11,22 +11,36 @@
         
         <div style="width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 12px;">
             
-            <h2 style="text-align: center; color: #1f2937; margin: 0 0 5px 0; font-size: 18px;">خدمة الإعارة</h2>
+            <h2 style="text-align: center; color: #1f2937; margin: 0 0 5px 0; font-size: 18px;">خدمة الإعارة الرقمية</h2>
 
             <p style="text-align: center; color: #64748b; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                اطلب استعارة كتابك المفضل بكل سهولة لتصلك الموافقة لحظة بلحظة.
+                اطلب استعارة كتابك الرقمي المفضل بكل سهولة لتصلك الموافقة لحظة بلحظة.
             </p>
+
+            <!-- حقل الرقم الجامعي للطالب -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">الرقم الجامعي</label>
+                <input type="text" id="studentId" placeholder="أدخل رقمك الجامعي" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
 
             <!-- حقل رقم الإعارة -->
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">رقم الإعارة</label>
-                <input type="text" id="loanId" placeholder="تلقائي أو أدخل الرقم" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="text" id="loanId" onclick="alert('هذا الحقل يتم إدخاله وتوليده تلقائياً بواسطة النظام.');" placeholder="تلقائي" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: #f1f5f9; cursor: pointer;" readonly>
             </div>
 
             <!-- حقل عنوان الكتاب -->
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">عنوان الكتاب</label>
-                <input type="text" id="itemId" placeholder="عنوان الكتاب أو العنصر" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="text" id="itemId" list="booksList" placeholder="ابحث عن كتاب أو اختره..." style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
+                <datalist id="booksList">
+                    <option value="أسس نظم البيانات الحديثة">
+                    <option value="برمجة قواعد البيانات المتقدمة">
+                    <option value="الذكاء الاصطناعي وتطبيقاته">
+                    <option value="هندسة البرمجيات وتحليل النظام">
+                    <option value="شبكات الحاسوب والتقنيات الأمنية">
+                    <option value="أمن المعلومات والسيبراني">
+                </datalist>
             </div>
 
             <!-- حقل تاريخ الإعارة -->
@@ -35,43 +49,45 @@
                 <input type="date" id="borrowDate" style="flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
             </div>
 
-            <!-- حقل العدد -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">العدد</label>
-                <input type="number" id="quantity" value="1" min="1" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-
-            <!-- حقل نوع الإعارة (قائمة منسدلة) -->
+            <!-- حقل نوع الإعارة (يتم وضعه أولاً للتحكم بمدد الإعارة) -->
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">نوع الإعارة</label>
-                <select id="loanType" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
-                    <option value="داخلية">إعارة داخلية</option>
+                <select id="loanType" onchange="onLoanTypeChange()" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
+                    <option value="داخلية">إعارة داخلية (رقمية مؤقتة)</option>
                     <option value="خارجية">إعارة خارجية</option>
                 </select>
             </div>
 
-            <!-- حقل تاريخ الإرجاع -->
+            <!-- حقل مدة الإعارة (تتغير خياراته ديناميكياً حسب نوع الإعارة) -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;" id="durationLabel">مدة الجلسة</label>
+                <select id="durationDays" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
+                    <!-- يتم تعبئتها ديناميكياً بواسطة JavaScript -->
+                </select>
+            </div>
+
+            <!-- حقل تاريخ الإرجاع (يحسب تلقائياً) -->
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">تاريخ الإرجاع</label>
-                <input type="date" id="returnDate" style="flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="date" id="returnDate" style="flex: 1; padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: #f8fafc;" readonly>
             </div>
 
             <!-- حقل العقوبة -->
             <div style="display: flex; align-items: center; gap: 10px;">
                 <label style="font-size: 13px; color: #334155; width: 90px; font-weight: bold; text-align: right;">العقوبة</label>
-                <input type="text" id="penalty" value="لا توجد" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="text" id="penalty" value="لا توجد" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;" readonly>
             </div>
 
             <!-- زر الإرسال -->
-            <button onclick="submitLoan()" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">إرسال</button>
+            <button onclick="submitLoan()" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">إرسال الطلب</button>
 
-            <!-- زر العودة لشاشة الخدمات الرئيسية -->
-            <button onclick="window.location.href='home.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للرئيسية</button>
+            <!-- زر العودة -->
+            <button onclick="window.location.href='service.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للخدمات</button>
 
         </div>
     </div>
 
-    <!-- كود الربط مع Firebase وتعبئة البيانات -->
+    <!-- كود JavaScript للتحكم الديناميكي بالمدد -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -94,20 +110,68 @@
 
         let currentUserId = null;
 
-        // التحقق من حالة تسجيل الدخول للمستخدم
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
             } else {
-                // إذا لم يكن مسجلاً، يمكنك توجيهه لصفحة تسجيل الدخول أو إبقاؤه بمعرف افتراضي مؤقت
                 currentUserId = 'student_user_123';
             }
         });
 
         document.getElementById('loanId').value = 'LN-' + Math.floor(1000 + Math.random() * 9000);
         
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('borrowDate').value = today;
+        const today = new Date();
+        document.getElementById('borrowDate').value = today.toISOString().split('T')[0];
+
+        // دالة لتحديث الخيارات بناءً على نوع الإعارة
+        window.onLoanTypeChange = function() {
+            const loanType = document.getElementById('loanType').value;
+            const durationSelect = document.getElementById('durationDays');
+            const durationLabel = document.getElementById('durationLabel');
+            
+            durationSelect.innerHTML = '';
+
+            if (loanType === 'داخلية') {
+                durationLabel.innerText = 'مدة الجلسة';
+                durationSelect.innerHTML = `
+                    <option value="0.12">ساعة واحدة (تصفح سريع)</option>
+                    <option value="0.25" selected>ساعتان (جلسة بحثية)</option>
+                    <option value="0.5">نصف يوم (مؤقت)</option>
+                    <option value="1">يوم واحد (أقصى حد داخلي)</option>
+                `;
+            } else {
+                durationLabel.innerText = 'مدة الإعارة';
+                durationSelect.innerHTML = `
+                    <option value="1">يوم واحد</option>
+                    <option value="3" selected>3 أيام (قياسية)</option>
+                    <option value="7">أسبوع واحد</option>
+                    <option value="14">أسبوعان (للبحوث)</option>
+                `;
+            }
+            updateReturnDate();
+        }
+
+        function updateReturnDate() {
+            const borrowVal = document.getElementById('borrowDate').value;
+            const durationVal = parseFloat(document.getElementById('durationDays').value) || 1;
+            
+            if (borrowVal) {
+                const bDate = new Date(borrowVal);
+                if (durationVal < 1) {
+                    // إذا كانت المدة بالساعات (إعارة داخلية لنفس اليوم)
+                    document.getElementById('returnDate').value = borrowVal;
+                } else {
+                    bDate.setDate(bDate.getDate() + durationVal);
+                    document.getElementById('returnDate').value = bDate.toISOString().split('T')[0];
+                }
+            }
+        }
+
+        // تهيئة أولية
+        onLoanTypeChange();
+
+        document.getElementById('borrowDate').addEventListener('change', updateReturnDate);
+        document.getElementById('durationDays').addEventListener('change', updateReturnDate);
 
         const urlParams = new URLSearchParams(window.location.search);
         const bookTitle = urlParams.get('title');
@@ -116,14 +180,29 @@
         }
 
         window.submitLoan = async function() {
+            const studentId = document.getElementById('studentId').value;
+            const loanId = document.getElementById('loanId').value;
+            const itemId = document.getElementById('itemId').value;
+            const borrowDate = document.getElementById('borrowDate').value;
+            const durationDays = document.getElementById('durationDays').value;
+            const loanType = document.getElementById('loanType').value;
+            const returnDate = document.getElementById('returnDate').value;
+            const penalty = document.getElementById('penalty').value;
+
+            if(!studentId || !itemId) {
+                alert('الرجاء إدخال الرقم الجامعي واختيار أو كتابة عنوان الكتاب.');
+                return;
+            }
+
             const loanData = {
-                loanId: document.getElementById('loanId').value,
-                itemId: document.getElementById('itemId').value,
-                borrowDate: document.getElementById('borrowDate').value,
-                quantity: document.getElementById('quantity').value,
-                loanType: document.getElementById('loanType').value,
-                returnDate: document.getElementById('returnDate').value,
-                penalty: document.getElementById('penalty').value,
+                studentId: studentId,
+                loanId: loanId,
+                itemId: itemId,
+                borrowDate: borrowDate,
+                durationDays: Number(durationDays),
+                loanType: loanType,
+                returnDate: returnDate,
+                penalty: penalty,
                 status: 'pending',
                 uid: currentUserId,
                 createdAt: new Date()
@@ -132,7 +211,7 @@
             try {
                 await addDoc(collection(db, "loans"), loanData);
                 alert('تم إرسال طلب الإعارة بنجاح إلى النظام!');
-                window.location.href = 'orders.html';
+                window.location.href = 'service.html';
             } catch (error) {
                 console.error("خطأ في الإرسال: ", error);
                 alert('حدث خطأ أثناء إرسال الطلب: ' + error.message);
