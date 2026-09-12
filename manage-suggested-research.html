@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة المدير - إدارة الأبحاث المقترحة</title>
+    <title>إدارة مقترحات الأبحاث - لوحة المدير</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -31,22 +31,46 @@
             justify-content: space-between;
             align-items: center;
         }
-        .card {
+        .suggestion-card {
             background: white;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             margin-bottom: 15px;
-            border-right: 5px solid #2563eb;
+            border-right: 5px solid #f59e0b;
+        }
+        .card-title {
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .card-info {
+            color: #475569;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .card-desc {
+            color: #334155;
+            font-size: 14px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
         .btn {
             padding: 8px 16px;
             border: none;
             border-radius: 6px;
-            font-weight: bold;
             cursor: pointer;
+            font-weight: bold;
             font-size: 13px;
-            margin-left: 5px;
         }
         .btn-approve {
             background: #dcfce7;
@@ -78,8 +102,8 @@
 
     <div class="container">
         <div class="header">
-            <h2>إدارة مقترحات الأبحاث</h2>
-            <button class="back-btn" onclick="window.location.href='admin-home.html'">العودة للوحة المدير</button>
+            <h2>إدارة مقترحات الأبحاث المعلقة</h2>
+            <button class="back-btn" onclick="window.location.href='admin-home.html'">لوحة التحكم</button>
         </div>
 
         <div id="suggestionsList">
@@ -87,10 +111,10 @@
         </div>
     </div>
 
-    <!-- كود فايربيس وجلب الأبحاث المقترحة -->
+    <!-- كود جلب ومعالجة المقترحات وربطها بالأرشيف -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, updateAndDelete, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -112,44 +136,73 @@
                 const querySnapshot = await getDocs(collection(db, "suggest_research"));
                 container.innerHTML = "";
 
-                if (querySnapshot.empty) {
-                    container.innerHTML = `<div class="no-data">لا توجد مقترحات أبحاث مرسلة حالياً.</div>`;
-                    return;
-                }
+                let pendingCount = 0;
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const docId = docSnap.id;
 
-                    const card = document.createElement("div");
-                    card.className = "card";
-                    card.innerHTML = `
-                        <h3 style="color: #1e293b; margin-bottom: 8px;">${data.title || "بدون عنوان"}</h3>
-                        <p style="color: #475569; font-size: 14px; margin-bottom: 8px;"><b>الوصف:</b> ${data.description || "لا يوجد وصف"}</p>
-                        <p style="color: #64748b; font-size: 13px; margin-bottom: 12px;"><b>الباحث / الفريق:</b> ${data.author || "غير محدد"} | <b>البريد:</b> ${data.researcherEmail || "غير متوفر"}</p>
-                        <div style="display: flex; gap: 5px;">
-                            <button class="btn btn-approve" onclick="updateStatus('${docId}', 'approved')">قبول ونشر</button>
-                            <button class="btn btn-reject" onclick="updateStatus('${docId}', 'rejected')">رفض</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
+                    // عرض الطلبات التي لا زالت بحالة pending فقط
+                    if (data.status === "pending" || !data.status) {
+                        pendingCount++;
+                        const card = document.createElement("div");
+                        card.className = "suggestion-card";
+                        card.innerHTML = `
+                            <div class="card-title">${data.title || "بدون عنوان"}</div>
+                            <div class="card-info"><b>المؤلف:</b> ${data.author || "غير محدد"} | <b>التخصص:</b> ${data.major || "غير محدد"}</div>
+                            <div class="card-info"><b>السنة:</b> ${data.year || "غير محددة"} | <b>الباحث المقترح:</b> ${data.researcherEmail || "غير محدد"}</div>
+                            <div class="card-desc"><b>الملخص:</b> ${data.description || "لا يوجد ملخص"}</div>
+                            <div class="actions">
+                                <button class="btn btn-approve" onclick="updateStatus('${docId}', 'approved')">قبول ونشر بالأرشيف</button>
+                                <button class="btn btn-reject" onclick="updateStatus('${docId}', 'rejected')">رفض الطلب</button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
                 });
+
+                if (pendingCount === 0) {
+                    container.innerHTML = `<div class="no-data">لا توجد مقترحات بحثية معلقة بانتظار المراجعة حالياً.</div>`;
+                }
 
             } catch (error) {
                 console.error("خطأ في جلب المقترحات:", error);
-                container.innerHTML = `<div class="no-data" style="color: #991b1b;">حدث خطأ أثناء تحميل البيانات.</div>`;
+                container.innerHTML = `<div class="no-data" style="color: #991b1b;">حدث خطأ أثناء تحميل المقترحات.</div>`;
             }
         }
 
         window.updateStatus = async function(id, status) {
             try {
                 const docRef = doc(db, "suggest_research", id);
+
+                if (status === 'approved') {
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+
+                        // نقل البيانات تلقائياً إلى مجموعة الأرشيف theses
+                        await addDoc(collection(db, "theses"), {
+                            title: data.title || "بدون عنوان",
+                            authorName: data.author || "غير محدد",
+                            degree: "بكالوريوس",
+                            department: data.major || "علوم الحاسوب",
+                            publicationYear: data.year || "2026",
+                            summary: data.description || "لا يوجد ملخص",
+                            thesesId: id,
+                            createdAt: serverTimestamp()
+                        });
+                    }
+                }
+
+                // تحديث حالة المقترح الحالي
                 await updateDoc(docRef, { status: status });
-                alert(status === 'approved' ? "تم قبول المقترح بنجاح!" : "تم رفض المقترح.");
-                loadSuggestions();
+                
+                alert(status === 'approved' ? "تم قبول ونشر البحث في الأرشيف بنجاح!" : "تم رفض المقترح.");
+                loadSuggestions(); // إعادة تحميل القائمة لتحديث الواجهة
+
             } catch (error) {
-                console.error("خطأ في تحديث الحالة:", error);
-                alert("حدث خطأ أثناء تحديث حالة المقترح.");
+                console.error("خطأ في معالجة المقترح:", error);
+                alert("حدث خطأ أثناء معالجة الطلب.");
             }
         }
 
