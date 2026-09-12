@@ -15,38 +15,45 @@
             <h2 style="color: #1f2937; margin: 0 0 5px 0; font-size: 22px; text-align: center;">لوحة التحكم</h2>
             <p style="color: #64748b; margin: 0 0 10px 0; font-size: 13px; text-align: center;">إدارة النظام وصلاحيات المدير</p>
 
-            <!-- حاوية الإحصائيات الأربعة التفاعلية بألوان باردة وجذابة -->
+            <!-- حاوية الإحصائيات الأربعة التفاعلية (تم إبقاء بطاقة الطلاب هنا) -->
             <div style="width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
                 
                 <!-- بطاقة الطلاب -->
-                <button onclick="navigateTo('manage-students.html')" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
-                    <div style="font-size: 11px; color: #166534; font-weight: bold;">الطلاب</div>
-                    <div id="totalStudentsCount" style="font-size: 16px; font-weight: bold; color: #14532d; margin-top: 3px;">...</div>
-                </button>
+                <div onclick="navigateTo('manage-students.html')" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                    <div style="font-size: 11px; color: #166534; font-weight: bold; pointer-events: none;">الطلاب</div>
+                    <div id="totalStudentsCount" style="font-size: 16px; font-weight: bold; color: #14532d; margin-top: 3px; pointer-events: none;">...</div>
+                </div>
 
                 <!-- بطاقة الكتب -->
-                <button onclick="navigateTo('manage-books.html')" style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
-                    <div style="font-size: 11px; color: #1e40af; font-weight: bold;">الكتب</div>
-                    <div id="totalBooksCount" style="font-size: 16px; font-weight: bold; color: #1e3a8a; margin-top: 3px;">...</div>
-                </button>
+                <div onclick="navigateTo('manage-books.html')" style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                    <div style="font-size: 11px; color: #1e40af; font-weight: bold; pointer-events: none;">الكتب</div>
+                    <div id="totalBooksCount" style="font-size: 16px; font-weight: bold; color: #1e3a8a; margin-top: 3px; pointer-events: none;">...</div>
+                </div>
 
                 <!-- بطاقة الرسائل -->
-                <button onclick="navigateTo('manage-theses.html')" style="background: #fdf4ff; border: 1px solid #f5d0fe; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#fae8ff'" onmouseout="this.style.background='#fdf4ff'">
-                    <div style="font-size: 11px; color: #86198f; font-weight: bold;">الرسائل</div>
-                    <div id="totalThesesCount" style="font-size: 16px; font-weight: bold; color: #701a75; margin-top: 3px;">...</div>
-                </button>
+                <div onclick="navigateTo('manage-theses.html')" style="background: #fdf4ff; border: 1px solid #f5d0fe; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#fae8ff'" onmouseout="this.style.background='#fdf4ff'">
+                    <div style="font-size: 11px; color: #86198f; font-weight: bold; pointer-events: none;">الرسائل</div>
+                    <div id="totalThesesCount" style="font-size: 16px; font-weight: bold; color: #701a75; margin-top: 3px; pointer-events: none;">...</div>
+                </div>
 
                 <!-- بطاقة الباحثين -->
-                <button onclick="navigateTo('manage-researchers.html')" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
-                    <div style="font-size: 11px; color: #334155; font-weight: bold;">الباحثين</div>
-                    <div id="totalResearchersCount" style="font-size: 16px; font-weight: bold; color: #0f172a; margin-top: 3px;">...</div>
-                </button>
+                <div onclick="navigateTo('manage-researchers.html')" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px 4px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+                    <div style="font-size: 11px; color: #334155; font-weight: bold; pointer-events: none;">الباحثين</div>
+                    <div id="totalResearchersCount" style="font-size: 16px; font-weight: bold; color: #0f172a; margin-top: 3px; pointer-events: none;">...</div>
+                </div>
 
             </div>
+
+            <!-- تم حذف زر إدارة الطلاب الكبير من هنا -->
 
             <!-- زر مراجعة الأبحاث المقترحة -->
             <button onclick="window.location.href='manage-suggested-research.html'" style="width: 100%; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
                 📁 مراجعة الأبحاث المقترحة
+            </button>
+
+            <!-- زر إدارة الكتب -->
+            <button onclick="navigateTo('manage-books.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
+                📚 إدارة الكتب
             </button>
 
             <button onclick="navigateTo('add-book.html')" style="width: 100%; background: #ffffff; color: #1e293b; border: 1px solid #94a3b8; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
@@ -86,7 +93,7 @@
         </div>
     </div>
 
-    <!-- كود جلب الإحصائيات الشاملة للأقسام الأربعة -->
+    <!-- كود جلب الإحصائيات الشاملة -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -116,7 +123,7 @@
         });
 
         async function fetchAllStats() {
-            // جلب عدد الطلاب من مجموعة "student" المطابقة لقاعدة البيانات
+            // جلب عدد الطلاب للبطاقة العلوية
             try {
                 const studentsSnap = await getDocs(collection(db, "student"));
                 document.getElementById('totalStudentsCount').innerText = studentsSnap.size;
