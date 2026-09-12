@@ -14,28 +14,43 @@
             <!-- العنوان الرئيسي -->
             <h2 style="color: #1f2937; margin-bottom: 0px; text-align: center;">إدارة طلبات الإعارة والبث الانتقائي</h2>
 
+            <!-- أزرار التبديل بين الأقسام (Tabs) -->
+            <div style="width: 100%; display: flex; gap: 10px;">
+                <button id="tabSdi" onclick="switchTab('sdi')" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s;">
+                    طلبات البث الانتقائي
+                </button>
+                <button id="tabLoans" onclick="switchTab('loans')" style="flex: 1; background: #e2e8f0; color: #475569; border: none; border-radius: 12px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s;">
+                    طلبات الإعارة
+                </button>
+            </div>
+
             <!-- عداد الطلبات الواردة -->
-            <div style="width: 100%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2); box-sizing: border-box;">
-                <span style="font-size: 14px; font-weight: bold;">إجمالي الطلبات الواردة:</span>
-                <span id="requestsCount" style="font-size: 18px; font-weight: bold; background: rgba(255, 255, 255, 0.2); padding: 3px 15px; border-radius: 10px;">0</span>
+            <div style="width: 100%; background: linear-gradient(135deg, #1e293b, #334155); color: white; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); box-sizing: border-box;">
+                <span id="requestsLabel" style="font-size: 14px; font-weight: bold;">إجمالي طلبات البث الانتقائي:</span>
+                <span id="requestsCount" style="font-size: 18px; font-weight: bold; background: rgba(255, 255, 255, 0.15); padding: 3px 15px; border-radius: 10px;">0</span>
             </div>
 
             <!-- حاوية عرض الطلبات -->
             <div id="requestsContainer" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-                <p style="text-align: center; color: #64748b; font-size: 14px;">جاري تحميل الطلبات الواردة...</p>
+                <p style="text-align: center; color: #64748b; font-size: 14px;">جاري تحميل الطلبات...</p>
             </div>
 
-            <!-- زر العودة لوحة التحكم -->
+            <!-- زر العودة إلى لوحة التحكم -->
             <button onclick="navigateTo('admin-home.html')" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px;">العودة إلى لوحة التحكم</button>
 
         </div>
     </div>
 
-    <!-- Firebase والسكربت البرمجي -->
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <!-- Firebase SDK والبرمجة الخاصة بالصفحة -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        emailjs.init("4wt5LI56x16rtKcFp");
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -52,92 +67,350 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        let currentTab = 'sdi';
+        let loanDocsData = [];
+        let sdiDocsData = [];
+
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = 'login.html';
             } else {
-                loadRequests();
+                fetchAndRenderData();
             }
         });
 
-        async function loadRequests() {
-            const container = document.getElementById('requestsContainer');
-            const countBadge = document.getElementById('requestsCount');
-            container.innerHTML = '';
+        async function fetchAndRenderData() {
+            try {
+                const sdiSnap = await getDocs(collection(db, "sdi_requests"));
+                sdiDocsData = sdiSnap.docs;
+            } catch (e) {
+                console.warn("تعذر جلب sdi_requests:", e);
+            }
 
             try {
-                const querySnapshot = await getDocs(collection(db, "loans"));
-                
-                // تحديث العداد بإجمالي عدد الطلبات
-                const totalRequests = querySnapshot.size;
-                countBadge.textContent = totalRequests;
+                const loanSnap = await getDocs(collection(db, "loans"));
+                loanDocsData = loanSnap.docs;
+            } catch (e) {
+                console.warn("تعذر جلب loans:", e);
+            }
 
-                if (querySnapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px; background: white; padding: 20px; border-radius: 15px;">لا توجد طلبات إعارة حالياً.</p>';
+            renderCurrentTab();
+        }
+
+        window.switchTab = function(tabName) {
+            currentTab = tabName;
+            const btnSdi = document.getElementById('tabSdi');
+            const btnLoans = document.getElementById('tabLoans');
+
+            if (tabName === 'sdi') {
+                btnSdi.style.background = '#2563eb';
+                btnSdi.style.color = 'white';
+                btnLoans.style.background = '#e2e8f0';
+                btnLoans.style.color = '#475569';
+            } else {
+                btnLoans.style.background = '#2563eb';
+                btnLoans.style.color = 'white';
+                btnSdi.style.background = '#e2e8f0';
+                btnSdi.style.color = '#475569';
+            }
+
+            renderCurrentTab();
+        };
+
+        async function renderCurrentTab() {
+            const container = document.getElementById('requestsContainer');
+            const countBadge = document.getElementById('requestsCount');
+            const requestsLabel = document.getElementById('requestsLabel');
+            container.innerHTML = '';
+
+            if (currentTab === 'sdi') {
+                requestsLabel.textContent = "إجمالي طلبات البث الانتقائي:";
+                countBadge.textContent = sdiDocsData.length;
+
+                if (sdiDocsData.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px; background: white; padding: 20px; border-radius: 15px;">لا توجد طلبات بث انتقائي حالياً.</p>';
                     return;
                 }
 
-                querySnapshot.forEach((docSnap) => {
+                for (const docSnap of sdiDocsData) {
                     const req = docSnap.data();
                     const reqId = docSnap.id;
 
-                    const loanId = req.loanId || req.id || 'LN-XXXX';
-                    const loanType = req.loanType || req.type || 'إعارة عادية';
-                    const itemId = req.itemId || req.bookId || req.thesesId || 'غير متوفر';
-                    const uid = req.uid || req.userId || req.userEmail || 'غير محدد';
-                    const borrowDate = req.borrowDate || req.date || '---';
-                    const returnDate = req.returnDate || '---';
-                    const quantity = req.quantity || req.count || '1';
-                    const penalty = req.penalty || 'لا توجد';
-                    const status = req.status || 'pending';
+                    let studentName = req.studentName || req.userName || 'طالب';
+                    let studentEmail = req.studentEmail || req.email || req.userEmail || '';
+                    const interests = req.interests || req.topics || 'غير محددة';
+                    const status = req.status || 'معلق';
 
-                    let statusColor = '#d97706'; // معلق
-                    if (status === 'approved' || status === 'مقبول' || status === 'active') statusColor = '#16a34a';
-                    if (status === 'rejected' || status === 'مرفوض') statusColor = '#dc2626';
+                    if (!studentEmail && req.uid) {
+                        try {
+                            const userDoc = await getDoc(doc(db, "users", req.uid));
+                            if (userDoc.exists()) {
+                                studentEmail = userDoc.data().email || '';
+                                if (!studentName || studentName === 'طالب') {
+                                    studentName = userDoc.data().name || studentName;
+                                }
+                            }
+                        } catch (err) {
+                            console.log("خطأ في جلب مستند المستخدم:", err);
+                        }
+                    }
+
+                    let statusColor = '#d97706';
+                    if (status === 'مقبول' || status === 'approved') statusColor = '#2563eb';
+                    if (status === 'مرفوض' || status === 'rejected') statusColor = '#64748b';
 
                     const card = document.createElement('div');
                     card.style.cssText = "background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;";
 
                     card.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 12px; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 10px; font-weight: bold;">رقم الإعارة: ${loanId}</span>
-                            <span style="font-size: 12px; color: #64748b;">النوع: ${loanType}</span>
+                            <span style="font-size: 12px; background: #eff6ff; color: #1d4ed8; padding: 3px 10px; border-radius: 10px; font-weight: bold;">طلب بث انتقائي</span>
+                            <span style="font-size: 12px; color: #3b82f6; font-weight: bold;">SDI</span>
                         </div>
-                        <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">معرف العنصر: ${itemId}</h4>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">معرف المستخدم (UID): <b>${uid}</b></p>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">تاريخ الإعارة: ${borrowDate} | تاريخ الإرجاع: ${returnDate}</p>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الكمية: ${quantity} | الغرامة: ${penalty}</p>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة الحالية: <b style="color: ${statusColor};">${status}</b></p>
+                        <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">الطالب: ${studentName}</h4>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563; word-break: break-all;">البريد: <b>${studentEmail || 'غير محدد'}</b></p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الاهتمامات البحثية: ${interests}</p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b style="color: ${statusColor};">${status}</b></p>
                         
                         <div style="display: flex; gap: 10px; margin-top: 8px;">
-                            <button onclick="updateRequestStatus('${reqId}', 'approved')" style="flex: 1; background: #22c55e; color: white; border: none; border-radius: 12px; padding: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">قبول</button>
-                            <button onclick="updateRequestStatus('${reqId}', 'rejected')" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 12px; padding: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض</button>
+                            <button onclick="updateSDIStatus('${reqId}', '${studentEmail}', '${studentName}', true)" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">قبول وإرسال إيميل</button>
+                            <button onclick="updateSDIStatus('${reqId}', '${studentEmail}', '${studentName}', false)" style="flex: 1; background: #64748b; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض وإرسال إيميل</button>
                         </div>
                     `;
                     container.appendChild(card);
-                });
+                }
 
-            } catch (error) {
-                console.error("خطأ في جلب الطلبات:", error);
-                container.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 14px;">حدث خطأ أثناء تحميل الطلبات.</p>';
+            } else {
+                requestsLabel.textContent = "إجمالي طلبات الإعارة:";
+                countBadge.textContent = loanDocsData.length;
+
+                if (loanDocsData.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px; background: white; padding: 20px; border-radius: 15px;">لا توجد طلبات إعارة حالياً.</p>';
+                    return;
+                }
+
+                for (const docSnap of loanDocsData) {
+                    const req = docSnap.data();
+                    const reqId = docSnap.id;
+
+                    const loanId = req.loanId || req.id || 'LN-XXXX';
+                    const loanType = req.loanType || req.type || 'داخلية';
+                    const itemId = req.itemId || req.bookId || req.thesesId || 'غير متوفر';
+                    const uid = req.uid || req.userId || 'غير محدد';
+                    const borrowDate = req.borrowDate || req.date || '---';
+                    const returnDate = req.returnDate || '---';
+                    const quantity = req.quantity || req.count || '1';
+                    const penalty = req.penalty || 'لا توجد';
+                    const rawStatus = (req.status || 'pending').toString().toLowerCase().trim();
+
+                    let statusColor = '#d97706';
+                    let statusText = 'قيد الانتظار';
+
+                    if (rawStatus === 'approved' || rawStatus === 'مقبول' || rawStatus === 'active') {
+                        statusColor = '#2563eb';
+                        statusText = 'مقبول (قيد الإعارة)';
+                    } else if (rawStatus === 'rejected' || rawStatus === 'مرفوض') {
+                        statusColor = '#64748b';
+                        statusText = 'مرفوض';
+                    } else if (rawStatus === 'returned' || rawStatus === 'تم الإرجاع') {
+                        statusColor = '#0284c7';
+                        statusText = 'تم الإرجاع للمكتبة';
+                    } else if (rawStatus === 'deleted' || rawStatus === 'محذوف' || rawStatus === 'محذوفة') {
+                        statusColor = '#94a3b8';
+                        statusText = 'ملغى / محذوف';
+                    }
+
+                    const adminNotes = req.adminNotes ? `<p style="margin: 0; font-size: 12px; color: #1d4ed8; background: #eff6ff; padding: 6px 10px; border-radius: 8px;">ملاحظة المكتبة: ${req.adminNotes}</p>` : '';
+
+                    const card = document.createElement('div');
+                    card.style.cssText = "background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;";
+
+                    let actionButtons = '';
+                    if (rawStatus === 'approved' || rawStatus === 'مقبول' || rawStatus === 'active') {
+                        actionButtons = `
+                            <button onclick="markAsReturned('${reqId}')" style="width: 100%; background: #0284c7; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px;">
+                                📥 تم إرجاع المادة للمكتبة
+                            </button>
+                        `;
+                    } else if (rawStatus !== 'returned' && rawStatus !== 'تم الإرجاع' && rawStatus !== 'deleted' && rawStatus !== 'محذوف') {
+                        actionButtons = `
+                            <div style="display: flex; gap: 10px; margin-top: 8px;">
+                                <button onclick="updateRequestStatus('${reqId}', 'approved')" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">قبول وإرسال إيميل</button>
+                                <button onclick="updateRequestStatus('${reqId}', 'rejected')" style="flex: 1; background: #64748b; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض وإرسال إيميل</button>
+                            </div>
+                        `;
+                    }
+
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; background: #f1f5f9; color: #334155; padding: 3px 10px; border-radius: 10px; font-weight: bold;">رقم الإعارة: ${loanId}</span>
+                            <span style="font-size: 12px; color: #64748b;">النوع: ${loanType}</span>
+                        </div>
+                        <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">معرف العنصر: ${itemId}</h4>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563; word-break: break-all;">معرف المستخدم (UID): <b>${uid}</b></p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">تاريخ الإعارة: ${borrowDate} | تاريخ الإرجاع: ${returnDate}</p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الكمية: ${quantity} | الغرامة: ${penalty}</p>
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة الحالية: <b style="color: ${statusColor};">${statusText}</b></p>
+                        ${adminNotes}
+                        ${actionButtons}
+                    `;
+                    container.appendChild(card);
+                }
             }
         }
 
         window.updateRequestStatus = async function(reqId, newStatus) {
             try {
                 const reqRef = doc(db, "loans", reqId);
-                await updateDoc(reqRef, { status: newStatus });
-                alert(`تم تحديث حالة الطلب إلى: ${newStatus}`);
-                loadRequests(); // تحديث القائمة والعداد مباشرة
+                const reqSnap = await getDoc(reqRef);
+                
+                if (!reqSnap.exists()) {
+                    alert("الطلب غير موجود!");
+                    return;
+                }
+
+                const loanData = reqSnap.data();
+                let studentEmail = loanData.email || loanData.userEmail || '';
+                let studentName = loanData.userName || loanData.studentName || 'عزيزي الطالب';
+
+                if (!studentEmail && loanData.uid) {
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", loanData.uid));
+                        if (userDoc.exists()) {
+                            studentEmail = userDoc.data().email || '';
+                            studentName = userDoc.data().name || studentName;
+                        }
+                    } catch (e) {
+                        console.log("تعذر جلب بيانات الطالب:", e);
+                    }
+                }
+
+                const customNotes = prompt("أدخل ملاحظات موجهة للطالب (اختياري):") || "";
+
+                await updateDoc(reqRef, { 
+                    status: newStatus,
+                    adminNotes: customNotes 
+                });
+
+                if (studentEmail) {
+                    const isApproved = (newStatus === 'approved' || newStatus === 'مقبول');
+                    const loanTypeStr = loanData.loanType || loanData.type || '';
+                    const isInternal = loanTypeStr.includes('داخل');
+                    
+                    let messageBody = "";
+
+                    if (isApproved) {
+                        if (isInternal) {
+                            messageBody = `تمت الموافقة على طلب الإعارة الداخلية برقم (${loanData.loanId || reqId}) للمادة: ${loanData.itemId || ''}.\n\nيرجى التوجه إلى قاعة الاطلاع بالمكتبة لاستلام المادة وتصفحها داخل المكتبة.`;
+                        } else {
+                            messageBody = `تمت الموافقة على طلب الإعارة الخارجية برقم (${loanData.loanId || reqId}) للمادة: ${loanData.itemId || ''}.\n\nيمكنك التوجه لمكتب الإعارة لاستلام المادة، علماً بأن تاريخ الإرجاع المحدد هو: ${loanData.returnDate || 'حسب النظام'}.`;
+                        }
+                    } else {
+                        messageBody = `نعتذر منك، تم رفض طلب الإعارة (${isInternal ? 'الداخلية' : 'الخارجية'}) برقم (${loanData.loanId || reqId}) للمادة: ${loanData.itemId || ''}.`;
+                    }
+
+                    if (customNotes) {
+                        messageBody += `\n\nملاحظة من أمين المكتبة: ${customNotes}`;
+                    }
+
+                    const templateParams = {
+                        email: studentEmail,
+                        student_name: studentName,
+                        message_body: messageBody
+                    };
+
+                    await emailjs.send("service_v4s03zs", "template_yc1aq67", templateParams);
+                    alert(`تم تحديث حالة طلب الإعارة وإرسال الإشعار بنجاح!`);
+                } else {
+                    alert(`تم تحديث حالة الطلب إلى (${newStatus})، ولكن لم يتم العثور على بريد إلكتروني للطالب.`);
+                }
+
+                fetchAndRenderData();
             } catch (error) {
-                console.error("خطأ في تحديث الحالة:", error);
-                alert('فشل تحديث حالة الطلب.');
+                console.error("خطأ في تحديث الحالة أو إرسال الإيميل:", error);
+                alert('حدث خطأ أثناء التحديث.');
             }
-        }
+        };
+
+        window.markAsReturned = async function(reqId) {
+            if (!confirm("هل تم استلام المادة بالفعل وإعادتها للمكتبة؟")) return;
+
+            try {
+                const reqRef = doc(db, "loans", reqId);
+                const reqSnap = await getDoc(reqRef);
+
+                if (!reqSnap.exists()) return;
+
+                const loanData = reqSnap.data();
+                let studentEmail = loanData.email || loanData.userEmail || '';
+                let studentName = loanData.userName || loanData.studentName || 'عزيزي الطالب';
+
+                if (!studentEmail && loanData.uid) {
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", loanData.uid));
+                        if (userDoc.exists()) studentEmail = userDoc.data().email || '';
+                    } catch (e) {}
+                }
+
+                await updateDoc(reqRef, { status: 'returned' });
+
+                if (studentEmail) {
+                    const templateParams = {
+                        email: studentEmail,
+                        student_name: studentName,
+                        message_body: `تم إرجاع المادة (${loanData.itemId || ''}) ذات رقم الإعارة (${loanData.loanId || reqId}) بنجاح إلى المكتبة. شكراً لاقتنائكم والتزامكم بمواعيد المكتبة.`
+                    };
+                    await emailjs.send("service_v4s03zs", "template_yc1aq67", templateParams);
+                }
+
+                alert("تم تحديث حالة الطلب إلى (تم الإرجاع) وإبلاغ الطالب بريدياً.");
+                fetchAndRenderData();
+            } catch (error) {
+                console.error("خطأ أثناء تأكيد الإرجاع:", error);
+                alert("حدث خطأ أثناء التحديث.");
+            }
+        };
+
+        window.updateSDIStatus = async function(docId, studentEmail, studentName, isApproved) {
+            if (!studentEmail || studentEmail === 'غير محدد') {
+                studentEmail = prompt("يرجى إدخال البريد الإلكتروني للطالب لإرسال الإشعار:");
+                if (!studentEmail) return;
+            }
+
+            const statusText = isApproved ? "مقبول" : "مرفوض";
+            let reason = "";
+            
+            if (!isApproved) {
+                reason = prompt("يرجى إدخال سبب الرفض (اختياري):") || "";
+            }
+
+            const messageBody = isApproved
+                ? "يسعدنا إبلاغك بأنه قد تم قبول طلبك وتفعيل اشتراكك في خدمة البث الانتقائي للمعلومات. ستصلك أحدث المصادر العلمية المقترنة باهتماماتك فور توفرها."
+                : `نعتذر منك، لم نتمكن من قبول طلب اشتراكك في خدمة البث الانتقائي حالياً. ${reason ? "السبب: " + reason : ""}`;
+
+            try {
+                const reqRef = doc(db, "sdi_requests", docId);
+                await updateDoc(reqRef, { status: statusText });
+
+                const templateParams = {
+                    email: studentEmail,
+                    student_name: studentName,
+                    message_body: messageBody
+                };
+
+                await emailjs.send("service_v4s03zs", "template_yc1aq67", templateParams);
+
+                alert(`تم تحديث الطلب إلى (${statusText}) وإرسال بريد إلكتروني للطالب بنجاح!`);
+                fetchAndRenderData();
+            } catch (error) {
+                console.error("خطأ في معالجة طلب البث الانتقائي:", error);
+                alert("حدث خطأ أثناء التحديث أو إرسال البريد الإلكتروني.");
+            }
+        };
 
         window.navigateTo = function(pageUrl) {
             window.location.href = pageUrl;
-        }
+        };
     </script>
 </body>
 </html>
