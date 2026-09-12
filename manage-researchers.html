@@ -18,7 +18,10 @@
                     <span style="font-size: 22px;">👨‍💻</span>
                     <h2 style="color: #1e293b; margin: 0; font-size: 18px; font-weight: bold;">إدارة وعرض الباحثين</h2>
                 </div>
-                <button onclick="window.location.href='admin-home.html'" style="background: #f1f5f9; color: #475569; border: none; border-radius: 8px; padding: 7px 12px; font-weight: 500; cursor: pointer; font-size: 12px; transition: 0.2s;">العودة للوحة التحكم</button>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="window.openAddModal()" style="background: #2563eb; color: white; border: none; border-radius: 8px; padding: 7px 12px; font-weight: bold; cursor: pointer; font-size: 12px;">+ إضافة باحث</button>
+                    <button onclick="window.location.href='admin-home.html'" style="background: #f1f5f9; color: #475569; border: none; border-radius: 8px; padding: 7px 12px; font-weight: 500; cursor: pointer; font-size: 12px;">لوحة التحكم</button>
+                </div>
             </div>
 
             <!-- قسم الباحثين -->
@@ -32,7 +35,30 @@
         </div>
     </div>
 
-    <!-- نافذة منبثقة لتعديل بيانات الباحث -->
+    <!-- نافذة إضافة باحث جديد -->
+    <div id="addModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.4); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box;">
+        <div style="background: white; padding: 22px; border-radius: 14px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <h3 style="margin: 0; color: #1e293b; font-size: 16px;">إضافة باحث جديد</h3>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 11px; color: #64748b; font-weight: bold;">اسم الباحث:</label>
+                <input type="text" id="addName" placeholder="أدخل الاسم الكامل" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 11px; color: #64748b; font-weight: bold;">البريد الإلكتروني:</label>
+                <input type="email" id="addEmail" placeholder="name@example.com" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 11px; color: #64748b; font-weight: bold;">التخصص / القسم:</label>
+                <input type="text" id="addSpecialty" value="علوم الحاسوب" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                <button onclick="window.saveNewResearcher()" style="flex: 1; background: #2563eb; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">حفظ وإضافة</button>
+                <button onclick="window.closeAddModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تعديل بيانات الباحث -->
     <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.4); backdrop-filter: blur(2px); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box;">
         <div style="background: white; padding: 22px; border-radius: 14px; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
             <h3 style="margin: 0; color: #1e293b; font-size: 16px;">تعديل بيانات الباحث</h3>
@@ -45,18 +71,22 @@
                 <label style="font-size: 11px; color: #64748b; font-weight: bold;">البريد الإلكتروني:</label>
                 <input type="text" id="editEmail" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
             </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 11px; color: #64748b; font-weight: bold;">التخصص / القسم:</label>
+                <input type="text" id="editSpecialty" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
             <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="window.saveResearcherEdit()" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">حفظ</button>
+                <button onclick="window.saveResearcherEdit()" style="flex: 1; background: #2563eb; color: white; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">حفظ</button>
                 <button onclick="window.closeEditModal()" style="flex: 1; background: #f1f5f9; color: #475569; border: none; padding: 9px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <!-- كود جلب بيانات الباحثين من Firebase -->
+    <!-- كود التعامل مع Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -84,21 +114,20 @@
         async function fetchResearchers() {
             const container = document.getElementById('researchersListContainer');
             try {
-                // يمكنك تغيير اسم المجموعة هنا إذا كانت مسجلة باسم "users" أو "researchers"
+                // سيتم إنشاء وعرض الجدول المخصص للباحثين باسم researchers تلقائياً عند إضافة أول باحث
                 const querySnapshot = await getDocs(collection(db, "researchers"));
                 container.innerHTML = '';
 
                 if (querySnapshot.empty) {
-                    container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">لا يوجد باحثون مسجلون حالياً.</p>';
+                    container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 13px; padding: 20px;">لا يوجد باحثون مسجلون حالياً. يمكنك إضافة باحث جديد عبر الزر بالأعلى.</p>';
                     return;
                 }
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    const name = data.name || data.fullName || data.researcherName || 'باحث بدون اسم';
-                    const email = data.email || data.userEmail || 'غير متوفر';
-                    const specialty = data.specialty || data.department || 'علوم الحاسوب';
-                    const researcherId = data.researcherId || docSnap.id;
+                    const name = data.name || 'باحث بدون اسم';
+                    const email = data.email || 'غير متوفر';
+                    const specialty = data.specialty || 'علوم الحاسوب';
 
                     const card = document.createElement('div');
                     card.style.cssText = "background: #ffffff; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);";
@@ -109,14 +138,13 @@
 
                         <!-- تفاصيل الباحث -->
                         <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #64748b; border-top: 1px dashed #f1f5f9; padding-top: 8px;">
-                            <div>معرف الباحث: <span style="font-family: monospace; color: #0284c7; font-weight: bold; direction: ltr; display: inline-block;">${researcherId}</span></div>
                             <div>البريد الإلكتروني: <span style="color: #334155; font-weight: 500;">${email}</span></div>
                             <div>التخصص / القسم: <span style="color: #0f172a; font-weight: 500;">${specialty}</span></div>
                         </div>
 
                         <!-- الأزرار في الأسفل -->
                         <div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px;">
-                            <button onclick="window.openEditModal('${docSnap.id}', '${name}', '${email}')" style="background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">تعديل</button>
+                            <button onclick="window.openEditModal('${docSnap.id}', '${name}', '${email}', '${specialty}')" style="background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">تعديل</button>
                             <button onclick="window.deleteResearcher('${docSnap.id}')" style="background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; border-radius: 6px; padding: 4px 10px; font-weight: 500; cursor: pointer; font-size: 11px;">حذف</button>
                         </div>
                     `;
@@ -128,10 +156,47 @@
             }
         }
 
-        window.openEditModal = function(docId, name, email) {
+        window.openAddModal = function() {
+            document.getElementById('addName').value = '';
+            document.getElementById('addEmail').value = '';
+            document.getElementById('addModal').style.display = 'flex';
+        }
+
+        window.closeAddModal = function() {
+            document.getElementById('addModal').style.display = 'none';
+        }
+
+        window.saveNewResearcher = async function() {
+            const name = document.getElementById('addName').value.trim();
+            const email = document.getElementById('addEmail').value.trim();
+            const specialty = document.getElementById('addSpecialty').value.trim();
+
+            if (!name || !email) {
+                alert('الرجاء إدخال اسم الباحث والبريد الإلكتروني.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "researchers"), {
+                    name: name,
+                    email: email,
+                    specialty: specialty,
+                    createdAt: new Date()
+                });
+                alert('تمت إضافة الباحث بنجاح!');
+                window.closeAddModal();
+                fetchResearchers();
+            } catch (error) {
+                console.error("خطأ أثناء الإضافة:", error);
+                alert('فشل إضافة الباحث.');
+            }
+        }
+
+        window.openEditModal = function(docId, name, email, specialty) {
             document.getElementById('editDocId').value = docId;
             document.getElementById('editName').value = name;
             document.getElementById('editEmail').value = email;
+            document.getElementById('editSpecialty').value = specialty;
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -143,11 +208,13 @@
             const docId = document.getElementById('editDocId').value;
             const newName = document.getElementById('editName').value;
             const newEmail = document.getElementById('editEmail').value;
+            const newSpecialty = document.getElementById('editSpecialty').value;
 
             try {
                 await updateDoc(doc(db, "researchers", docId), {
                     name: newName,
-                    email: newEmail
+                    email: newEmail,
+                    specialty: newSpecialty
                 });
                 alert('تم تعديل بيانات الباحث بنجاح.');
                 window.closeEditModal();
