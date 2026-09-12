@@ -42,6 +42,10 @@
                 <label style="font-size: 12px; color: #475569; font-weight: bold;">البريد الإلكتروني:</label>
                 <input type="email" id="editEmail" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
             </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 12px; color: #475569; font-weight: bold;">الرقم الجامعي:</label>
+                <input type="text" id="editStudentId" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; direction: ltr;">
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button onclick="window.saveStudentEdit()" style="flex: 1; background: #16a34a; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">حفظ التغييرات</button>
                 <button onclick="window.closeEditModal()" style="flex: 1; background: #e2e8f0; color: #334155; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer;">إلغاء</button>
@@ -80,8 +84,7 @@
 
         async function fetchAllData() {
             const departmentsMap = await fetchDepartmentsMap();
-            const authorsMap = await fetchAuthorsMap();
-            await fetchStudents(departmentsMap, authorsMap);
+            await fetchStudents(departmentsMap);
         }
 
         async function fetchDepartmentsMap() {
@@ -103,27 +106,7 @@
             return deptMap;
         }
 
-        async function fetchAuthorsMap() {
-            const authorsMap = new Map();
-            try {
-                const querySnapshot = await getDocs(collection(db, "authors"));
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    const docId = docSnap.id.trim();
-                    const fullname = (data.fullname || data.name || '').trim().toLowerCase();
-                    const studentIdField = (data.studentId || data.id || '').trim();
-
-                    if (fullname) authorsMap.set(fullname, docId);
-                    if (studentIdField) authorsMap.set(studentIdField.toLowerCase(), docId);
-                    authorsMap.set(docId.toLowerCase(), docId);
-                });
-            } catch (error) {
-                console.error("خطأ في جلب authors:", error);
-            }
-            return authorsMap;
-        }
-
-        async function fetchStudents(deptMap, authorsMap) {
+        async function fetchStudents(deptMap) {
             const container = document.getElementById('studentsListContainer');
             try {
                 const querySnapshot = await getDocs(collection(db, "student"));
@@ -138,16 +121,10 @@
                     const data = docSnap.data();
                     const name = data.name || data.fullname || 'طالب بدون اسم';
                     const email = data.email || 'لا يوجد بريد';
-                    const cleanName = name.trim().toLowerCase();
-                    const cleanEmail = email.trim().toLowerCase();
                     
-                    // الأولوية الأولى لحقل studentId الموجود مباشرة داخل وثيقة الطالب
+                    // الاعتماد المباشر على حقل studentId أو universityId في وثيقة الطالب
                     let universityId = data.studentId || 
-                                       data.authorId || 
-                                       authorsMap.get(cleanName) || 
-                                       authorsMap.get(cleanEmail) || 
-                                       authorsMap.get(docSnap.id.trim().toLowerCase()) || 
-                                       data.uid || 
+                                       data.universityId || 
                                        'غير متوفر';
 
                     const deptKey1 = String(data.departmentId || data.department_id || '').trim();
@@ -167,7 +144,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-weight: bold; color: #15803d; font-size: 16px;">${name}</span>
                             <div style="display: flex; gap: 6px;">
-                                <button onclick="window.openEditModal('${docSnap.id}', '${name}', '${email}')" style="background: #e0f2fe; color: #0369a1; border: none; border-radius: 6px; padding: 5px 10px; font-weight: bold; cursor: pointer; font-size: 12px;">تعديل</button>
+                                <button onclick="window.openEditModal('${docSnap.id}', '${name}', '${email}', '${universityId}')" style="background: #e0f2fe; color: #0369a1; border: none; border-radius: 6px; padding: 5px 10px; font-weight: bold; cursor: pointer; font-size: 12px;">تعديل</button>
                                 <button onclick="window.deleteStudent('${docSnap.id}')" style="background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 5px 10px; font-weight: bold; cursor: pointer; font-size: 12px;">حذف</button>
                             </div>
                         </div>
@@ -193,10 +170,11 @@
             }
         }
 
-        window.openEditModal = function(docId, name, email) {
+        window.openEditModal = function(docId, name, email, studentId) {
             document.getElementById('editDocId').value = docId;
             document.getElementById('editName').value = name;
             document.getElementById('editEmail').value = email;
+            document.getElementById('editStudentId').value = studentId === 'غير متوفر' ? '' : studentId;
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -208,11 +186,13 @@
             const docId = document.getElementById('editDocId').value;
             const newName = document.getElementById('editName').value;
             const newEmail = document.getElementById('editEmail').value;
+            const newStudentId = document.getElementById('editStudentId').value;
 
             try {
                 await updateDoc(doc(db, "student", docId), {
                     name: newName,
-                    email: newEmail
+                    email: newEmail,
+                    studentId: newStudentId
                 });
                 alert('تم تعديل بيانات الطالب بنجاح.');
                 window.closeEditModal();
