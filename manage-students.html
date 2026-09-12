@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلاب</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 15px; box-sizing: border-box; min-height: 100vh;">
+        
+        <!-- الحاوية الرئيسية -->
+        <div style="width: 100%; max-width: 600px; background: white; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 15px; box-sizing: border-box;">
+            
+            <!-- رأس الصفحة -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
+                <h2 style="color: #1f2937; margin: 0; font-size: 20px;">إدارة وعرض الطلاب</h2>
+                <button onclick="window.location.href='admin-home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للوحة التحكم</button>
+            </div>
+
+            <!-- حقل البحث السريع -->
+            <div style="width: 100%;">
+                <input type="text" id="searchInput" placeholder="ابحث باسم الطالب أو بريده الإلكتروني أو القسم..." onkeyup="filterStudents()" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; box-sizing: border-box;">
+            </div>
+
+            <!-- قائمة الطلاب -->
+            <div id="studentsListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto;">
+                <p style="text-align: center; color: #64748b; font-size: 14px;">جاري تحميل بيانات الطلاب...</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- كود جلب وحذف وعرض الطلاب من Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
+            authDomain: "library-catalog-5d1ee.firebaseapp.com",
+            databaseURL: "https://library-catalog-5d1ee-default-rtdb.firebaseio.com",
+            projectId: "library-catalog-5d1ee",
+            storageBucket: "library-catalog-5d1ee.firebasestorage.app",
+            messagingSenderId: "208558639650",
+            appId: "1:208558639650:web:564ef91d341bbb23ef587b",
+            measurementId: "G-BHYSZHJLTR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let allStudents = [];
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                fetchStudents();
+            }
+        });
+
+        async function fetchStudents() {
+            const container = document.getElementById('studentsListContainer');
+            container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">جاري تحميل بيانات الطلاب...</p>';
+
+            try {
+                // جلب البيانات من مجموعة "student" المطابقة لقاعدة البيانات
+                const querySnapshot = await getDocs(collection(db, "student"));
+                allStudents = [];
+
+                querySnapshot.forEach((docSnap) => {
+                    allStudents.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                displayStudents(allStudents);
+            } catch (error) {
+                console.error("خطأ في جلب الطلاب:", error);
+                container.innerHTML = '<p style="text-align: center; color: #dc2626; font-size: 14px;">حدث خطأ أثناء جلب بيانات الطلاب.</p>';
+            }
+        }
+
+        function displayStudents(students) {
+            const container = document.getElementById('studentsListContainer');
+            container.innerHTML = '';
+
+            if (students.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">لا يوجد طلاب مسجلين حالياً.</p>';
+                return;
+            }
+
+            students.forEach((student) => {
+                // عرض الحقول المتاحة (الاسم، البريد، القسم) واستبعاد authorId تماماً
+                const name = student.name || 'طالب بدون اسم';
+                const email = student.email || 'لا يوجد بريد إلكتروني';
+                const department = student.department || student.departmet || 'غير محدد';
+
+                const card = document.createElement('div');
+                card.style.cssText = "background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
+
+                card.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 4px; overflow: hidden;">
+                        <span style="font-weight: bold; color: #1e293b; font-size: 14px;">${name}</span>
+                        <span style="color: #64748b; font-size: 12px;">البريد الإلكتروني: ${email}</span>
+                        <span style="color: #64748b; font-size: 12px;">القسم: ${department}</span>
+                    </div>
+                    <button onclick="window.deleteStudent('${student.id}')" style="background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 6px 10px; font-weight: bold; cursor: pointer; font-size: 12px; white-space: nowrap;">حذف</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.filterStudents = function() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allStudents.filter(student => {
+                const name = (student.name || '').toLowerCase();
+                const email = (student.email || '').toLowerCase();
+                const department = (student.department || student.departmet || '').toLowerCase();
+                return name.includes(query) || email.includes(query) || department.includes(query);
+            });
+            displayStudents(filtered);
+        }
+
+        window.deleteStudent = async function(docId) {
+            if (confirm('هل أنت متأكد من حذف هذا الطالب من النظام؟')) {
+                try {
+                    await deleteDoc(doc(db, "student", docId));
+                    alert('تم حذف الطالب بنجاح.');
+                    fetchStudents();
+                } catch (error) {
+                    console.error("خطأ في حذف الطالب:", error);
+                    alert('فشل حذف الطالب.');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
