@@ -51,7 +51,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         emailjs.init("4wt5LI56x16rtKcFp");
 
@@ -108,13 +108,11 @@
             const btnLoans = document.getElementById('tabLoans');
             const btnConsult = document.getElementById('tabConsult');
 
-            // إعادة تعيين جميع الأزرار للوضع غير النشط
             [btnSdi, btnLoans, btnConsult].forEach(btn => {
                 btn.style.background = '#e2e8f0';
                 btn.style.color = '#475569';
             });
 
-            // تفعيل الزر المختار بلون موحد
             const activeBtn = tabName === 'sdi' ? btnSdi : (tabName === 'loans' ? btnLoans : btnConsult);
             activeBtn.style.background = '#2563eb';
             activeBtn.style.color = 'white';
@@ -122,13 +120,12 @@
             renderCurrentTab();
         };
 
-        async function renderCurrentTab() {
+        function renderCurrentTab() {
             const container = document.getElementById('requestsContainer');
             const countBadge = document.getElementById('requestsCount');
             const requestsLabel = document.getElementById('requestsLabel');
             container.innerHTML = '';
 
-            // 1. قسم البث الانتقائي
             if (currentTab === 'sdi') {
                 requestsLabel.textContent = "إجمالي طلبات البث الانتقائي:";
                 countBadge.textContent = sdiDocsData.length;
@@ -146,15 +143,19 @@
                     const interests = req.interests || 'غير محددة';
                     const status = req.status || 'معلق';
 
+                    const isProcessed = status === 'مقبول' || status === 'مرفوض';
+                    const statusColor = status === 'مقبول' ? '#16a34a' : (status === 'مرفوض' ? '#dc2626' : '#d97706');
+
                     const card = document.createElement('div');
-                    card.style.cssText = "background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;";
+                    card.id = `card-${reqId}`;
+                    card.style.cssText = `background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; border-right: 5px solid ${statusColor};`;
                     card.innerHTML = `
                         <span style="font-size: 12px; background: #eff6ff; color: #1d4ed8; padding: 3px 10px; border-radius: 10px; font-weight: bold; width: fit-content;">بث انتقائي</span>
                         <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">الطالب: ${studentName}</h4>
                         <p style="margin: 0; font-size: 13px; color: #4b5563;">البريد: <b>${studentEmail}</b></p>
                         <p style="margin: 0; font-size: 13px; color: #4b5563;">الاهتمامات: ${interests}</p>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b style="color: #d97706;">${status}</b></p>
-                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b id="status-${reqId}" style="color: ${statusColor};">${status}</b></p>
+                        <div id="actions-${reqId}" style="display: ${isProcessed ? 'none' : 'flex'}; gap: 10px; margin-top: 8px;">
                             <button onclick="updateSDIStatus('${reqId}', '${studentEmail}', '${studentName}', true)" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">قبول وإرسال إيميل</button>
                             <button onclick="updateSDIStatus('${reqId}', '${studentEmail}', '${studentName}', false)" style="flex: 1; background: #64748b; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض وإرسال إيميل</button>
                         </div>
@@ -162,7 +163,6 @@
                     container.appendChild(card);
                 }
 
-            // 2. قسم الإعارة
             } else if (currentTab === 'loans') {
                 requestsLabel.textContent = "إجمالي طلبات الإعارة:";
                 countBadge.textContent = loanDocsData.length;
@@ -175,13 +175,18 @@
                 for (const docSnap of loanDocsData) {
                     const req = docSnap.data();
                     const reqId = docSnap.id;
+                    const status = req.status || 'pending';
+                    const isProcessed = status === 'approved' || status === 'rejected';
+                    const statusColor = status === 'approved' ? '#16a34a' : (status === 'rejected' ? '#dc2626' : '#d97706');
+
                     const card = document.createElement('div');
-                    card.style.cssText = "background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;";
+                    card.id = `card-${reqId}`;
+                    card.style.cssText = `background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; border-right: 5px solid ${statusColor};`;
                     card.innerHTML = `
                         <span style="font-size: 12px; background: #f1f5f9; color: #334155; padding: 3px 10px; border-radius: 10px; font-weight: bold; width: fit-content;">رقم الإعارة: ${req.loanId || 'LN'}</span>
                         <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">معرف العنصر: ${req.itemId || 'غير متوفر'}</h4>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b>${req.status || 'pending'}</b></p>
-                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b id="status-${reqId}" style="color: ${statusColor};">${status}</b></p>
+                        <div id="actions-${reqId}" style="display: ${isProcessed ? 'none' : 'flex'}; gap: 10px; margin-top: 8px;">
                             <button onclick="updateRequestStatus('${reqId}', 'approved')" style="flex: 1; background: #2563eb; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">قبول الطلب</button>
                             <button onclick="updateRequestStatus('${reqId}', 'rejected')" style="flex: 1; background: #64748b; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض الطلب</button>
                         </div>
@@ -189,7 +194,6 @@
                     container.appendChild(card);
                 }
 
-            // 3. قسم الاستشارات المرجعية
             } else if (currentTab === 'consult') {
                 requestsLabel.textContent = "إجمالي طلبات الاستشارات:";
                 countBadge.textContent = consultDocsData.length;
@@ -209,16 +213,20 @@
                     const desc = req.description || 'لا توجد تفاصيل';
                     const status = req.status || 'pending';
 
+                    const isProcessed = status === 'مقبول' || status === 'مرفوض';
+                    const statusColor = status === 'مقبول' ? '#16a34a' : (status === 'مرفوض' ? '#dc2626' : '#059669');
+
                     const card = document.createElement('div');
-                    card.style.cssText = "background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;";
+                    card.id = `card-${reqId}`;
+                    card.style.cssText = `background: white; padding: 15px 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box; border-right: 5px solid ${statusColor};`;
                     card.innerHTML = `
                         <span style="font-size: 12px; background: #ecfdf5; color: #047857; padding: 3px 10px; border-radius: 10px; font-weight: bold; width: fit-content;">استشارة مرجعية</span>
                         <h4 style="margin: 5px 0; color: #1f2937; font-size: 15px;">العنوان: ${title}</h4>
                         <p style="margin: 0; font-size: 13px; color: #4b5563;">الطالب: ${studentName} (${studentEmail})</p>
                         <p style="margin: 0; font-size: 13px; color: #4b5563;">التخصص: ${major}</p>
                         <p style="margin: 0; font-size: 13px; color: #4b5563;">التفاصيل: ${desc}</p>
-                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b style="color: #059669;">${status}</b></p>
-                        <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <p style="margin: 0; font-size: 13px; color: #4b5563;">الحالة: <b id="status-${reqId}" style="color: ${statusColor};">${status}</b></p>
+                        <div id="actions-${reqId}" style="display: ${isProcessed ? 'none' : 'flex'}; gap: 10px; margin-top: 8px;">
                             <button onclick="updateConsultStatus('${reqId}', '${studentEmail}', '${studentName}', true)" style="flex: 1; background: #16a34a; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">الرد والقبول</button>
                             <button onclick="updateConsultStatus('${reqId}', '${studentEmail}', '${studentName}', false)" style="flex: 1; background: #dc2626; color: white; border: none; border-radius: 10px; padding: 9px; font-weight: bold; cursor: pointer; font-size: 13px;">رفض الطلب</button>
                         </div>
@@ -228,8 +236,28 @@
             }
         }
 
+        // دالة مساعدة لتحديث شكل البطاقة فورياً في الواجهة
+        function updateCardUI(reqId, newStatusText, isApproved) {
+            const statusEl = document.getElementById(`status-${reqId}`);
+            const actionsEl = document.getElementById(`actions-${reqId}`);
+            const cardEl = document.getElementById(`card-${reqId}`);
+
+            if (statusEl) {
+                statusEl.textContent = newStatusText;
+                statusEl.style.color = isApproved ? '#16a34a' : '#dc2626';
+            }
+            if (cardEl) {
+                cardEl.style.borderRight = `5px solid ${isApproved ? '#16a34a' : '#dc2626'}`;
+            }
+            if (actionsEl) {
+                actionsEl.style.display = 'none'; // إخفاء أزرار القبول والرفض فوراً بعد النقر
+            }
+        }
+
         window.updateSDIStatus = async function(docId, studentEmail, studentName, isApproved) {
             const statusText = isApproved ? "مقبول" : "مرفوض";
+            updateCardUI(docId, statusText, isApproved); // تحديث الشكل فوراً
+
             try {
                 await updateDoc(doc(db, "sdi_requests", docId), { status: statusText });
                 await emailjs.send("service_v4s03zs", "template_yc1aq67", {
@@ -237,13 +265,17 @@
                     message_body: isApproved ? "تم قبول طلب اشتراكك في خدمة البث الانتقائي." : "نعتذر، لم يتم قبول طلب البث الانتقائي."
                 });
                 alert("تم تحديث الطلب وإرسال البريد بنجاح!");
-                fetchAndRenderData();
-            } catch (e) { alert("حدث خطأ."); }
+            } catch (e) { 
+                alert("حدث خطأ أثناء التحديث."); 
+                fetchAndRenderData(); // إعادة التحميل في حال حدوث خطأ
+            }
         };
 
         window.updateConsultStatus = async function(docId, studentEmail, studentName, isApproved) {
             const statusText = isApproved ? "مقبول" : "مرفوض";
             const replyText = prompt("اكتب الرد أو التوجيه الموجه للطالب:") || "شكراً لاستشارتك.";
+            
+            updateCardUI(docId, statusText, isApproved); // تحديث الشكل فوراً
 
             try {
                 await updateDoc(doc(db, "consultations", docId), { status: statusText, reply: replyText });
@@ -254,16 +286,24 @@
                     });
                 }
                 alert("تم الرد على الاستشارة وإرسال الإشعار للطالب بنجاح!");
+            } catch (e) { 
+                console.error(e); 
+                alert("حدث خطأ أثناء إرسال الرد."); 
                 fetchAndRenderData();
-            } catch (e) { console.error(e); alert("حدث خطأ أثناء إرسال الرد."); }
+            }
         };
 
         window.updateRequestStatus = async function(reqId, newStatus) {
+            const isApproved = newStatus === 'approved';
+            updateCardUI(reqId, newStatus, isApproved); // تحديث الشكل فوراً
+
             try {
                 await updateDoc(doc(db, "loans", reqId), { status: newStatus });
                 alert("تم تحديث حالة الإعارة بنجاح!");
+            } catch (e) { 
+                alert("حدث خطأ."); 
                 fetchAndRenderData();
-            } catch (e) { alert("حدث خطأ."); }
+            }
         };
 
         window.navigateTo = (url) => window.location.href = url;
