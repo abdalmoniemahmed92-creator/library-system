@@ -5,66 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>خدمة البث الانتقائي</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
 
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; min-height: 100vh;">
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
         
-        <div style="width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 12px;">
-            
-            <!-- عنوان الصفحة -->
-            <h2 style="text-align: center; color: #1f2937; margin: 0 0 5px 0; font-size: 18px;">خدمة البث الانتقائي</h2>
+        <div style="width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
 
-            <!-- النص الجذاب أعلى الحقول يعبر عن الخدمة -->
-            <p style="text-align: center; color: #64748b; font-size: 12px; line-height: 1.5; margin: 0 0 10px 0; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                اشترك في خدمة البث الانتقائي لتصلك أحدث الإصدارات، الكتب، والرسائل الجامعية في مجالك الأكاديمي مباشرة وبشكل مخصص لك.
-            </p>
+            <!-- العنوان الرئيسي -->
+            <h2 style="color: #1e293b; margin-bottom: 0px; text-align: center; font-size: 18px;">خدمة البث الانتقائي (SDI)</h2>
 
-            <!-- حقل الاسم -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">الإسم</label>
-                <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            <!-- نبذة تعريفيّة بالخدمة -->
+            <div style="background: white; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <p style="margin: 0; font-size: 12px; color: #475569; line-height: 1.6;">
+                    اشترك في خدمة البث الانتقائي لتصلك أحدث الإصدارات، الكتب، والرسائل الجامعية في مجالك الأكاديمي مباشرة وبشكل مخصص لك.
+                </p>
             </div>
 
-            <!-- حقل الهاتف -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">الهاتف</label>
-                <input type="tel" id="phone" placeholder="رقم الهاتف للتواصل" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
+            <!-- نموذج الاشتراك -->
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; box-sizing: border-box;">
+                
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">الاسم الكامل</label>
+                    <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #1e293b;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">رقم الهاتف</label>
+                    <input type="text" id="phone" placeholder="رقم الهاتف للتواصل" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #1e293b;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">البريد الإلكتروني</label>
+                    <input type="email" id="email" placeholder="example@domain.com" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #1e293b;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">التخصص / القسم الأكاديمي</label>
+                    <select id="department" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #334155; cursor: pointer;">
+                        <option value="" disabled selected>اختر التخصص / القسم...</option>
+                        <option value="علوم الحاسوب">علوم الحاسوب</option>
+                        <option value="تقنية معلومات">تقنية معلومات</option>
+                        <option value="هندسة برمجيات">هندسة برمجيات</option>
+                        <option value="نظم معلومات إدارية">نظم معلومات إدارية</option>
+                        <option value="نظم معلومات محاسبية">نظم معلومات محاسبية</option>
+                        <option value="نظم معلومات المكتبات">نظم معلومات المكتبات</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">نوع المحتوى المطلوب استقباله</label>
+                    <select id="contentType" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #334155; cursor: pointer;">
+                        <option value="الكل (كتب وريلائل جامعية)">الكل (كتب وإصدارات + رسائل جامعية)</option>
+                        <option value="الكتب والإصدارات فقط">الكتب والإصدارات فقط</option>
+                        <option value="الرسائل الجامعية فقط">الرسائل الجامعية فقط</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">طريقة استلام التنبيهات</label>
+                    <select id="notificationChannel" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #334155; cursor: pointer;">
+                        <option value="البريد الإلكتروني">البريد الإلكتروني فقط</option>
+                        <option value="رقم الهاتف">رقم الهاتف فقط</option>
+                        <option value="كلاهما">كلاهما (البريد والهاتف)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">كلمات مفتاحية أو موضوعات الاهتمام</label>
+                    <textarea id="interests" rows="3" placeholder="مثال: الذكاء الاصطناعي، قواعد البيانات السحابية..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; resize: none; font-family: Tahoma, sans-serif; color: #1e293b;"></textarea>
+                </div>
+
+                <!-- الأزرار -->
+                <button id="submitBtn" onclick="submitSubscription()" style="width: 100%; background: #475569; color: white; border: none; border-radius: 6px; padding: 11px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 5px; transition: 0.2s;">إشتراك في الخدمة</button>
+                
+                <button onclick="navigateTo('service.html')" style="width: 100%; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 11px; font-weight: bold; cursor: pointer; font-size: 12px;">العودة للخدمات</button>
             </div>
-
-            <!-- حقل البريد الإلكتروني الأول -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">البريد الإلكتروني</label>
-                <input type="email" id="email" placeholder="example@domain.com" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-
-            <!-- حقل اختيار البريد أو التخصص (قائمة منسدلة) -->
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right;">التخصص / القسم</label>
-                <select id="categorySelect" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white;">
-                    <option value="علوم الحاسوب">علوم الحاسوب</option>
-                    <option value="تقنية المعلومات">تقنية المعلومات</option>
-                    <option value="نظم المعلومات">نظم المعلومات</option>
-                </select>
-            </div>
-
-            <!-- حقل النوع والعنوان (مربع نص متعدد الأسطر) -->
-            <div style="display: flex; align-items: flex-start; gap: 10px;">
-                <label style="font-size: 13px; color: #334155; width: 100px; font-weight: bold; text-align: right; padding-top: 8px;">النوع والعنوان</label>
-                <textarea id="notes" placeholder="اكتب تفاصيل اهتماماتك أو المواضيع المطلوبة..." style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; resize: none; height: 70px;"></textarea>
-            </div>
-
-            <!-- زر إشتراك -->
-            <button onclick="submitSubscription()" style="width: 100%; background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">إشتراك</button>
-
-            <!-- زر العودة لصفحة الخدمات (مربوط بـ service.html) -->
-            <button onclick="window.location.href='service.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للخدمات</button>
 
         </div>
     </div>
 
-    <!-- كود الربط مع Firebase لحفظ طلب البث الانتقائي -->
+    <!-- Firebase والسكربت البرمجي -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -79,33 +102,76 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.submitSubscription = async function() {
-            const subData = {
-                fullName: document.getElementById('fullName').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                specialty: document.getElementById('categorySelect').value,
-                details: document.getElementById('notes').value,
-                date: new Date().toISOString().split('T')[0],
-                status: 'pending'
-            };
+        let currentUserUid = "";
 
-            if (!subData.fullName || !subData.email) {
-                alert('الرجاء إدخال الاسم والبريد الإلكتروني على الأقل.');
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                if(!document.getElementById('email').value) {
+                    document.getElementById('email').value = user.email || '';
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        window.submitSubscription = async function() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const department = document.getElementById('department').value;
+            const contentType = document.getElementById('contentType').value;
+            const notificationChannel = document.getElementById('notificationChannel').value;
+            const interests = document.getElementById('interests').value.trim();
+            const btn = document.getElementById('submitBtn');
+
+            if (!fullName || !phone || !email || !department) {
+                alert('الرجاء تعبئة الحقول الأساسية المطلوبة.');
                 return;
             }
 
             try {
-                // حفظ البيانات في مجموعة جديدة خاصة بخدمة البث الانتقائي في Firestore
-                await addDoc(collection(db, "broadcast_subscriptions"), subData);
-                alert('تم تقديم طلب الاشتراك في خدمة البث الانتقائي بنجاح!');
-                window.location.href = 'service.html';
+                btn.disabled = true;
+                btn.innerText = "جاري الإرسال...";
+
+                await addDoc(collection(db, "selective_requests"), {
+                    uid: currentUserUid,
+                    fullName: fullName,
+                    phone: phone,
+                    email: email,
+                    department: department,
+                    contentType: contentType,
+                    notificationChannel: notificationChannel,
+                    interests: interests,
+                    type: "بث انتقائي (SDI)",
+                    status: "pending",
+                    createdAt: new Date()
+                });
+
+                alert('تم إرسال طلب الاشتراك في خدمة البث الانتقائي (SDI) بنجاح! سيتم التواصل معك عند توفر إصدارات جديدة مطابقة لاهتماماتك.');
+                
+                // إعادة تعيين الحقول
+                document.getElementById('fullName').value = '';
+                document.getElementById('phone').value = '';
+                document.getElementById('interests').value = '';
+                document.getElementById('department').selectedIndex = 0;
+                document.getElementById('contentType').selectedIndex = 0;
+                document.getElementById('notificationChannel').selectedIndex = 0;
+
             } catch (error) {
-                console.error("خطأ في حفظ الاشتراكات: ", error);
-                alert('حدث خطأ أثناء إرسال الطلب، تأكد من اتصال الإنترنت.');
+                console.error("خطأ في إرسال الطلب:", error);
+                alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة لاحقاً.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "إشتراك في الخدمة";
             }
+        }
+
+        window.navigateTo = function(pageUrl) {
+            window.location.href = pageUrl;
         }
     </script>
 </body>
