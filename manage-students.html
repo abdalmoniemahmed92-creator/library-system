@@ -53,11 +53,11 @@
         </div>
     </div>
 
-    <!-- كود جلب البيانات وربطها من Firebase -->
+    <!-- كود جلب البيانات وربطها من Firebase مع ضبط إعدادات الاتصال المحلي -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeFirestore, collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -72,7 +72,11 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        
+        // استخدام initializeFirestore مع تفعيل Long Polling لمنع أخطاء الاتصال في بيئة التطوير المحلية
+        const db = initializeFirestore(app, {
+            experimentalForceLongPolling: true
+        });
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -122,7 +126,6 @@
                     const name = data.name || data.fullname || 'طالب بدون اسم';
                     const email = data.email || 'لا يوجد بريد';
                     
-                    // الاعتماد المباشر على حقل studentId أو universityId في وثيقة الطالب
                     let universityId = data.studentId || 
                                        data.universityId || 
                                        'غير متوفر';
