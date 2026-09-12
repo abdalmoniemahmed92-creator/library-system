@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اقتراح بحث أو مرجع - الفهرس الإلكتروني</title>
+    <title>اقتراح بحث أو مرجع جديد</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -13,144 +13,164 @@
             font-family: 'Cairo', sans-serif;
         }
         body {
-            background-color: #f4f6f9;
-            direction: rtl;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: #f1f5f9;
+            color: #1e293b;
             padding: 20px;
         }
-        .form-card {
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 600px;
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
+            color: #1f2937;
             text-align: center;
             font-size: 22px;
+            margin-bottom: 5px;
         }
         .form-group {
-            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
         label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
         }
         input, select, textarea {
-            width: 100%;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            background: #f8fafc;
         }
         textarea {
             resize: vertical;
-            height: 100px;
         }
-        .btn-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .submit-btn {
-            background: #3498db;
+        .btn-submit {
+            background: #2563eb;
             color: white;
             border: none;
-            flex: 1;
-            padding: 12px;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: 700;
+            border-radius: 8px;
+            padding: 14px;
+            font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
+            font-size: 15px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(37,99,235,0.2);
         }
-        .submit-btn:hover {
-            background: #2980b9;
-        }
-        .back-btn {
+        .btn-back {
             background: #e2e8f0;
             color: #334155;
-            border: 1px solid #cbd5e1;
-            flex: 1;
+            border: none;
+            border-radius: 8px;
             padding: 12px;
-            border-radius: 5px;
-            font-size: 15px;
-            font-weight: 700;
-            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
             text-align: center;
-            display: flex;
+            text-decoration: none;
+            display: block;
+        }
+        /* تصميم النافذة المنبثقة (Modal) */
+        #successModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
-            transition: background 0.3s;
+            z-index: 1000;
+            padding: 15px;
         }
-        .back-btn:hover {
-            background: #cbd5e1;
-        }
-        .msg {
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 380px;
             text-align: center;
-            margin-bottom: 15px;
-            font-size: 14px;
-            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            animation: fadeIn 0.3s ease;
         }
-        .success { color: #27ae60; }
-        .error { color: #e74c3c; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="form-card">
+    <div class="container">
         <h2>اقتراح بحث أو مشروع تخرج جديد</h2>
-        <div id="statusMsg" class="msg"></div>
+        <p style="color: #64748b; font-size: 13px; text-align: center; margin-bottom: 10px;">قم بملء الحقول أدناه لتقديم مقترحك للمكتبة</p>
 
-        <form id="researchForm">
-            <div class="form-group">
-                <label for="title">عنوان البحث أو الرسالة</label>
-                <input type="text" id="title" required placeholder="مثال: نظام إدارة المكتبات الذكي">
-            </div>
+        <!-- عنوان البحث -->
+        <div class="form-group">
+            <label>عنوان البحث أو الرسالة</label>
+            <input type="text" id="researchTitle" placeholder="مثال: نظام إدارة المكتبات الذكي">
+        </div>
 
-            <div class="form-group">
-                <label for="author">اسم الباحث / المؤلف</label>
-                <input type="text" id="author" required placeholder="الاسم الثلاثي">
-            </div>
+        <!-- اسم الباحث -->
+        <div class="form-group">
+            <label>اسم الباحث / المؤلف</label>
+            <input type="text" id="researchAuthor" placeholder="الاسم الثلاثي">
+        </div>
 
-            <div class="form-group">
-                <label for="category">التخصص الأكاديمي</label>
-                <select id="category" required>
-                    <option value="">اختر التخصص</option>
-                    <option value="الذكاء الاصطناعي">الذكاء الاصطناعي (AI)</option>
-                    <option value="هندسة البرمجيات">هندسة البرمجيات (Software Engineering)</option>
-                    <option value="أمن المعلومات">أمن المعلومات (Cybersecurity)</option>
-                    <option value="شبكات الحاسوب">شبكات الحاسوب (Networks)</option>
-                    <option value="نظم المعلومات">نظم المعلومات (Information Systems)</option>
-                </select>
-            </div>
+        <!-- التخصص الأكاديمي -->
+        <div class="form-group">
+            <label>التخصص الأكاديمي</label>
+            <select id="researchMajor">
+                <option value="">اختر التخصص</option>
+                <option value="علوم الحاسوب">علوم الحاسوب</option>
+                <option value="نظم المعلومات">نظم المعلومات</option>
+                <option value="تقنية المعلومات">تقنية المعلومات</option>
+                <option value="هندسة البرمجيات">هندسة البرمجيات</option>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="year">سنة النشر / التخرج</label>
-                <input type="number" id="year" required placeholder="2026" min="2000" max="2030">
-            </div>
+        <!-- سنة النشر / التخرج -->
+        <div class="form-group">
+            <label>سنة النشر / التخرج</label>
+            <input type="number" id="researchYear" value="2026">
+        </div>
 
-            <div class="form-group">
-                <label for="abstract">ملخص البحث (Abstract)</label>
-                <textarea id="abstract" required placeholder="اكتب نبذة مختصرة عن محتوى البحث والهدف منه..."></textarea>
-            </div>
+        <!-- ملخص البحث (Abstract) -->
+        <div class="form-group">
+            <label>ملخص البحث (Abstract)</label>
+            <textarea id="researchDesc" rows="4" placeholder="اكتب نبذة مختصرة عن فكرة البحث أو المشروع..."></textarea>
+        </div>
 
-            <div class="btn-container">
-                <button type="submit" class="submit-btn" id="submitBtn">إرسال الاقتراح</button>
-                <a href="researcher-home.html" class="back-btn">العودة للوحة الباحث</a>
-            </div>
-        </form>
+        <!-- أزرار الإجراءات -->
+        <button id="submitBtn" class="btn-submit" onclick="submitResearch()">إرسال المقترح</button>
+        <a href="researcher-home.html" class="btn-back">العودة لوحة الباحث</a>
     </div>
 
+    <!-- نافذة منبثقة (Modal) لتأكيد الإرسال -->
+    <div id="successModal">
+        <div class="modal-content">
+            <div style="font-size: 40px;">🎉</div>
+            <h3 style="color: #16a34a; font-size: 18px; margin: 0;">تم إرسال المقترح بنجاح!</h3>
+            <p style="color: #475569; font-size: 13px; line-height: 1.5;">تم إرسال مقترحك إلى لوحة تحكم المدير بنجاح، وسيتم مراجعته (قبول أو رفض) قريباً.</p>
+            <button onclick="window.location.href='researcher-home.html'" style="background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">العودة إلى لوحة الباحث</button>
+        </div>
+    </div>
+
+    <!-- كود إرسال البيانات لفايربيس -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -171,59 +191,56 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let currentUser = null;
+        let currentUserEmail = "";
 
-        // التحقق من أن المستخدم مسجل دخول
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
+            if (!user) {
+                window.location.href = 'login.html';
             } else {
-                window.location.href = "login.html";
+                currentUserEmail = user.email;
             }
         });
 
-        // معالجة إرسال النموذج وحفظه في Firestore
-        document.getElementById("researchForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const statusMsg = document.getElementById("statusMsg");
-            
-            const title = document.getElementById("title").value.trim();
-            const author = document.getElementById("author").value.trim();
-            const category = document.getElementById("category").value;
-            const year = document.getElementById("year").value.trim();
-            const abstract = document.getElementById("abstract").value.trim();
+        async function submitResearch() {
+            const title = document.getElementById("researchTitle").value.trim();
+            const author = document.getElementById("researchAuthor").value.trim();
+            const major = document.getElementById("researchMajor").value;
+            const year = document.getElementById("researchYear").value.trim();
+            const desc = document.getElementById("researchDesc").value.trim();
+            const btn = document.getElementById("submitBtn");
 
-            if (!currentUser) {
-                statusMsg.className = "msg error";
-                statusMsg.textContent = "يجب تسجيل الدخول أولاً لإرسال المقترح.";
+            if (!title || !author || !major || !year || !desc) {
+                alert("الرجاء ملء جميع الحقول المطلوبة!");
                 return;
             }
 
             try {
-                // حفظ البيانات في مجموعة suggested_research
-                await addDoc(collection(db, "suggested_research"), {
+                btn.disabled = true;
+                btn.textContent = "جاري الإرسال...";
+
+                await addDoc(collection(db, "suggest_research"), {
                     title: title,
                     author: author,
-                    category: category,
+                    major: major,
                     year: year,
-                    abstract: abstract,
-                    suggestedBy: currentUser.uid,
-                    status: "pending", // معلق لحين موافقة المشرف
+                    description: desc,
+                    researcherEmail: currentUserEmail,
+                    status: "pending",
                     createdAt: serverTimestamp()
                 });
 
-                statusMsg.className = "msg success";
-                statusMsg.textContent = "تم إرسال اقتراح البحث بنجاح، بانتظار مراجعة الإدارة.";
-                
-                // تفريغ الحقول بعد الإرسال الناجح
-                document.getElementById("researchForm").reset();
+                document.getElementById("successModal").style.display = "flex";
 
             } catch (error) {
-                console.error("خطأ أثناء حفظ الاقتراح:", error);
-                statusMsg.className = "msg error";
-                statusMsg.textContent = "حدث خطأ أثناء الإرسال، حاول مرة أخرى.";
+                console.error("خطأ في إرسال المقترح: ", error);
+                alert("حدث خطأ أثناء الإرسال، حاول مرة أخرى.");
+                btn.disabled = false;
+                btn.textContent = "إرسال المقترح";
             }
-        });
+        }
+
+        // ربط الدالة بـ window لحل مشكلة استدعائها من الـ HTML مباشرة داخل الـ Module
+        window.submitResearch = submitResearch;
     </script>
 </body>
 </html>
