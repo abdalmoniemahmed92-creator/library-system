@@ -15,67 +15,74 @@
         body {
             background-color: #f1f5f9;
             color: #1e293b;
-            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
         }
         .container {
             max-width: 500px;
-            margin: 0 auto;
+            width: 100%;
             background: white;
-            padding: 30px 20px;
-            border-radius: 12px;
+            padding: 12px 15px;
+            border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 6px;
         }
         h2 {
             color: #1f2937;
             text-align: center;
-            font-size: 22px;
-            margin-bottom: 5px;
+            font-size: 16px;
+            margin-bottom: 2px;
         }
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 2px;
         }
         label {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: bold;
             color: #374151;
         }
         input, select, textarea {
-            padding: 12px;
+            padding: 7px 10px;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 11.5px;
             outline: none;
             background: #f8fafc;
+            width: 100%;
         }
         textarea {
-            resize: vertical;
+            resize: none;
+            height: 45px;
         }
         .btn-submit {
             background: #2563eb;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 14px;
+            border-radius: 6px;
+            padding: 9px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 15px;
-            margin-top: 10px;
+            font-size: 12px;
+            margin-top: 2px;
             box-shadow: 0 2px 4px rgba(37,99,235,0.2);
         }
         .btn-back {
             background: #e2e8f0;
             color: #334155;
             border: none;
-            border-radius: 8px;
-            padding: 12px;
+            border-radius: 6px;
+            padding: 8px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 11.5px;
             text-align: center;
             text-decoration: none;
             display: block;
@@ -96,14 +103,14 @@
         }
         .modal-content {
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 12px;
             width: 100%;
-            max-width: 380px;
+            max-width: 350px;
             text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             animation: fadeIn 0.3s ease;
         }
@@ -117,7 +124,7 @@
 
     <div class="container">
         <h2>اقتراح بحث أو مشروع تخرج جديد</h2>
-        <p style="color: #64748b; font-size: 13px; text-align: center; margin-bottom: 10px;">قم بملء الحقول أدناه لتقديم مقترحك للمكتبة</p>
+        <p style="color: #64748b; font-size: 11px; text-align: center; margin-bottom: 2px;">قم بملء الحقول أدناه لتقديم مقترحك للمكتبة</p>
 
         <!-- عنوان البحث -->
         <div class="form-group">
@@ -152,7 +159,7 @@
         <!-- ملخص البحث (Abstract) -->
         <div class="form-group">
             <label>ملخص البحث (Abstract)</label>
-            <textarea id="researchDesc" rows="4" placeholder="اكتب نبذة مختصرة عن فكرة البحث أو المشروع..."></textarea>
+            <textarea id="researchDesc" placeholder="اكتب نبذة مختصرة عن فكرة البحث أو المشروع..."></textarea>
         </div>
 
         <!-- أزرار الإجراءات -->
@@ -163,10 +170,10 @@
     <!-- نافذة منبثقة (Modal) لتأكيد الإرسال -->
     <div id="successModal">
         <div class="modal-content">
-            <div style="font-size: 40px;">🎉</div>
-            <h3 style="color: #16a34a; font-size: 18px; margin: 0;">تم إرسال المقترح بنجاح!</h3>
-            <p style="color: #475569; font-size: 13px; line-height: 1.5;">تم إرسال مقترحك إلى لوحة تحكم المدير بنجاح، وسيتم مراجعته (قبول أو رفض) قريباً.</p>
-            <button onclick="window.location.href='researcher-home.html'" style="background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">العودة إلى لوحة الباحث</button>
+            <div style="font-size: 35px;">🎉</div>
+            <h3 style="color: #16a34a; font-size: 16px; margin: 0;">تم إرسال المقترح بنجاح!</h3>
+            <p style="color: #475569; font-size: 12px; line-height: 1.4;">تم إرسال مقترحك إلى لوحة تحكم المدير بنجاح، وسيتم مراجعته (قبول أو رفض) قريباً.</p>
+            <button onclick="window.location.href='researcher-home.html'" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة إلى لوحة الباحث</button>
         </div>
     </div>
 
@@ -239,7 +246,6 @@
             }
         }
 
-        // ربط الدالة بـ window لحل مشكلة استدعائها من الـ HTML مباشرة داخل الـ Module
         window.submitResearch = submitResearch;
     </script>
 </body>
