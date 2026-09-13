@@ -15,7 +15,7 @@
             <h2 style="color: #1f2937; margin: 0 0 5px 0; font-size: 22px; text-align: center;">لوحة التحكم</h2>
             <p style="color: #64748b; margin: 0 0 10px 0; font-size: 13px; text-align: center;">إدارة النظام وصلاحيات المدير</p>
 
-            <!-- حاوية الإحصائيات الأربعة التفاعلية (تم إبقاء بطاقة الطلاب هنا) -->
+            <!-- حاوية الإحصائيات الأربعة التفاعلية -->
             <div style="width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
                 
                 <!-- بطاقة الطلاب -->
@@ -43,8 +43,6 @@
                 </div>
 
             </div>
-
-            <!-- تم حذف زر إدارة الطلاب الكبير من هنا -->
 
             <!-- زر مراجعة الأبحاث المقترحة -->
             <button onclick="window.location.href='manage-suggested-research.html'" style="width: 100%; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: right;">
@@ -123,10 +121,32 @@
         });
 
         async function fetchAllStats() {
-            // جلب عدد الطلاب للبطاقة العلوية
+            // جلب وحساب عدد الطلاب من جميع المجموعات المحتملة مع استبعاد الـ Admin
             try {
-                const studentsSnap = await getDocs(collection(db, "student"));
-                document.getElementById('totalStudentsCount').innerText = studentsSnap.size;
+                const possibleStudentCollections = ["student", "students", "users", "uid"];
+                let uniqueStudents = new Set();
+
+                for (const colName of possibleStudentCollections) {
+                    try {
+                        const snap = await getDocs(collection(db, colName));
+                        snap.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            const name = (data.name || data.fullname || data.displayName || '').toLowerCase();
+                            const email = (data.email || data.userEmail || '').toLowerCase();
+                            const type = (data.type || data.role || '').toLowerCase();
+
+                            // استبعاد حساب المسؤولين (Admin)
+                            const isAdmin = (name === 'admin' || email.includes('admin') || type === 'admin' || type === 'مشرف' || type === 'مدير' || data.isAdmin === true);
+                            
+                            if (!isAdmin) {
+                                uniqueStudents.add(docSnap.id); // استخدام المعرف لضمان عدم تكرار الحساب
+                            }
+                        });
+                    } catch (e) {
+                        // المجموعة غير موجودة أو فارغة
+                    }
+                }
+                document.getElementById('totalStudentsCount').innerText = uniqueStudents.size;
             } catch (e) {
                 document.getElementById('totalStudentsCount').innerText = "0";
             }
