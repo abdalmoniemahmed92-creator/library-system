@@ -114,7 +114,6 @@
         async function fetchResearchers() {
             const container = document.getElementById('researchersListContainer');
             try {
-                // سيتم إنشاء وعرض الجدول المخصص للباحثين باسم researchers تلقائياً عند إضافة أول باحث
                 const querySnapshot = await getDocs(collection(db, "researchers"));
                 container.innerHTML = '';
 
@@ -123,18 +122,39 @@
                     return;
                 }
 
+                const now = new Date();
+
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
                     const name = data.name || 'باحث بدون اسم';
                     const email = data.email || 'غير متوفر';
                     const specialty = data.specialty || 'علوم الحاسوب';
 
+                    // التحقق مما إذا كان الباحث مسجلاً حديثاً (خلال آخر 24 ساعة)
+                    let isNew = false;
+                    if (data.createdAt) {
+                        let createdDate = typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : new Date(data.createdAt);
+                        let diffHours = (now - createdDate) / (1000 * 60 * 60);
+                        if (diffHours <= 24) {
+                            isNew = true;
+                        }
+                    }
+
+                    const cardBg = isNew ? "#f0fdf4" : "#ffffff";
+                    const cardBorder = isNew ? "1px solid #86efac" : "1px solid #e2e8f0";
+                    const badgeHtml = isNew ? '<span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: bold; border: 1px solid #bbf7d0; margin-right: 6px;">✨ تسجيل جديد</span>' : '';
+
                     const card = document.createElement('div');
-                    card.style.cssText = "background: #ffffff; border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);";
+                    card.style.cssText = `background: ${cardBg}; border: ${cardBorder}; padding: 14px 16px; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);`;
 
                     card.innerHTML = `
-                        <!-- اسم الباحث -->
-                        <div style="font-weight: bold; color: #1e293b; font-size: 15px; line-height: 1.4;">${name}</div>
+                        <!-- اسم الباحث والشارة -->
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                <span style="font-weight: bold; color: #1e293b; font-size: 15px; line-height: 1.4;">${name}</span>
+                                ${badgeHtml}
+                            </div>
+                        </div>
 
                         <!-- تفاصيل الباحث -->
                         <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #64748b; border-top: 1px dashed #f1f5f9; padding-top: 8px;">
