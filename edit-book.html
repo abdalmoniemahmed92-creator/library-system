@@ -5,61 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تعديل بيانات كتاب</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
 
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
-        
-        <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+    <div style="width: 100%; max-width: 500px; padding: 4px 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px;">
 
-            <!-- العنوان الرئيسي -->
-            <h2 style="color: #1f2937; margin-bottom: 0px; text-align: center;">تعديل بيانات كتاب</h2>
+        <!-- العنوان الرئيسي -->
+        <h2 style="color: #1f2937; margin: 0; text-align: center; font-size: 14px; font-weight: bold;">تعديل بيانات كتاب</h2>
 
-            <!-- اختيار الكتاب -->
-            <div style="width: 100%; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; box-sizing: border-box;">
-                <label style="font-size: 13px; font-weight: bold; color: #334155;">اختر الكتاب للتعديل:</label>
-                <select id="bookSelect" onchange="loadBookData()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; background: #fff;">
-                    <option value="">جاري تحميل الكتب...</option>
-                </select>
-            </div>
-
-            <!-- نموذج تعديل البيانات -->
-            <div id="editFormContainer" style="width: 100%; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: none; flex-direction: column; gap: 12px; box-sizing: border-box;">
-                
-                <input type="hidden" id="bookDocId">
-
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #334155;">عنوان الكتاب</label>
-                    <input type="text" id="bookTitle" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #334155;">المؤلف</label>
-                    <input type="text" id="bookAuthor" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #334155;">القسم / التصنيف</label>
-                    <input type="text" id="bookDepartment" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #334155;">عدد النسخ</label>
-                    <input type="number" id="copiesCount" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <label style="font-size: 12px; font-weight: bold; color: #334155;">رابط الكتاب أو الملف (URL)</label>
-                    <input type="text" id="bookUrl" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;">
-                </div>
-
-                <!-- زر حفظ التعديلات -->
-                <button onclick="updateBook()" style="width: 100%; background: #22c55e; color: white; border: none; border-radius: 12px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">حفظ التعديلات</button>
-            </div>
-
-            <!-- زر العودة لوحة التحكم المحدث -->
-            <button onclick="window.location.href='admin-home.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 20px; padding: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 5px;">العودة إلى لوحة التحكم</button>
-
+        <!-- اختيار الكتاب -->
+        <div style="width: 100%; background: white; padding: 6px 8px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 2px; box-sizing: border-box;">
+            <label style="font-size: 10px; font-weight: bold; color: #334155;">اختر الكتاب للتعديل:</label>
+            <select id="bookSelect" onchange="loadBookData()" style="width: 100%; padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10.5px; outline: none; background: #fff;">
+                <option value="">جاري تحميل الكتب...</option>
+            </select>
         </div>
+
+        <!-- نموذج تعديل البيانات -->
+        <div id="editFormContainer" style="width: 100%; background: white; padding: 8px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: none; flex-direction: column; gap: 4px; box-sizing: border-box;">
+            
+            <input type="hidden" id="bookDocId">
+
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+                <label style="font-size: 9.5px; font-weight: bold; color: #334155;">عنوان الكتاب</label>
+                <input type="text" id="bookTitle" style="padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; outline: none;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+                <label style="font-size: 9.5px; font-weight: bold; color: #334155;">المؤلف</label>
+                <input type="text" id="bookAuthor" style="padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; outline: none;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+                <label style="font-size: 9.5px; font-weight: bold; color: #334155;">القسم / التصنيف</label>
+                <input type="text" id="bookDepartment" style="padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; outline: none;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+                <label style="font-size: 9.5px; font-weight: bold; color: #334155;">عدد النسخ</label>
+                <input type="number" id="copiesCount" style="padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; outline: none;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1px;">
+                <label style="font-size: 9.5px; font-weight: bold; color: #334155;">رابط الكتاب أو الملف (URL)</label>
+                <input type="text" id="bookUrl" style="padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 10px; outline: none;">
+            </div>
+
+            <!-- زر حفظ التعديلات -->
+            <button onclick="updateBook()" style="width: 100%; background: #22c55e; color: white; border: none; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; font-size: 10.5px; margin-top: 2px;">حفظ التعديلات</button>
+        </div>
+
+        <!-- زر العودة لوحة التحكم -->
+        <button onclick="window.location.href='admin-home.html'" style="width: 100%; background: #e2e8f0; color: #334155; border: none; border-radius: 4px; padding: 6px; font-weight: bold; cursor: pointer; font-size: 10.5px;">العودة إلى لوحة التحكم</button>
+
     </div>
 
     <!-- Firebase والسكربت البرمجي -->
