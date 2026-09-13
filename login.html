@@ -124,7 +124,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-E9VX8n8ytdBh-xJvU9T94tgayv91O24",
@@ -141,6 +141,38 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // دالة مساعدة لتسجيل وقت الدخول في الجدول المنفصل student_sessions
+        async function recordStudentLogin(userEmail) {
+            try {
+                let studentId = "";
+                // البحث عن الرقم الجامعي للطالب في المجموعات المحتملة
+                const collectionsToCheck = ["student", "students", "users", "uid", "loans"];
+                
+                for (const col of collectionsToCheck) {
+                    const q = query(collection(db, col), where("email", "==", userEmail));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        querySnapshot.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            studentId = data.studentId || data.universityId || data.idNumber || "";
+                        });
+                        if (studentId) break;
+                    }
+                }
+
+                // إنشاء سجل جديد في جدول student_sessions يحتوي على وقت الضغطة الحالي
+                await addDoc(collection(db, "student_sessions"), {
+                    studentId: studentId || "غير محدد",
+                    email: userEmail,
+                    loginTime: serverTimestamp(), // الوقت والتاريخ الحالي بالضغطة
+                    logoutTime: "", // يترك فارغاً لكي يظهر في لوحة التحكم كـ "نشط الآن"
+                    services: "تسجيل الدخول واستعراض الكتالوج"
+                });
+            } catch (error) {
+                console.error("خطأ أثناء حفظ زمن الدخول:", error);
+            }
+        }
+
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const email = document.getElementById("email").value.trim();
@@ -149,9 +181,14 @@
             errorDiv.textContent = "";
 
             try {
+                // 1. تسجيل الدخول عبر Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
+                // 2. تسجيل زمن الدخول تلقائياً في الجدول المنفصل عند الضغطة
+                await recordStudentLogin(email);
+
+                // 3. جلب بيانات نوع المستخدم وتوجيهه للصفحة المناسبة
                 const userDocRef = doc(db, "uid", user.uid);
                 const userDoc = await getDoc(userDocRef);
 
@@ -159,13 +196,12 @@
                     const userData = userDoc.data();
                     const userType = userData.type;
                     
-                    // شروط التوجيه الدقيقة حسب نوع المستخدم في قاعدة البيانات
                     if (userType === "admin" || userType === "مشرف" || userType === "مدير") {
                         window.location.href = "admin-home.html";
                     } else if (userType === "باحث") {
                         window.location.href = "researcher-home.html";
                     } else {
-                        window.location.href = "home.html"; // للطالب أو أي نوع آخر افتراضي
+                        window.location.href = "home.html";
                     }
                 } else {
                     errorDiv.textContent = "بيانات الحساب غير موجودة في مجموعة uid.";
