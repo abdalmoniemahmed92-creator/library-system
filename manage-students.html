@@ -3,23 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة الطلاب</title>
+    <title>إدارة الطلاب وجلساتهم</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif;">
 
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 15px; box-sizing: border-box; min-height: 100vh;">
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 15px; box-sizing: border-box; min-height: 100vh;">
         
-        <div style="width: 100%; max-width: 650px; background: white; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
+        <div style="width: 100%; max-width: 700px; background: white; padding: 25px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;">
             
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px;">
-                <h2 style="color: #1f2937; margin: 0; font-size: 20px;">لوحة عرض بيانات الطلاب</h2>
-                <button onclick="window.location.href='admin-home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للوحة التحكم</button>
+            <!-- رأس الصفحة وزر العودة بشكل متناسق -->
+            <div style="display: flex; flex-direction: column; gap: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="color: #1f2937; margin: 0; font-size: 19px;">لوحة عرض بيانات الطلاب وسجلات الدخول</h2>
+                    <button onclick="window.location.href='admin-home.html'" style="background: #e2e8f0; color: #334155; border: none; border-radius: 8px; padding: 8px 14px; font-weight: bold; cursor: pointer; font-size: 13px;">العودة للوحة التحكم</button>
+                </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <h3 style="color: #16a34a; margin: 0; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">🎓 جدول الطلاب ومعرفاتهم</h3>
-                <div id="studentsListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto;">
-                    <p style="text-align: center; color: #64748b; font-size: 13px;">جاري تحميل الطلاب...</p>
+                <h3 style="color: #16a34a; margin: 0; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">🎓 جدول الطلاب وأزمنة الدخول</h3>
+                <div id="studentsListContainer" style="display: flex; flex-direction: column; gap: 12px; max-height: 600px; overflow-y: auto;">
+                    <p style="text-align: center; color: #64748b; font-size: 13px;">جاري تحميل الطلاب والسجلات...</p>
                 </div>
             </div>
 
@@ -73,9 +76,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = initializeFirestore(app, {
-            experimentalForceLongPolling: true
-        });
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -87,7 +88,7 @@
 
         async function fetchAllData() {
             const departmentsMap = await fetchDepartmentsMap();
-            const sessionsMap = await fetchSessionsMap(); // جلب بيانات الجدول المنفصل للأزمنة
+            const sessionsMap = await fetchAllSessions();
             await fetchStudents(departmentsMap, sessionsMap);
         }
 
@@ -99,9 +100,7 @@
                     const data = docSnap.data();
                     const deptName = data.department_name || data.departmentName || data.name || '';
                     const deptId = data.department_id || data.departmentId || docSnap.id;
-                    
                     if (deptId) deptMap.set(String(deptId).trim(), deptName || String(deptId));
-                    if (docSnap.id) deptMap.set(String(docSnap.id).trim(), deptName || String(docSnap.id));
                     if (deptName) deptMap.set(deptName.trim(), deptName);
                 });
             } catch (error) {
@@ -110,39 +109,43 @@
             return deptMap;
         }
 
-        // دالة لجلب الجلسات من الجدول المنفصل (مثلاً student_sessions أو sessions)
-        async function fetchSessionsMap() {
+        async function fetchAllSessions() {
             const sessionsMap = new Map();
-            const possibleSessionCols = ["student_sessions", "sessions", "logs", "attendance"];
+            const possibleCols = ["student_sessions", "sessions", "logs", "attendance"];
 
-            for (const colName of possibleSessionCols) {
+            for (const colName of possibleCols) {
                 try {
                     const querySnapshot = await getDocs(collection(db, colName));
                     querySnapshot.forEach((docSnap) => {
                         const data = docSnap.data();
-                        // المفتاح المرتبط بالطالب (سواء كان studentId أو universityId أو email)
-                        const key1 = String(data.studentId || data.universityId || '').trim();
-                        const key2 = String(data.email || '').trim().toLowerCase();
+                        const studentId = String(data.studentId || data.universityId || '').trim();
+                        const email = String(data.email || data.userEmail || '').trim().toLowerCase();
+                        const uid = String(data.uid || data.userId || '').trim();
 
-                        if (key1) sessionsMap.set(key1, data);
-                        if (key2) sessionsMap.set(key2, data);
+                        const keys = [studentId, email, uid];
+                        keys.forEach(key => {
+                            if (key && key !== "غير محدد" && key !== "undefined") {
+                                if (!sessionsMap.has(key)) sessionsMap.set(key, []);
+                                const existingList = sessionsMap.get(key);
+                                if (!existingList.some(s => JSON.stringify(s) === JSON.stringify(data))) {
+                                    existingList.push(data);
+                                }
+                            }
+                        });
                     });
-                } catch (e) {
-                    // الجدول قد لا يكون موجوداً بعد
-                }
+                } catch (e) {}
             }
             return sessionsMap;
         }
 
-        // تحويل الوقت إلى ساعة ودقيقة فقط
-        function formatTimeToHoursMinutes(timeInput) {
+        function formatDateTime(timeInput) {
             if (!timeInput) return '';
             if (typeof timeInput.toDate === 'function') {
-                return timeInput.toDate().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                return timeInput.toDate().toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
             }
             let dateObj = new Date(timeInput);
             if (!isNaN(dateObj.getTime())) {
-                return dateObj.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                return dateObj.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
             }
             return String(timeInput);
         }
@@ -151,31 +154,23 @@
             const container = document.getElementById('studentsListContainer');
             container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 13px;">جاري تحميل الطلاب...</p>';
             
-            const possibleCollections = ["student", "students", "users", "uid", "loans"];
+            const possibleCollections = ["student", "students", "users", "uid"];
             let allStudents = [];
+            let processedIds = new Set();
 
             for (const colName of possibleCollections) {
                 try {
                     const querySnapshot = await getDocs(collection(db, colName));
                     querySnapshot.forEach((docSnap) => {
+                        if (processedIds.has(docSnap.id)) return;
+                        processedIds.add(docSnap.id);
+
                         const data = docSnap.data();
-                        
-                        let name = data.name || data.fullname || data.displayName || data.userName || data.fullName || '';
+                        let name = data.name || data.fullname || data.displayName || data.userName || '';
                         let email = data.email || data.userEmail || '';
 
-                        const isAdmin = (name.toLowerCase() === 'admin' || email.toLowerCase().includes('admin') || data.role === 'admin' || data.isAdmin === true);
+                        const isAdmin = (name.toLowerCase() === 'admin' || email.toLowerCase().includes('admin') || data.type === 'admin' || data.role === 'admin' || data.isAdmin === true);
                         if (isAdmin) return;
-
-                        if (!name || name.includes('@') || name.length > 30) {
-                            name = '';
-                            for (let key in data) {
-                                let val = data[key];
-                                if (typeof val === 'string' && val.length > 2 && val.length < 30 && !val.includes('@') && !val.includes('http') && !val.includes('.')) {
-                                    name = val;
-                                    break;
-                                }
-                            }
-                        }
 
                         allStudents.push({
                             id: docSnap.id,
@@ -184,15 +179,13 @@
                             ...data
                         });
                     });
-                } catch (e) {
-                    console.log(`المجموعة ${colName} غير موجودة`);
-                }
+                } catch (e) {}
             }
 
             container.innerHTML = '';
 
             if (allStudents.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 13px;">لا توجد بيانات طلاب مسجلة في قاعدة البيانات.</p>';
+                container.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 13px;">لا توجد بيانات طلاب مسجلة.</p>';
                 return;
             }
 
@@ -201,47 +194,60 @@
                 const email = data.email || data.userEmail || 'لا يوجد بريد';
                 
                 let rawStudentId = data.studentId || data.universityId || data.idNumber || '';
-                let universityId = (rawStudentId && rawStudentId.length < 25) ? rawStudentId : 'غير مُدخل (اضغط تعديل لإضافته)';
+                let universityId = (rawStudentId && String(rawStudentId).trim() !== "" && String(rawStudentId).trim() !== "غير محدد" && rawStudentId.length < 25) ? rawStudentId : '<span style="color: #0284c7; cursor: pointer;">غير مُدخل (اضغط تعديل)</span>';
 
-                const deptKey1 = String(data.departmentId || data.department_id || '').trim();
-                const deptKey2 = String(data.department || '').trim();
-                const deptKey3 = String(data.departmentName || data.department_name || '').trim();
-                
-                let rawDept = deptMap.get(deptKey1) || deptMap.get(deptKey2) || deptMap.get(deptKey3) || data.department || data.departmentName || data.department_name || '';
-                let departmentName = (rawDept && rawDept.length < 30 && !rawDept.includes('@')) ? rawDept : 'غير محدد (اضغط تعديل)';
+                const deptKey = String(data.departmentId || data.department || '').trim();
+                let rawDept = deptMap.get(deptKey) || data.department || '';
+                let departmentName = (rawDept && String(rawDept).trim() !== "" && String(rawDept).trim() !== "غير محدد" && rawDept.length < 30 && !rawDept.includes('@')) ? rawDept : '<span style="color: #0284c7; cursor: pointer;">غير مُدخل (اضغط تعديل)</span>';
 
-                // البحث عن بيانات الدخول والخروج في الجدول المنفصل باستخدام الرقم الجامعي أو البريد
-                const sessionData = sessionsMap.get(String(rawStudentId).trim()) || sessionsMap.get(String(email).trim().toLowerCase()) || {};
+                let studentSessions = [];
+                const searchKeys = [rawStudentId, email.toLowerCase(), data.id];
+                for (const key of searchKeys) {
+                    if (key && sessionsMap.has(key)) {
+                        studentSessions = sessionsMap.get(key);
+                        break;
+                    }
+                }
 
-                const rawLogin = sessionData.loginTime || sessionData.entry_time || sessionData.time || data.loginTime || data.lastLogin;
-                const rawLogout = sessionData.logoutTime || sessionData.exit_time || data.logoutTime || data.lastLogout;
+                let sessionsHtml = '';
+                if (studentSessions.length > 0) {
+                    studentSessions.forEach((sess) => {
+                        const lTime = formatDateTime(sess.loginTime) || 'مسجل حالياً';
+                        const oTime = sess.logoutTime ? formatDateTime(sess.logoutTime) : '<span style="color: #16a34a; font-weight: bold;">نشط الآن 🟢</span>';
+                        const srv = sess.services || sess.action || 'استعراض الكتالوج والبحث';
 
-                const loginTime = rawLogin ? formatTimeToHoursMinutes(rawLogin) : 'مسجل حالياً';
-                const logoutTime = rawLogout ? formatTimeToHoursMinutes(rawLogout) : 'نشط الآن';
-
-                const servicesUsed = sessionData.services || data.services || 'استعراض الكتالوج والبحث';
+                        sessionsHtml += `
+                            <div style="background: #ffffff; border: 1px dashed #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 11px; color: #334155; margin-top: 4px;">
+                                <div>⏱️ <strong>دخول:</strong> ${lTime} &nbsp;|&nbsp; <strong>خروج:</strong> ${oTime}</div>
+                                <div>🛠️ <strong>الخدمة:</strong> ${srv}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    sessionsHtml = `<div style="font-size: 11px; color: #94a3b8; padding: 4px;">لا توجد سجلات دخول مسجلة حتى الآن.</div>`;
+                }
 
                 const card = document.createElement('div');
                 card.style.cssText = "background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px;";
 
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;">
                         <span style="font-weight: bold; color: #15803d; font-size: 16px;">${name}</span>
                         <div style="display: flex; gap: 6px;">
-                            <button onclick="window.openEditModal('${data.id}', '${data.collectionName}', '${name}', '${email}', '${rawStudentId}', '${(rawDept && rawDept.length < 30) ? rawDept : ''}')" style="background: #e0f2fe; color: #0369a1; border: none; border-radius: 6px; padding: 5px 10px; font-weight: bold; cursor: pointer; font-size: 12px;">تعديل</button>
+                            <button onclick="window.openEditModal('${data.id}', '${data.collectionName}', '${name}', '${email}', '${rawStudentId}', '${rawDept}')" style="background: #e0f2fe; color: #0369a1; border: none; border-radius: 6px; padding: 5px 10px; font-weight: bold; cursor: pointer; font-size: 12px;">تعديل</button>
                             <button onclick="window.deleteStudent('${data.id}', '${data.collectionName}')" style="background: #fee2e2; color: #991b1b; border: none; border-radius: 6px; padding: 5px 10px; font-weight: bold; cursor: pointer; font-size: 12px;">حذف</button>
                         </div>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #475569;">
-                        <div>الرقم الجامعي: <span style="font-family: monospace; color: ${universityId.includes('غير') ? '#94a3b8' : '#0284c7'}; font-weight: bold; direction: ltr; display: inline-block;">${universityId}</span></div>
+                        <div>الرقم الجامعي: <span style="font-family: monospace; font-weight: bold; direction: ltr; display: inline-block;">${universityId}</span></div>
                         <div>البريد الإلكتروني: <span style="color: #334155;">${email}</span></div>
-                        <div>القسم الأكاديمي: <strong style="color: ${departmentName.includes('غير') ? '#94a3b8' : '#0f172a'};">${departmentName}</strong></div>
+                        <div>القسم الأكاديمي: <span style="font-weight: bold;">${departmentName}</span></div>
                     </div>
 
-                    <div style="background: #ffffff; border: 1px dashed #cbd5e1; padding: 8px 10px; border-radius: 6px; font-size: 11px; color: #334155; display: flex; flex-direction: column; gap: 4px;">
-                        <div>⏱️ <strong>زمن الدخول:</strong> ${loginTime} &nbsp;|&nbsp; <strong>زمن الخروج:</strong> ${logoutTime}</div>
-                        <div>🛠️ <strong>الخدمات المُنجزة:</strong> ${servicesUsed}</div>
+                    <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 5px;">
+                        <span style="font-size: 12px; font-weight: bold; color: #334155;">سجلات الجلسات والدخول:</span>
+                        ${sessionsHtml}
                     </div>
                 `;
                 container.appendChild(card);
@@ -251,10 +257,10 @@
         window.openEditModal = function(docId, colName, name, email, studentId, department) {
             document.getElementById('editDocId').value = docId;
             document.getElementById('editCollectionName').value = colName;
-            document.getElementById('editName').value = name === 'مستخدم نظام' ? '' : name;
-            document.getElementById('editEmail').value = email === 'لا يوجد بريد' ? '' : email;
-            document.getElementById('editStudentId').value = (studentId && studentId.length < 25) ? studentId : '';
-            document.getElementById('editDepartment').value = department || '';
+            document.getElementById('editName').value = name;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editStudentId').value = (studentId === "غير محدد" || studentId === "undefined") ? "" : studentId;
+            document.getElementById('editDepartment').value = (department === "غير محدد" || department === "undefined") ? "" : department;
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -265,23 +271,17 @@
         window.saveStudentEdit = async function() {
             const docId = document.getElementById('editDocId').value;
             const colName = document.getElementById('editCollectionName').value;
-            const newName = document.getElementById('editName۲۰') || document.getElementById('editName').value;
-            const newEmail = document.getElementById('editEmail').value;
-            const newStudentId = document.getElementById('editStudentId').value;
-            const newDepartment = document.getElementById('editDepartment').value;
-
             try {
                 await updateDoc(doc(db, colName, docId), {
                     name: document.getElementById('editName').value,
-                    email: newEmail,
-                    studentId: newStudentId,
-                    department: newDepartment
+                    email: document.getElementById('editEmail').value,
+                    studentId: document.getElementById('editStudentId').value,
+                    department: document.getElementById('editDepartment').value
                 });
-                alert('تم تعديل بيانات الطالب بنجاح.');
+                alert('تم التعديل بنجاح.');
                 window.closeEditModal();
                 fetchAllData();
             } catch (error) {
-                console.error("خطأ أثناء التعديل:", error);
                 alert('فشل حفظ التعديلات.');
             }
         }
@@ -290,11 +290,10 @@
             if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
                 try {
                     await deleteDoc(doc(db, colName, docId));
-                    alert('تم حذف الطالب بنجاح.');
+                    alert('تم الحذف بنجاح.');
                     fetchAllData();
                 } catch (error) {
-                    console.error("خطأ أثناء الحذف:", error);
-                    alert('فشل عملية الحذف.');
+                    alert('فشل الحذف.');
                 }
             }
         }
