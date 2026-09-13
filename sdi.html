@@ -5,83 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>خدمة البث الانتقائي</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Tahoma, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: Tahoma, sans-serif; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center;">
 
-    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px 20px; box-sizing: border-box; min-height: 100vh;">
-        
-        <div style="width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+    <div style="width: 100%; max-width: 500px; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px;">
 
-            <!-- العنوان الرئيسي -->
-            <h2 style="color: #1e293b; margin-bottom: 0px; text-align: center; font-size: 18px;">خدمة البث الانتقائي (SDI)</h2>
+        <!-- العنوان الرئيسي -->
+        <h2 style="color: #1e3a8a; margin: 0; text-align: center; font-size: 15px; font-weight: bold;">خدمة البث الانتقائي (SDI)</h2>
 
-            <!-- نبذة تعريفيّة بالخدمة -->
-            <div style="background: white; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
-                <p style="margin: 0; font-size: 12px; color: #475569; line-height: 1.6;">
-                    اشترك في خدمة البث الانتقائي لتصلك أحدث الإصدارات، الكتب، والرسائل الجامعية في مجالك الأكاديمي مباشرة وبشكل مخصص لك.
-                </p>
+        <!-- نبذة تعريفيّة مصغرة -->
+        <div style="background: white; padding: 6px 10px; border-radius: 6px; border: 2px solid #cbd5e1; text-align: center; width: 100%; box-sizing: border-box;">
+            <p style="margin: 0; font-size: 10.5px; color: #1e293b; line-height: 1.3; font-weight: 600;">
+                اشترك لتصلك أحدث الإصدارات والرسائل الجامعية في مجالك الأكاديمي مباشرة.
+            </p>
+        </div>
+
+        <!-- نموذج الاشتراك -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: white; padding: 10px; border-radius: 6px; border: 2px solid #cbd5e1; box-sizing: border-box; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">الاسم الكامل</label>
+                <input type="text" id="fullName" placeholder="الاسم الكامل" style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; color: #0f172a; width: 100%; box-sizing: border-box; font-weight: 600;">
             </div>
 
-            <!-- نموذج الاشتراك -->
-            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; box-sizing: border-box;">
-                
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">الاسم الكامل</label>
-                    <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #1e293b;">
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">رقم الهاتف</label>
+                <input type="text" id="phone" placeholder="رقم الهاتف" style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; color: #0f172a; width: 100%; box-sizing: border-box; font-weight: 600;">
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">رقم الهاتف</label>
-                    <input type="text" id="phone" placeholder="رقم الهاتف للتواصل" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #1e293b;">
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">البريد الإلكتروني</label>
+                <input type="email" id="email" placeholder="example@domain.com" style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; color: #0f172a; width: 100%; box-sizing: border-box; font-weight: 600;">
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">البريد الإلكتروني</label>
-                    <input type="email" id="email" placeholder="example@domain.com" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #1e293b;">
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">التخصص / القسم</label>
+                <select id="department" style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; color: #0f172a; cursor: pointer; width: 100%; box-sizing: border-box; font-weight: 600;">
+                    <option value="" disabled selected>اختر التخصص...</option>
+                    <option value="علوم الحاسوب">علوم الحاسوب</option>
+                    <option value="تقنية معلومات">تقنية معلومات</option>
+                    <option value="هندسة برمجيات">هندسة برمجيات</option>
+                    <option value="نظم معلومات إدارية">نظم معلومات إدارية</option>
+                    <option value="نظم معلومات محاسبية">نظم معلومات محاسبية</option>
+                    <option value="نظم معلومات المكتبات">نظم معلومات المكتبات</option>
+                </select>
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">التخصص / القسم الأكاديمي</label>
-                    <select id="department" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #334155; cursor: pointer;">
-                        <option value="" disabled selected>اختر التخصص / القسم...</option>
-                        <option value="علوم الحاسوب">علوم الحاسوب</option>
-                        <option value="تقنية معلومات">تقنية معلومات</option>
-                        <option value="هندسة برمجيات">هندسة برمجيات</option>
-                        <option value="نظم معلومات إدارية">نظم معلومات إدارية</option>
-                        <option value="نظم معلومات محاسبية">نظم معلومات محاسبية</option>
-                        <option value="نظم معلومات المكتبات">نظم معلومات المكتبات</option>
-                    </select>
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">نوع المحتوى</label>
+                <select id="contentType" style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; color: #0f172a; cursor: pointer; width: 100%; box-sizing: border-box; font-weight: 600;">
+                    <option value="الكل (كتب وريلائل جامعية)">الكل (كتب + رسائل)</option>
+                    <option value="الكتب والإصدارات فقط">الكتب والإصدارات فقط</option>
+                    <option value="الرسائل الجامعية فقط">الرسائل الجامعية فقط</option>
+                </select>
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">نوع المحتوى المطلوب استقباله</label>
-                    <select id="contentType" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #334155; cursor: pointer;">
-                        <option value="الكل (كتب وريلائل جامعية)">الكل (كتب وإصدارات + رسائل جامعية)</option>
-                        <option value="الكتب والإصدارات فقط">الكتب والإصدارات فقط</option>
-                        <option value="الرسائل الجامعية فقط">الرسائل الجامعية فقط</option>
-                    </select>
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">طريقة الاستلام</label>
+                <select id="notificationChannel" style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; color: #0f172a; cursor: pointer; width: 100%; box-sizing: border-box; font-weight: 600;">
+                    <option value="البريد الإلكتروني">البريد الإلكتروني</option>
+                    <option value="رقم الهاتف">رقم الهاتف</option>
+                    <option value="كلاهما">كلاهما</option>
+                </select>
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">طريقة استلام التنبيهات</label>
-                    <select id="notificationChannel" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; color: #334155; cursor: pointer;">
-                        <option value="البريد الإلكتروني">البريد الإلكتروني فقط</option>
-                        <option value="رقم الهاتف">رقم الهاتف فقط</option>
-                        <option value="كلاهما">كلاهما (البريد والهاتف)</option>
-                    </select>
-                </div>
+            <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 10px; color: #1e3a8a; font-weight: bold; text-align: right;">كلمات مفتاحية أو موضوعات الاهتمام</label>
+                <textarea id="interests" rows="1" placeholder="مثال: الذكاء الاصطناعي، قواعد البيانات..." style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 5px 8px; outline: none; font-size: 10.5px; text-align: right; resize: none; font-family: Tahoma, sans-serif; color: #0f172a; width: 100%; box-sizing: border-box; font-weight: 600;"></textarea>
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <label style="font-size: 11px; color: #334155; font-weight: bold; text-align: right;">كلمات مفتاحية أو موضوعات الاهتمام</label>
-                    <textarea id="interests" rows="3" placeholder="مثال: الذكاء الاصطناعي، قواعد البيانات السحابية..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; outline: none; font-size: 12px; text-align: right; resize: none; font-family: Tahoma, sans-serif; color: #1e293b;"></textarea>
-                </div>
-
-                <!-- الأزرار -->
-                <button id="submitBtn" onclick="submitSubscription()" style="width: 100%; background: #475569; color: white; border: none; border-radius: 6px; padding: 11px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 5px; transition: 0.2s;">إشتراك في الخدمة</button>
-                
-                <button onclick="navigateTo('service.html')" style="width: 100%; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 11px; font-weight: bold; cursor: pointer; font-size: 12px;">العودة للخدمات</button>
+            <!-- الأزرار بألوان قوية وبارزة -->
+            <div style="grid-column: span 2; display: flex; gap: 6px; margin-top: 2px;">
+                <button id="submitBtn" onclick="submitSubscription()" style="flex: 1; background: #1e3a8a; color: white; border: none; border-radius: 4px; padding: 7px; font-weight: bold; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(30,58,138,0.3);">إشتراك في الخدمة</button>
+                <button onclick="navigateTo('service.html')" style="flex: 1; background: #e2e8f0; color: #1e3a8a; border: 1.5px solid #94a3b8; border-radius: 4px; padding: 7px; font-weight: bold; cursor: pointer; font-size: 11px;">العودة للخدمات</button>
             </div>
 
         </div>
+
     </div>
 
     <!-- Firebase والسكربت البرمجي -->
@@ -151,9 +150,8 @@
                     createdAt: new Date()
                 });
 
-                alert('تم إرسال طلب الاشتراك في خدمة البث الانتقائي (SDI) بنجاح! سيتم التواصل معك عند توفر إصدارات جديدة مطابقة لاهتماماتك.');
+                alert('تم إرسال طلب الاشتراك في خدمة البث الانتقائي (SDI) بنجاح!');
                 
-                // إعادة تعيين الحقول
                 document.getElementById('fullName').value = '';
                 document.getElementById('phone').value = '';
                 document.getElementById('interests').value = '';
